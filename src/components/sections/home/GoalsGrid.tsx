@@ -105,14 +105,14 @@ export function GoalsGrid() {
                     'transition-[background-color,border-color,color] motion-safe:duration-200 ease-signature',
                     'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                     isActive
-                      ? 'border-brass/45 bg-brass/[0.08] text-ink'
+                      ? 'border-accent/45 bg-accent/[0.07] text-ink'
                       : 'border-divider bg-transparent text-ink-secondary hover:border-border hover:bg-surface-2/60 hover:text-ink'
                   )}
                 >
                   <span
                     className={cn(
                       'inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm transition-colors motion-safe:duration-200',
-                      isActive ? 'bg-brass text-on-brass' : 'bg-surface-2 text-ink-muted group-hover:text-accent'
+                      isActive ? 'bg-accent text-on-accent' : 'bg-surface-2 text-ink-muted group-hover:text-accent'
                     )}
                   >
                     <Icon icon={goal.icon} size={18} />
@@ -144,7 +144,7 @@ export function GoalsGrid() {
                   transition={withMotionSafety(prefersReducedMotion, transitions.fast)}
                   className="flex h-full flex-col"
                 >
-                  <h3 className="text-h3 font-display-wonk">{activeGoal.title}</h3>
+                  <h3 className="text-h3 font-display-sharp">{activeGoal.title}</h3>
                   <p className="mt-3 max-w-prose text-body-lg text-ink-secondary">{activeGoal.description}</p>
 
                   <p className="mt-8 text-label font-semibold text-ink">What we&rsquo;d work through</p>

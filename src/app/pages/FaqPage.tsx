@@ -42,7 +42,7 @@ export default function FaqPage() {
                 <Reveal key={category} variants={riseVariants}>
                   <section aria-labelledby={headingId}>
                     <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
-                    <h2 id={headingId} className="mt-5 text-h2 font-display-wonk">
+                    <h2 id={headingId} className="mt-5 text-h2 font-display-sharp">
                       {category}
                     </h2>
 

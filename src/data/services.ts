@@ -1,14 +1,4 @@
-import {
-  LineChart,
-  ShieldCheck,
-  Landmark,
-  Sprout,
-  Heart,
-  Home,
-  Receipt,
-  Compass,
-  GraduationCap,
-} from 'lucide-react';
+import { LineChart, ShieldCheck, Landmark, TrendingUp, Users, Home, Receipt, GraduationCap, Armchair } from 'lucide-react';
 import type { ServicePillar, GoalEntry } from '@/types/content';
 
 /**
@@ -98,7 +88,7 @@ export const goalEntries: GoalEntry[] = [
       'Whether a lump sum, a monthly SIP, or both fits your cash flow',
     ],
     relatedServiceIds: ['mutual-funds-pms'],
-    icon: Sprout,
+    icon: TrendingUp,
   },
   {
     id: 'protect-family',
@@ -111,7 +101,7 @@ export const goalEntries: GoalEntry[] = [
       'Which health costs would otherwise come out of your savings',
     ],
     relatedServiceIds: ['insurance'],
-    icon: Heart,
+    icon: Users,
   },
   {
     id: 'buy-a-home',
@@ -162,7 +152,7 @@ export const goalEntries: GoalEntry[] = [
       'How the plan changes if you stop earlier, or later, than planned',
     ],
     relatedServiceIds: ['mutual-funds-pms', 'insurance'],
-    icon: Compass,
+    icon: Armchair,
   },
 ];
 

@@ -50,7 +50,7 @@ export function SectionHeading({
         />
         <h2
           id={id}
-          className={cn('mt-6 text-h2 font-display-wonk', tone === 'band' ? 'text-on-band' : 'text-ink')}
+          className={cn('mt-6 text-h2 font-display-sharp', tone === 'band' ? 'text-on-band' : 'text-ink')}
         >
           {title}
         </h2>

@@ -37,9 +37,9 @@ export default function FinancialGoalsPage() {
               <li key={goal.id}>
                 <a
                   href={`#${goal.id}`}
-                  className="group flex min-h-[4rem] items-center gap-3 rounded-md border border-divider px-4 py-3 transition-colors motion-safe:duration-200 hover:border-brass/45 hover:bg-brass/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="group flex min-h-[4rem] items-center gap-3 rounded-md border border-divider px-4 py-3 transition-colors motion-safe:duration-200 hover:border-accent/45 hover:bg-accent/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm bg-surface-2 text-ink-muted transition-colors motion-safe:duration-200 group-hover:bg-brass group-hover:text-on-brass">
+                  <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm bg-surface-2 text-ink-muted transition-colors motion-safe:duration-200 group-hover:bg-accent group-hover:text-on-accent">
                     <Icon icon={goal.icon} size={18} />
                   </span>
                   <span className="font-display text-body-lg text-ink">{goal.title}</span>
@@ -84,10 +84,10 @@ function GoalSection({ goal }: { goal: GoalEntry }) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <div className="flex items-center gap-4">
-              <span className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md border border-brass/35 bg-brass/[0.08] text-brass">
+              <span className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md border border-accent/30 bg-accent/[0.07] text-accent">
                 <Icon icon={goal.icon} size={22} />
               </span>
-              <h2 id={headingId} className="text-h2 font-display-wonk">
+              <h2 id={headingId} className="text-h2 font-display-sharp">
                 {goal.title}
               </h2>
             </div>

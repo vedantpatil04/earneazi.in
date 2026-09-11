@@ -36,7 +36,7 @@ export function PageHeader({ title, lead, actions, children, className }: PageHe
       <Container size="wide">
         <Reveal variants={riseVariants} immediate>
           <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
-          <h1 className="mt-6 max-w-[20ch] text-h1 font-display-wonk">{title}</h1>
+          <h1 className="mt-6 max-w-[20ch] text-h1 font-display-sharp">{title}</h1>
           {lead && <p className="mt-5 max-w-prose text-lead text-ink-secondary">{lead}</p>}
           {actions && <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">{actions}</div>}
         </Reveal>

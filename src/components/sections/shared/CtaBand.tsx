@@ -46,7 +46,7 @@ export function CtaBand({ id, title, body, primary, secondary }: CtaBandProps) {
           <Reveal variants={riseVariants}>
             <span aria-hidden="true" className="mx-auto block h-px w-16 rounded-full bg-on-band/40" />
 
-            <h2 id={id} className="mt-8 text-h1 font-display-wonk text-on-band">
+            <h2 id={id} className="mt-8 text-h1 font-display-sharp text-on-band">
               {title}
             </h2>
 

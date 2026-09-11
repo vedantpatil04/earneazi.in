@@ -85,13 +85,19 @@ export function ServicesShowcase() {
                         <Icon icon={service.icon} size={24} />
                       </span>
 
-                      <span
-                        className={cn(
-                          'flex-1 font-display text-h3 transition-colors motion-safe:duration-200',
-                          isOpen ? 'text-ink' : 'text-ink-secondary group-hover:text-ink'
-                        )}
-                      >
-                        {service.title}
+                      <span className="flex-1">
+                        <span
+                          className={cn(
+                            'block font-display text-h3 transition-colors motion-safe:duration-200',
+                            isOpen ? 'text-ink' : 'text-ink-secondary group-hover:text-ink'
+                          )}
+                        >
+                          {service.title}
+                        </span>
+                        {/* The one-clause version stays visible whether the row
+                            is open or shut, so all three can be compared
+                            without opening any of them. */}
+                        <span className="mt-1.5 block text-small text-ink-muted">{service.tagline}</span>
                       </span>
 
                       <span

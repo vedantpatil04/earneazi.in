@@ -90,7 +90,7 @@ function ServiceSection({ service, background }: { service: ServicePillar; backg
               <Icon icon={service.icon} size={26} />
             </span>
 
-            <h2 id={headingId} className="mt-6 text-h2 font-display-wonk">
+            <h2 id={headingId} className="mt-6 text-h2 font-display-sharp">
               {service.title}
             </h2>
 

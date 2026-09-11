@@ -31,52 +31,52 @@
 :root {
   /* Warm paper — an oat-toned paper stack, deliberately warmer than a
      neutral grey and cooler than a cream. */
-  --color-bg: 246 245 238; /* #F6F5EE */
-  --color-surface: 255 255 255; /* #FFFFFF */
-  --color-surface-2: 234 234 222; /* #EAEADE */
+  --color-bg: 247 245 241; /* #F7F5F1 */ /* #F6F5EE */
+  --color-surface: 255 255 255; /* #FFFFFF */ /* #FFFFFF */
+  --color-surface-2: 237 235 229; /* #EDEBE5 */ /* #EAEADE */
 
-  --color-border: 127 142 110; /* #7F8E6E — interactive boundaries, >=3:1 */
-  --color-divider: 214 215 201; /* #D6D7C9 — decorative hairlines only */
+  --color-border: 124 135 151; /* #7C8797 — interactive boundaries, 3.3:1 on bg */ /* #7F8E6E — interactive boundaries, >=3:1 */
+  --color-divider: 222 220 213; /* #DEDCD5 — must read on surface-2 too */ /* #D6D7C9 — decorative hairlines only */
 
   /* Forest ink */
-  --color-text-primary: 18 33 28; /* #12211C */
-  --color-text-secondary: 63 76 69; /* #3F4C45 */
-  --color-text-muted: 102 113 103; /* #667167 */
+  --color-text-primary: 19 26 42; /* #131A2A — near-black with a navy cast, never pure black */ /* #12211C */
+  --color-text-secondary: 62 71 87; /* #3E4757 */ /* #3F4C45 */
+  --color-text-muted: 100 109 125; /* #646D7D — 4.6:1 on bg */ /* #667167 */
 
-  --color-accent-primary: 31 111 82; /* #1F6F52 */
-  --color-accent-primary-hover: 23 87 63; /* #17573F */
+  --color-accent-primary: 26 76 139; /* #1A4C8B — 7.9:1 on bg, 8.6:1 under white */ /* #1F6F52 */
+  --color-accent-primary-hover: 20 60 110; /* #143C6E */ /* #17573F */
   --color-on-accent-primary: 255 255 255;
 
   /* Muted brass — the single warm accent. Used for emphasis, selected
      states and rules; never as a large fill. */
-  --color-brass: 140 101 38; /* #8C6526 */
-  --color-brass-hover: 113 79 29; /* #714F1D */
+  --color-brass: 133 104 32; /* #856820 — muted gold, 4.8:1 on bg so it is safe for small labels */ /* #8C6526 */
+  --color-brass-hover: 107 83 25; /* #6B5319 */ /* #714F1D */
   --color-on-brass: 255 255 255;
 
   /* Deep forest band — the one full-bleed high-contrast surface on the
      page (the closing consultation CTA). Kept separate from
      --color-accent-primary so the band can be dark in BOTH themes, rather
      than flipping to a bright mint fill in dark mode. */
-  --color-band: 20 61 44; /* #143D2C */
-  --color-on-band: 244 246 239; /* #F4F6EF */
+  --color-band: 16 26 46; /* #101A2E */ /* #143D2C */
+  --color-on-band: 242 245 250; /* #F2F5FA */ /* #F4F6EF */
 
-  --color-success: 46 125 79; /* #2E7D4F */
-  --color-warning: 138 90 0; /* #8A5A00 */
-  --color-error: 179 57 43; /* #B3392B */
-  --color-focus: 31 111 82; /* #1F6F52 */
+  --color-success: 26 106 74; /* #1A6A4A */ /* #2E7D4F */
+  --color-warning: 141 88 12; /* #8D580C */ /* #8A5A00 */
+  --color-error: 170 45 45; /* #AA2D2D */ /* #B3392B */
+  --color-focus: 26 76 139; /* #1A4C8B */ /* #1F6F52 */
 
-  --color-chart-1: 31 111 82;
-  --color-chart-2: 140 101 38;
-  --color-chart-3: 43 110 134;
-  --color-chart-4: 149 75 73;
-  --color-chart-5: 85 96 107;
+  --color-chart-1: 26 76 139;
+  --color-chart-2: 133 104 32;
+  --color-chart-3: 69 108 148;
+  --color-chart-4: 140 90 78;
+  --color-chart-5: 90 103 120;
 
   /* Shadows are tinted with the ink colour, never neutral black — a soft
      grey drop shadow under every card is the tell we're avoiding. They are
      tokens (not Tailwind literals) so dark mode gets its own, heavier set. */
-  --shadow-sm: 0 1px 2px 0 rgb(18 33 28 / 0.06);
-  --shadow-md: 0 8px 28px -10px rgb(18 33 28 / 0.18);
-  --shadow-lg: 0 28px 64px -28px rgb(18 33 28 / 0.28);
+  --shadow-sm: 0 1px 2px 0 rgb(19 26 42 / 0.07);
+  --shadow-md: 0 8px 28px -10px rgb(19 26 42 / 0.20);
+  --shadow-lg: 0 28px 64px -28px rgb(19 26 42 / 0.30);
 
   /* Fine paper grain. Light theme only — dark gets a soft overhead lift
      instead, since dark noise on a dark ground is invisible. */
@@ -87,44 +87,44 @@
 }
 
 [data-theme='dark'] {
-  --color-bg: 15 23 19; /* #0F1713 */
-  --color-surface: 22 33 28; /* #16211C */
-  --color-surface-2: 29 42 35; /* #1D2A23 */
+  --color-bg: 12 17 25; /* #0C1119 — deep navy-charcoal, not black */ /* #0F1713 */
+  --color-surface: 19 26 37; /* #131A25 */ /* #16211C */
+  --color-surface-2: 26 35 50; /* #1A2332 */ /* #1D2A23 */
 
-  --color-border: 93 119 103; /* #5D7767 */
-  --color-divider: 48 66 56; /* #304238 — must stay readable against surface-2 (#1D2A23), not just against bg */
+  --color-border: 90 103 120; /* #5A6778 */ /* #5D7767 */
+  --color-divider: 44 56 73; /* #2C3849 — chosen against surface-2, not just against bg */ /* #304238 — must stay readable against surface-2 (#1D2A23), not just against bg */
 
-  --color-text-primary: 242 244 239; /* #F2F4EF */
-  --color-text-secondary: 198 205 196; /* #C6CDC4 */
-  --color-text-muted: 147 160 147; /* #93A093 */
+  --color-text-primary: 238 241 246; /* #EEF1F6 */ /* #F2F4EF */
+  --color-text-secondary: 188 197 210; /* #BCC5D2 */ /* #C6CDC4 */
+  --color-text-muted: 139 150 166; /* #8B96A6 */ /* #93A093 */
 
-  --color-accent-primary: 87 199 147; /* #57C793 */
-  --color-accent-primary-hover: 120 214 171; /* #78D6AB */
-  --color-on-accent-primary: 15 23 19;
+  --color-accent-primary: 122 160 235; /* #7AA0EB */ /* #57C793 */
+  --color-accent-primary-hover: 151 182 242; /* #97B6F2 */ /* #78D6AB */
+  --color-on-accent-primary: 12 17 25;
 
-  --color-brass: 217 169 77; /* #D9A94D */
-  --color-brass-hover: 230 189 112; /* #E6BD70 */
-  --color-on-brass: 15 23 19;
+  --color-brass: 212 169 79; /* #D4A94F */ /* #D9A94D */
+  --color-brass-hover: 226 190 116; /* #E2BE74 */ /* #E6BD70 */
+  --color-on-brass: 12 17 25;
 
-  --color-band: 22 48 36; /* #163024 */
-  --color-on-band: 242 244 239; /* #F2F4EF */
+  --color-band: 22 32 46; /* #16202E */ /* #163024 */
+  --color-on-band: 238 241 246; /* #F2F4EF */
 
-  --color-success: 87 199 147;
-  --color-warning: 217 169 77;
-  --color-error: 226 104 92; /* #E2685C */
-  --color-focus: 87 199 147;
+  --color-success: 92 193 150;
+  --color-warning: 212 169 79;
+  --color-error: 233 122 122; /* #E2685C */
+  --color-focus: 122 160 235;
 
-  --color-chart-1: 87 199 147;
-  --color-chart-2: 217 169 77;
-  --color-chart-3: 95 168 194;
-  --color-chart-4: 200 124 121;
-  --color-chart-5: 154 166 172;
+  --color-chart-1: 122 160 235;
+  --color-chart-2: 212 169 79;
+  --color-chart-3: 125 165 196;
+  --color-chart-4: 196 137 124;
+  --color-chart-5: 150 162 178;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-md: 0 10px 30px -12px rgb(0 0 0 / 0.6);
   --shadow-lg: 0 30px 70px -30px rgb(0 0 0 / 0.75);
 
-  --paper-texture: radial-gradient(120% 80% at 50% -10%, rgb(87 199 147 / 0.06), transparent 60%);
+  --paper-texture: radial-gradient(120% 80% at 50% -10%, rgb(122 160 235 / 0.07), transparent 60%);
   --paper-texture-opacity: 1;
 
   color-scheme: dark;
@@ -181,8 +181,8 @@
   }
 
   ::selection {
-    background: rgb(var(--color-brass));
-    color: rgb(var(--color-on-brass));
+    background: rgb(var(--color-accent-primary));
+    color: rgb(var(--color-on-accent-primary));
   }
 
   :focus-visible {
@@ -202,10 +202,12 @@
 }
 
 @layer utilities {
-  /* Fraunces' sharper, slightly wonky editorial instance. Applied to
-     display-scale headlines only — at body sizes the wonk reads as noise. */
-  .font-display-wonk {
-    font-variation-settings: 'SOFT' 0, 'WONK' 1;
+  /* Fraunces at its sharpest: hard terminals, no wonk. At display sizes this
+     reads closer to a Scotch Roman than to the soft default instance — high
+     contrast and precise, which is what a financial brand should sound like
+     in type. Display-scale headlines only. */
+  .font-display-sharp {
+    font-variation-settings: 'SOFT' 0, 'WONK' 0;
   }
 
   /* For financial figures and step numbers — keeps digits from jittering
