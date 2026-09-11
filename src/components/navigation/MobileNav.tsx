@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { RefObject } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { ArrowRight, X } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import type { NavItem } from '@/types/nav';
 import { headerCta } from '@/data/nav';
-import { Icon } from '@/components/ui/Icon';
+import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
+import { LogoMark } from '@/components/brand/Logo';
+import { ThemeControl } from '@/components/ui/ThemeToggle';
+import { Button } from '@/components/ui/Button';
+import { MenuTrigger } from './MenuTrigger';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { navItemVariants, panelVariants, transitions, withMotionSafety } from '@/lib/motion/variants';
+import { useInert } from '@/hooks/useInert';
+import { navItemVariants, sheetVariants } from '@/lib/motion/variants';
+import { duration, easing, staggerInterval, withMotionSafety } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils/cn';
 
 interface MobileNavProps {
@@ -19,16 +26,36 @@ interface MobileNavProps {
   triggerRef: RefObject<HTMLButtonElement>;
 }
 
-const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** The route that gets its own highlighted row (Phase 0 §16). */
+const HIGHLIGHT_PATH = '/sip-calculator';
 
 /**
- * Full-height navigation panel for small screens. Rows arrive in sequence
- * rather than all at once, which gives the eye an order to read them in,
- * and every row is at least 56px tall so it stays comfortably tappable.
+ * Mobile navigation — Phase 0 §16.
  *
- * Behaviour that has to be right for this to feel native: focus moves into
- * the panel on open and returns to the trigger on close, Tab is trapped
- * inside it, Escape closes it, and the page behind it does not scroll.
+ * A full-screen sheet rather than a side drawer, entering with a vertical
+ * translate and a clip reveal instead of a plain opacity fade, so it reads
+ * as a surface arriving rather than as content appearing from nothing.
+ *
+ * Content order is the audit's, and it is an argument rather than a list:
+ * where you can go, then the one tool worth trying, then how to reach a
+ * person, then the controls.
+ *
+ * The behaviour that has to be right for this to feel native rather than
+ * like a div over the page:
+ *   · focus moves into the sheet on open and returns to the trigger on
+ *     close, Tab is trapped, and Escape closes;
+ *   · the rest of the document is `inert`, so a screen reader's virtual
+ *     cursor cannot walk into the page behind it;
+ *   · the page behind does not scroll, and its position is restored;
+ *   · `env(safe-area-inset-*)` is respected top and bottom, so the last row
+ *     is not under the home indicator;
+ *   · rows stagger at 30ms and travel 12px, and under reduced motion they
+ *     do neither.
+ *
+ * Rendered through a portal on `document.body` so `inert` can be applied to
+ * the whole app root — the sheet has to sit outside the tree it freezes.
  */
 export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -36,6 +63,20 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useLockBodyScroll(open);
+  useInert('#root', open);
+
+  /*
+    Focus returns to the trigger only after the sheet has closed. It cannot
+    be done inside the close handler: the trigger lives inside #root, which
+    is `inert` while the sheet is open, and an inert element cannot take
+    focus. Restoring on the open→closed transition runs after the inert
+    attribute has been removed.
+  */
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (wasOpen.current && !open) triggerRef.current?.focus();
+    wasOpen.current = open;
+  }, [open, triggerRef]);
 
   useEffect(() => {
     if (!open) return;
@@ -44,14 +85,16 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
+        event.preventDefault();
         onClose();
-        triggerRef.current?.focus();
         return;
       }
 
       if (event.key !== 'Tab' || !panelRef.current) return;
 
-      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (element) => element.offsetParent !== null || element === document.activeElement
+      );
       if (focusable.length === 0) return;
 
       const first = focusable[0];
@@ -70,12 +113,20 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose, triggerRef]);
 
-  const handleClose = () => {
-    onClose();
-    triggerRef.current?.focus();
-  };
 
-  return (
+  const destinations = items.filter((item) => item.path !== HIGHLIGHT_PATH);
+  const highlight = items.find((item) => item.path === HIGHLIGHT_PATH);
+
+  /* Only channels the owner has confirmed. Nothing is invented, and an
+     unconfirmed channel renders nothing rather than a placeholder. */
+  const directChannels = verifiedContactChannels.filter((channel) =>
+    ['phone', 'whatsapp', 'email'].includes(channel.kind)
+  );
+  const contextChannels = verifiedContactChannels.filter((channel) => ['office', 'hours'].includes(channel.kind));
+
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -86,25 +137,27 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
           aria-label="Site navigation"
           initial="hidden"
           animate="visible"
-          exit="hidden"
-          variants={panelVariants}
-          transition={withMotionSafety(prefersReducedMotion, transitions.base)}
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg lg:hidden"
+          exit="exit"
+          variants={sheetVariants}
+          transition={withMotionSafety(
+            prefersReducedMotion,
+            /* §16: 280ms, ease-out. Under reduced motion the sheet appears
+               with opacity only and no longer than 120ms — which is what
+               `withMotionSafety` collapsing to zero duration delivers. */
+            { duration: 0.28, ease: easing.out }
+          )}
+          className={cn(
+            'fixed inset-0 z-overlay flex flex-col overflow-y-auto overscroll-contain',
+            'bg-surface shadow-lg lg:hidden'
+          )}
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
         >
-          <div className="flex h-16 flex-shrink-0 items-center justify-between px-4 sm:px-6">
-            <span className="inline-flex items-baseline gap-0.5 font-display text-[1.375rem] font-medium text-ink">
-              Earneazi
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-brass" />
-            </span>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={handleClose}
-              aria-label="Close menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-divider text-ink transition-colors motion-safe:duration-200 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              <X size={22} aria-hidden="true" />
-            </button>
+          <div className="flex h-header shrink-0 items-center justify-between gap-4 px-gutter">
+            <LogoMark lockup="primary" className="text-ink" />
+            <MenuTrigger ref={closeButtonRef} open onClick={onClose} />
           </div>
 
           <motion.nav
@@ -113,12 +166,17 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
             animate="visible"
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: prefersReducedMotion ? 0 : 0.045, delayChildren: prefersReducedMotion ? 0 : 0.08 } },
+              visible: {
+                transition: {
+                  staggerChildren: staggerInterval(prefersReducedMotion, 0.03),
+                  delayChildren: prefersReducedMotion ? 0 : duration.instant,
+                },
+              },
             }}
-            className="flex-1 px-4 pb-6 pt-2 sm:px-6"
+            className="flex flex-1 flex-col px-gutter pb-10 pt-2"
           >
             <ul className="flex flex-col">
-              {items.map((item) => (
+              {destinations.map((item) => (
                 <motion.li key={item.path} variants={navItemVariants}>
                   <NavLink
                     to={item.path}
@@ -126,32 +184,89 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex min-h-[3.5rem] flex-col justify-center border-b border-divider py-3 pl-3 pr-2 transition-colors motion-safe:duration-200',
-                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-                        isActive ? 'border-l-2 border-l-brass bg-surface-2/60 text-ink' : 'text-ink hover:bg-surface-2/50'
+                        'flex min-h-14 flex-col justify-center border-b border-divider py-2.5 pl-3 pr-2',
+                        'transition-colors motion-safe:duration-instant ease-out',
+                        isActive ? 'border-l-2 border-l-brand bg-selected/50 text-ink' : 'text-ink hover:bg-hovered'
                       )
                     }
                   >
-                    <span className="font-display text-h3">{item.label}</span>
-                    {item.description && <span className="mt-0.5 text-small text-ink-muted">{item.description}</span>}
+                    <span className="font-display text-title-lg">{item.label}</span>
+                    {item.description && <span className="mt-0.5 text-body-sm text-ink-muted">{item.description}</span>}
                   </NavLink>
                 </motion.li>
               ))}
             </ul>
 
-            <motion.div variants={navItemVariants} className="mt-8">
-              <NavLink
-                to={headerCta.path}
-                onClick={onClose}
-                className="flex min-h-[3.25rem] items-center justify-between gap-3 rounded-md bg-accent px-5 text-body-lg font-medium text-on-accent transition-colors motion-safe:duration-200 hover:bg-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-              >
+            {/* The one tool a visitor can use before speaking to anyone, so
+                it is a distinct row rather than the fifth item in a list. */}
+            {highlight && (
+              <motion.div variants={navItemVariants} className="mt-6">
+                <NavLink
+                  to={highlight.path}
+                  onClick={onClose}
+                  className="flex min-h-14 items-center gap-3 rounded-surface border border-brand/25 bg-brand-subtle px-4 py-3 text-ink transition-colors motion-safe:duration-instant ease-out hover:border-brand/40"
+                >
+                  <Calculator size={22} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-brand-ink" />
+                  <span className="min-w-0">
+                    <span className="block font-display text-title-sm">{highlight.label}</span>
+                    {highlight.description && (
+                      <span className="block text-body-sm text-ink-muted">{highlight.description}</span>
+                    )}
+                  </span>
+                </NavLink>
+              </motion.div>
+            )}
+
+            <motion.div variants={navItemVariants} className="mt-6">
+              <Button to={headerCta.path} onClick={onClose} size="lg" className="w-full">
                 {headerCta.label}
-                <Icon icon={ArrowRight} size={18} />
-              </NavLink>
+              </Button>
             </motion.div>
+
+            {/* Direct channels — real `tel:` / `mailto:` / WhatsApp links,
+                not routes. Appears only once the owner confirms a channel
+                in data/contact.ts (Phase 0 §25). */}
+            {directChannels.length > 0 && (
+              <motion.ul variants={navItemVariants} className="mt-6 flex flex-col gap-2">
+                {directChannels.map((channel) => {
+                  const href = contactChannelHref(channel);
+                  if (!href) return null;
+                  const external = channel.kind === 'whatsapp';
+                  return (
+                    <li key={channel.id}>
+                      <a
+                        href={href}
+                        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        onClick={onClose}
+                        className="flex min-h-12 items-center justify-between gap-3 rounded-action border border-divider px-4 text-body text-ink transition-colors motion-safe:duration-instant ease-out hover:bg-hovered"
+                      >
+                        <span className="font-medium">{channel.label}</span>
+                        <span className="text-ink-muted">{channel.value}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </motion.ul>
+            )}
+
+            <motion.div variants={navItemVariants} className="mt-8">
+              <ThemeControl />
+            </motion.div>
+
+            {contextChannels.length > 0 && (
+              <motion.dl variants={navItemVariants} className="mt-8 flex flex-col gap-2 text-body-sm text-ink-muted">
+                {contextChannels.map((channel) => (
+                  <div key={channel.id}>
+                    <dt className="sr-only">{channel.label}</dt>
+                    <dd className="whitespace-pre-line">{channel.value}</dd>
+                  </div>
+                ))}
+              </motion.dl>
+            )}
           </motion.nav>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

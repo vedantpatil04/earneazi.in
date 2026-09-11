@@ -16,28 +16,30 @@ interface PageHeaderProps {
 }
 
 /**
- * The opening block on every inner page: brass rule, h1, supporting line.
+ * The opening block on every inner page: the `h1` and its supporting line.
  *
- * Shared rather than rewritten per page — it is the single most visible
- * piece of vertical rhythm on the site, and six pages each setting their own
- * top padding and heading size is how a set of routes starts looking like
+ * Shared rather than rewritten per page — it is the most visible piece of
+ * vertical rhythm on the site, and six routes each choosing their own top
+ * padding and heading size is how a set of pages starts looking like
  * separate projects.
+ *
+ * The decorative rule that sat above the heading is gone: §17 removes the
+ * eyebrow as a global device and §34 lists it among the templated tells
+ * being retired.
  */
 export function PageHeader({ title, lead, actions, children, className }: PageHeaderProps) {
   return (
     <Section
       spacing={children ? 'lg' : 'md'}
-      /* With no children the following Section supplies its own top padding,
-         so the header's bottom padding would stack on top of it — about
-         160px of nothing between the lead and the first real content.
+      /* With no children the following Section supplies its own top
+         padding, so the header's bottom padding would stack on top of it.
          Tailwind emits `pb-*` after `py-*`, so this reliably wins. */
       className={cn('pt-12 md:pt-16', !children && 'pb-2 md:pb-4', className)}
     >
-      <Container size="wide">
+      <Container size="shell">
         <Reveal variants={riseVariants} immediate>
-          <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
-          <h1 className="mt-6 max-w-[20ch] text-h1 font-display-sharp">{title}</h1>
-          {lead && <p className="mt-5 max-w-prose text-lead text-ink-secondary">{lead}</p>}
+          <h1 className="max-w-[20ch] text-display-lg text-ink-display">{title}</h1>
+          {lead && <p className="mt-5 max-w-measure text-body-lg text-ink-secondary">{lead}</p>}
           {actions && <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">{actions}</div>}
         </Reveal>
 

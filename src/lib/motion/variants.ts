@@ -1,37 +1,31 @@
-import type { Transition, Variants } from 'framer-motion';
+import type { Variants } from 'framer-motion';
+import { travel } from './tokens';
 
 /**
- * Shared motion tokens. Add new motion needs here rather than inventing
- * one-off durations and eases per component — that consistency is what
- * keeps the "restrained and deliberate" bar as later phases add pages.
+ * Shared motion variants, built on the tokens in ./tokens.ts.
  *
- * These are *base* transitions. Always resolve them through
- * `withMotionSafety(prefersReducedMotion, transition)` before handing them
- * to a `motion.*` component, so prefers-reduced-motion is respected
- * wherever motion is used — see usePrefersReducedMotion.
+ * Rules these obey (Phase 0 §18.2), so that a component using them cannot
+ * accidentally break the motion system:
  *
- * Everything below animates `opacity`, `transform` or `clip-path` only.
- * No layout properties (width/height/top/left) are animated on scroll,
- * which is what keeps these cheap on mobile and in Safari; the one
- * height animation on the page is the services disclosure, which is
- * user-triggered and animates a single element at a time.
+ *   · Only `opacity`, `transform` and `clip-path` are animated. No layout
+ *     property is animated in a scroll-linked context.
+ *   · Travel never exceeds the budget in `travel` — 12px for feedback,
+ *     24px for a content entrance, 40px for a section device.
+ *   · Every variant resolves through `withMotionSafety` at the call site,
+ *     and the base CSS renders the final visible state, so content is never
+ *     dependent on an animation having fired.
+ *   · There is no site-wide fade-up. A generic opacity+translateY entrance
+ *     is permitted on at most one section of a page; the variants below are
+ *     deliberately different shapes so sections do not all perform the same
+ *     trick.
  */
-export const transitions = {
-  fast: { duration: 0.15, ease: [0.22, 1, 0.36, 1] } satisfies Transition,
-  base: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } satisfies Transition,
-  slow: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } satisfies Transition,
-  /** For the hero photograph — long enough to read as a reveal rather than a pop. */
-  cinematic: { duration: 0.9, ease: [0.22, 1, 0.36, 1] } satisfies Transition,
-};
 
-export function withMotionSafety(prefersReducedMotion: boolean, transition: Transition): Transition {
-  return prefersReducedMotion ? { duration: 0 } : transition;
-}
+export { transitions, springUi, duration, easing, travel, withMotionSafety, staggerInterval } from './tokens';
 
-// --- Interaction-triggered ------------------------------------------------
-// Menus, dialogs, disclosures, tab panels. Deliberately kept separate from
-// the scroll reveals below: motion that answers a click should be faster and
-// more literal than motion that introduces a section.
+// ── Interaction-triggered ──────────────────────────────────────────────
+// Menus, dialogs, disclosures, tab panels. Faster and more literal than the
+// scroll reveals below: motion answering a tap should feel like a response,
+// not like an introduction.
 
 export const fadeInVariants: Variants = {
   hidden: { opacity: 0 },
@@ -44,53 +38,63 @@ export const scaleInVariants: Variants = {
 };
 
 export const slideDownVariants: Variants = {
-  hidden: { opacity: 0, y: -8 },
+  hidden: { opacity: 0, y: -travel.sm },
   visible: { opacity: 1, y: 0 },
 };
 
-export const panelVariants: Variants = {
-  hidden: { opacity: 0, x: '100%' },
-  visible: { opacity: 1, x: 0 },
+/**
+ * The mobile navigation sheet — Phase 0 §16. A vertical translate with a
+ * clip reveal rather than a plain opacity fade, so the sheet reads as a
+ * surface arriving rather than as content appearing out of nothing.
+ */
+export const sheetVariants: Variants = {
+  hidden: { opacity: 0, y: -16, clipPath: 'inset(0 0 100% 0)' },
+  visible: { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' },
+  exit: { opacity: 0, y: -12, clipPath: 'inset(0 0 100% 0)' },
 };
 
-/** Tab panel swap — a short lateral drift so the change reads as "different content", not "same content flickered". */
+/** Tab panel swap — a short lateral drift so the change reads as different content. */
 export const panelSwapVariants: Variants = {
-  hidden: { opacity: 0, x: 12 },
+  hidden: { opacity: 0, x: travel.sm },
   visible: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -12 },
+  exit: { opacity: 0, x: -travel.sm },
 };
 
-/** Rows inside the mobile navigation panel, staggered by the panel itself. */
+/** Rows inside the mobile navigation sheet, staggered by the sheet itself. */
 export const navItemVariants: Variants = {
-  hidden: { opacity: 0, x: 16 },
-  visible: { opacity: 1, x: 0 },
-};
-
-// --- Scroll-triggered section reveals ------------------------------------
-// Used through components/motion/Reveal.tsx, which handles viewport
-// tracking, once-only firing and reduced-motion resolution. Deliberately a
-// different shape per call site rather than one fade-up on every section:
-// the page should not feel like it is performing the same trick eight times.
-
-/** Restrained default — a small upward drift and fade. The quiet reveal. */
-export const riseVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: travel.sm },
   visible: { opacity: 1, y: 0 },
 };
 
-/** Opacity only. For content that should read as settled fact rather than as animated in. */
+/**
+ * LEGACY — the side-drawer variant used before Phase 1. Kept so anything
+ * still importing it compiles; the mobile sheet uses `sheetVariants`.
+ */
+export const panelVariants: Variants = sheetVariants;
+
+// ── Scroll-triggered section reveals ───────────────────────────────────
+// Used through components/motion/Reveal.tsx, which owns viewport tracking,
+// once-only firing and reduced-motion resolution.
+
+/** Restrained default — a small upward drift and fade. */
+export const riseVariants: Variants = {
+  hidden: { opacity: 0, y: travel.md },
+  visible: { opacity: 1, y: 0 },
+};
+
+/** Opacity only. For content that should read as settled fact. */
 export const settleVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
 
-/** The hero photograph: opens from a slightly inset crop and settles out of a gentle over-scale. */
+/** Opens from a slightly inset crop and settles out of a gentle over-scale. */
 export const clipRevealVariants: Variants = {
-  hidden: { opacity: 0, scale: 1.04, clipPath: 'inset(8% 8% 8% 8% round 1rem)' },
-  visible: { opacity: 1, scale: 1, clipPath: 'inset(0% 0% 0% 0% round 1rem)' },
+  hidden: { opacity: 0, scale: 1.03, clipPath: 'inset(6% 6% 6% 6% round 0.75rem)' },
+  visible: { opacity: 1, scale: 1, clipPath: 'inset(0% 0% 0% 0% round 0.75rem)' },
 };
 
-/** Horizontal connector line — pair with `origin-left`, since Framer Motion respects CSS transform-origin. */
+/** Horizontal connector line — pair with `origin-left`. */
 export const lineDrawVariants: Variants = {
   hidden: { scaleX: 0 },
   visible: { scaleX: 1 },
@@ -102,13 +106,13 @@ export const lineDrawVerticalVariants: Variants = {
   visible: { scaleY: 1 },
 };
 
-/** Child item for a stagger container (see RevealGroup) — variants propagate from the parent automatically. */
+/** Child item for a stagger container — see RevealGroup. */
 export const staggerItemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: travel.sm },
   visible: { opacity: 1, y: 0 },
 };
 
-/** Stagger child that grows from its baseline — used for the SIP illustration's columns. */
+/** Stagger child that grows from its baseline. */
 export const growFromBaseVariants: Variants = {
   hidden: { opacity: 0, scaleY: 0 },
   visible: { opacity: 1, scaleY: 1 },

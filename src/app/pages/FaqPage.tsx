@@ -41,8 +41,9 @@ export default function FaqPage() {
               return (
                 <Reveal key={category} variants={riseVariants}>
                   <section aria-labelledby={headingId}>
-                    <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
-                    <h2 id={headingId} className="mt-5 text-h2 font-display-sharp">
+                    {/* The eyebrow rule that sat here is retired as a global
+                        device — Phase 0 §17 and §34. */}
+                    <h2 id={headingId} className="text-display-md">
                       {category}
                     </h2>
 

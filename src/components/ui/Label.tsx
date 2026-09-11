@@ -6,13 +6,15 @@ interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
 }
 
 /**
- * The visual asterisk is decorative only — pair this with a native
- * `required` attribute on the actual input, which is what assistive tech
- * announces.
+ * Standalone label, for controls composed by hand. `Field` renders its own
+ * label and should be preferred for new work.
+ *
+ * The asterisk is decorative only — pair this with a native `required` (or
+ * `aria-required`) on the control, which is what assistive tech announces.
  */
 export function Label({ className, required, children, ...props }: LabelProps) {
   return (
-    <label className={cn('block text-label font-medium text-ink-secondary', className)} {...props}>
+    <label className={cn('block text-body-sm font-semibold text-ink', className)} {...props}>
       {children}
       {required && (
         <span className="ml-1 text-error" aria-hidden="true">

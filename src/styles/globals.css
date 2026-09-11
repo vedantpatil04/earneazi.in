@@ -1,178 +1,72 @@
+/* Font faces first — @import must precede every other rule. */
+@import './fonts.css';
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
-  ─────────────────────────────────────────────────────────────────────────
-  DESIGN TOKENS
-  ─────────────────────────────────────────────────────────────────────────
-  Every colour, shadow and surface in the app resolves to one of the
-  variables below. Components never hard-code a hex value — change a token
-  here and the whole site (both themes) follows.
-
-  Colour values are space-separated RGB channels rather than hex, so
-  Tailwind's opacity modifiers (`bg-brass/10`) work against a
-  runtime-swappable theme — see the `rgb(var(--x) / <alpha-value>)` pattern
-  in tailwind.config.ts.
-
-  The named groups the Phase 2 brief asks to be adjustable:
-
-    warm paper   --color-bg, --color-surface, --color-surface-2
-    forest/ink   --color-text-*, --color-accent-primary*, --color-band
-    muted brass  --color-brass, --color-brass-hover, --color-on-brass
-    borders      --color-border (interactive, >=3:1), --color-divider (decorative)
-    surfaces     --color-surface, --color-surface-2, --color-band
-    shadows      --shadow-sm, --shadow-md, --shadow-lg
-    accent states --color-accent-primary-hover, --color-brass-hover, --color-focus
-
-  Dark is its own hierarchy, not an inversion of light: each value is chosen
-  and contrast-checked independently (ratios in /README.md).
+  ═════════════════════════════════════════════════════════════════════════
+  GLOBAL BASE LAYER
+  ═════════════════════════════════════════════════════════════════════════
+  Values live in tokens.css. This file only applies them: document defaults,
+  the typographic system, the focus system, and the reduced-motion safety
+  net. Nothing here introduces a literal colour, size or duration.
 */
-:root {
-  /* Warm paper — an oat-toned paper stack, deliberately warmer than a
-     neutral grey and cooler than a cream. */
-  --color-bg: 247 245 241; /* #F7F5F1 */ /* #F6F5EE */
-  --color-surface: 255 255 255; /* #FFFFFF */ /* #FFFFFF */
-  --color-surface-2: 237 235 229; /* #EDEBE5 */ /* #EAEADE */
-
-  --color-border: 124 135 151; /* #7C8797 — interactive boundaries, 3.3:1 on bg */ /* #7F8E6E — interactive boundaries, >=3:1 */
-  --color-divider: 222 220 213; /* #DEDCD5 — must read on surface-2 too */ /* #D6D7C9 — decorative hairlines only */
-
-  /* Forest ink */
-  --color-text-primary: 19 26 42; /* #131A2A — near-black with a navy cast, never pure black */ /* #12211C */
-  --color-text-secondary: 62 71 87; /* #3E4757 */ /* #3F4C45 */
-  --color-text-muted: 100 109 125; /* #646D7D — 4.6:1 on bg */ /* #667167 */
-
-  --color-accent-primary: 26 76 139; /* #1A4C8B — 7.9:1 on bg, 8.6:1 under white */ /* #1F6F52 */
-  --color-accent-primary-hover: 20 60 110; /* #143C6E */ /* #17573F */
-  --color-on-accent-primary: 255 255 255;
-
-  /* Muted brass — the single warm accent. Used for emphasis, selected
-     states and rules; never as a large fill. */
-  --color-brass: 133 104 32; /* #856820 — muted gold, 4.8:1 on bg so it is safe for small labels */ /* #8C6526 */
-  --color-brass-hover: 107 83 25; /* #6B5319 */ /* #714F1D */
-  --color-on-brass: 255 255 255;
-
-  /* Deep forest band — the one full-bleed high-contrast surface on the
-     page (the closing consultation CTA). Kept separate from
-     --color-accent-primary so the band can be dark in BOTH themes, rather
-     than flipping to a bright mint fill in dark mode. */
-  --color-band: 16 26 46; /* #101A2E */ /* #143D2C */
-  --color-on-band: 242 245 250; /* #F2F5FA */ /* #F4F6EF */
-
-  --color-success: 26 106 74; /* #1A6A4A */ /* #2E7D4F */
-  --color-warning: 141 88 12; /* #8D580C */ /* #8A5A00 */
-  --color-error: 170 45 45; /* #AA2D2D */ /* #B3392B */
-  --color-focus: 26 76 139; /* #1A4C8B */ /* #1F6F52 */
-
-  --color-chart-1: 26 76 139;
-  --color-chart-2: 133 104 32;
-  --color-chart-3: 69 108 148;
-  --color-chart-4: 140 90 78;
-  --color-chart-5: 90 103 120;
-
-  /* Shadows are tinted with the ink colour, never neutral black — a soft
-     grey drop shadow under every card is the tell we're avoiding. They are
-     tokens (not Tailwind literals) so dark mode gets its own, heavier set. */
-  --shadow-sm: 0 1px 2px 0 rgb(19 26 42 / 0.07);
-  --shadow-md: 0 8px 28px -10px rgb(19 26 42 / 0.20);
-  --shadow-lg: 0 28px 64px -28px rgb(19 26 42 / 0.30);
-
-  /* Fine paper grain. Light theme only — dark gets a soft overhead lift
-     instead, since dark noise on a dark ground is invisible. */
-  --paper-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
-  --paper-texture-opacity: 0.055;
-
-  color-scheme: light;
-}
-
-[data-theme='dark'] {
-  --color-bg: 12 17 25; /* #0C1119 — deep navy-charcoal, not black */ /* #0F1713 */
-  --color-surface: 19 26 37; /* #131A25 */ /* #16211C */
-  --color-surface-2: 26 35 50; /* #1A2332 */ /* #1D2A23 */
-
-  --color-border: 90 103 120; /* #5A6778 */ /* #5D7767 */
-  --color-divider: 44 56 73; /* #2C3849 — chosen against surface-2, not just against bg */ /* #304238 — must stay readable against surface-2 (#1D2A23), not just against bg */
-
-  --color-text-primary: 238 241 246; /* #EEF1F6 */ /* #F2F4EF */
-  --color-text-secondary: 188 197 210; /* #BCC5D2 */ /* #C6CDC4 */
-  --color-text-muted: 139 150 166; /* #8B96A6 */ /* #93A093 */
-
-  --color-accent-primary: 122 160 235; /* #7AA0EB */ /* #57C793 */
-  --color-accent-primary-hover: 151 182 242; /* #97B6F2 */ /* #78D6AB */
-  --color-on-accent-primary: 12 17 25;
-
-  --color-brass: 212 169 79; /* #D4A94F */ /* #D9A94D */
-  --color-brass-hover: 226 190 116; /* #E2BE74 */ /* #E6BD70 */
-  --color-on-brass: 12 17 25;
-
-  --color-band: 22 32 46; /* #16202E */ /* #163024 */
-  --color-on-band: 238 241 246; /* #F2F4EF */
-
-  --color-success: 92 193 150;
-  --color-warning: 212 169 79;
-  --color-error: 233 122 122; /* #E2685C */
-  --color-focus: 122 160 235;
-
-  --color-chart-1: 122 160 235;
-  --color-chart-2: 212 169 79;
-  --color-chart-3: 125 165 196;
-  --color-chart-4: 196 137 124;
-  --color-chart-5: 150 162 178;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
-  --shadow-md: 0 10px 30px -12px rgb(0 0 0 / 0.6);
-  --shadow-lg: 0 30px 70px -30px rgb(0 0 0 / 0.75);
-
-  --paper-texture: radial-gradient(120% 80% at 50% -10%, rgb(122 160 235 / 0.07), transparent 60%);
-  --paper-texture-opacity: 1;
-
-  color-scheme: dark;
-}
 
 @layer base {
+  /* Font roles. One family today (see fonts.css); the roles are already
+     separated so a second approved face is a one-line change. */
+  :root {
+    --font-display: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+    --font-body: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  }
+
   html {
-    scrollbar-gutter: stable;
-    /* `clip` (not `hidden`) so this can't silently create a scroll
-       container and break `position: sticky` on the header. Safety net
-       only — layouts are built not to overflow in the first place. */
+    /* `clip`, not `hidden` — `hidden` silently creates a scroll container
+       and breaks `position: sticky` on the header. This is a safety net;
+       layouts are built not to overflow in the first place. */
     overflow-x: clip;
+    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
+    /* Anchored headings must clear the sticky header. One token, so the
+       two can never drift apart. */
+    scroll-behavior: smooth;
+  }
+
+  /* Every anchor target, not just headings — in-page links land below the
+     header rather than underneath it. */
+  :target,
+  [id] {
+    scroll-margin-top: var(--header-offset);
   }
 
   body {
-    @apply bg-bg font-body text-ink antialiased;
-    overflow-x: clip;
+    margin: 0;
+    min-height: 100svh;
+    background-color: rgb(var(--color-bg));
+    color: rgb(var(--color-text-primary));
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.55;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Inter's `cv05` gives the lowercase l a tail — worth switching on when
-       the page is full of figures and fund names. */
-    font-feature-settings: 'cv05' 1;
   }
 
-  /* Paper grain sits above the background colour and below all content.
-     A single fixed layer rather than a per-section background image, so it
-     costs one composited layer instead of one repaint per section. */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background-image: var(--paper-texture);
-    opacity: var(--paper-texture-opacity);
-  }
-
-  #root {
-    position: relative;
-    z-index: 1;
-  }
-
+  /* Headings inherit the display role; size and tracking come from the
+     text-* scale in tailwind.config.ts, never from an element selector. */
   h1,
   h2,
   h3,
-  h4 {
-    @apply font-display text-ink;
-    font-optical-sizing: auto;
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    color: rgb(var(--color-text-display));
+    font-weight: var(--weight-display);
     text-wrap: balance;
   }
 
@@ -180,100 +74,281 @@
     text-wrap: pretty;
   }
 
-  ::selection {
-    background: rgb(var(--color-accent-primary));
-    color: rgb(var(--color-on-accent-primary));
-  }
-
-  :focus-visible {
-    outline: 2px solid rgb(var(--color-focus));
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  /* Native controls should follow the theme (date pickers, scrollbars,
-     the range track in the Slider primitive). */
+  /* Native controls follow the theme rather than the OS default. */
   input,
   select,
   textarea,
   button {
     font: inherit;
+    color: inherit;
+  }
+
+  ::selection {
+    background-color: rgb(var(--color-brand));
+    color: rgb(var(--color-on-brand));
+  }
+
+  /*
+    FOCUS SYSTEM — Phase 0 §29.
+    One indicator for the whole site: a 2px brand ring at 2px offset, plus a
+    1px contrasting inner ring drawn with box-shadow so the indicator
+    survives on a brand-coloured fill as well as on paper or ink.
+    `outline: none` without a replacement is a build-breaking error here.
+  */
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-focus-ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px rgb(var(--color-focus-ring-inner));
+    border-radius: var(--radius-action);
+  }
+
+  /* Windows high-contrast: the ring above is replaced by the system
+     highlight, which forced-colors mode would otherwise strip. */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline: 3px solid Highlight;
+      box-shadow: none;
+    }
+  }
+}
+
+@layer components {
+  /*
+    CONTAINERS — Phase 0 §14. Three widths and one gutter scale, so no
+    section can invent its own content edge. Written as component classes
+    rather than a pile of Tailwind max-w/px utilities because the gutter is
+    a token that steps at four breakpoints.
+  */
+  .container-shell,
+  .container-content,
+  .container-prose {
+    margin-inline: auto;
+    inline-size: 100%;
+    padding-inline: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+
+  .container-shell {
+    max-inline-size: var(--container-shell);
+  }
+
+  .container-content {
+    max-inline-size: var(--container-content);
+  }
+
+  .container-prose {
+    max-inline-size: var(--container-prose);
+  }
+
+  /*
+    DIMENSIONAL TYPE — Phase 0 §9, infrastructure only.
+    Paired with components/brand/DimensionalText.tsx. Not applied anywhere
+    yet; its intended home is the oversized footer wordmark (Phase 6).
+
+    The construction is selected by `data-ground`, not by the theme — the
+    footer band is ink in both themes, so a theme-keyed rule would render
+    the paper build on it in light mode. See the component's header.
+
+    Each layer hides itself when its index exceeds --depth-steps, which the
+    token layer steps by breakpoint: flat below 768px, 3 layers at
+    768–1023px, 5 from 1024px.
+  */
+  .dimensional-face {
+    /* Inherits, so the face colour is the caller's token decision and its
+       contrast pair is checked like every other pair on the site. */
+    color: inherit;
+  }
+
+  /* On paper: neutrals stepping down-right beneath the face, each layer one
+     step further out and one step fainter than the last. */
+  [data-ground='paper'] .dimensional-layer {
+    color: rgb(var(--neutral-300));
+    opacity: calc(1 - (var(--layer) - 1) * 0.16);
+    transform: translate(calc(var(--layer) * var(--depth-unit)), calc(var(--layer) * var(--depth-unit)));
+    z-index: calc(0 - var(--layer));
+  }
+
+  @media (max-width: 767px) {
+    .dimensional-layer {
+      display: none;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .dimensional-layer:nth-child(n + 4) {
+      display: none;
+    }
+  }
+
+  /*
+    On ink: a downward dark extrusion vanishes, so there is no stack at all.
+    One cool shadow carries the depth and a 1px optical edge-light on the
+    top-left gives the face its edge.
+  */
+  [data-ground='ink'] .dimensional-layer {
+    display: none;
+  }
+
+  [data-ground='ink'] .dimensional-face {
+    text-shadow:
+      -1px -1px 0 rgb(255 255 255 / 0.22),
+      0 calc(var(--depth-unit) * 3) calc(var(--depth-unit) * 6) rgb(var(--ink-950) / 0.85);
+  }
+
+  /* The depth resolves from flat to full on entry. Under reduced motion the
+     component renders at full depth immediately and this never runs. */
+  [data-dimensional='resolve'][data-ground='paper'] .dimensional-layer {
+    animation: dimensional-resolve var(--dur-story) var(--ease-out) both;
+    animation-delay: calc(var(--layer) * 40ms);
+  }
+
+  @keyframes dimensional-resolve {
+    from {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
   }
 }
 
 @layer utilities {
-  /* Fraunces at its sharpest: hard terminals, no wonk. At display sizes this
-     reads closer to a Scotch Roman than to the soft default instance — high
-     contrast and precise, which is what a financial brand should sound like
-     in type. Display-scale headlines only. */
-  .font-display-sharp {
-    font-variation-settings: 'SOFT' 0, 'WONK' 0;
+  /*
+    Financial values. Tabular lining figures keep digits from changing
+    width as a number updates, which is required for every monetary value
+    on the site (Phase 0 §8.2). Archivo carries `tnum`; this is verified,
+    not assumed.
+  */
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
-  /* For financial figures and step numbers — keeps digits from jittering
-     in width as a value updates. */
+  /* Legacy alias for the same thing — kept so sections built before Phase 1
+     keep their tabular figures without being rewritten. */
   .font-numeric {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
-  /* Visible only when the wrapped element receives focus — the "skip to
-     main content" link. */
-  .sr-only-focusable {
-    @apply sr-only focus:not-sr-only;
+  /*
+    Display treatment. The display face is the body face at a heavier
+    weight and tighter tracking — the contrast is optical, not a second
+    family. Applied by the text-display-* scale, and available directly for
+    the few places that set their own size.
+  */
+  .font-display-cut {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    letter-spacing: -0.02em;
   }
 
-  /* Hairline that fades out at one end — used to close editorial rules
-     without a hard stop. Decorative; never used to separate interactive rows. */
-  .rule-fade {
-    background-image: linear-gradient(to right, rgb(var(--color-brass) / 0.55), rgb(var(--color-divider) / 0));
+  /*
+    Legacy alias: the Fraunces "sharp" instance the previous build used for
+    headlines. The serif is retired (Phase 0 §8.1), so this now resolves to
+    the grotesque display cut. Sections still carrying this class keep
+    working and pick up the new voice; the class is removed as each section
+    is rebuilt in its own phase.
+  */
+  .font-display-sharp {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    letter-spacing: -0.02em;
   }
 
-  /* The thumb is the one control on the calculator you hold onto, so it
-     gets the clearest feedback on the page: it grows slightly under the
-     cursor and again while being dragged. Transform only — animating
-     width/height here would relayout the track on every frame of a drag. */
+  /*
+    Visible only while focused — the skip link.
+
+    Written out rather than composed from `sr-only` + `focus:not-sr-only`,
+    because `not-sr-only` sets `position: static; padding: 0`, which strips
+    the positioning and padding off whatever it is applied to. The link then
+    appears as an unstyled full-width strip at the top of the document. The
+    focused state here restores only what `sr-only` clipped.
+  */
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /*
+    Range thumb. The Slider primitive sets `appearance: none` on the input,
+    which removes the platform thumb entirely, so it has to be redrawn —
+    and it has to be redrawn once, here, because the pseudo-element cannot
+    be reached from a component's class list.
+
+    Transform only on hover and press: animating width or height would
+    relayout the track on every frame of a drag.
+
+    KNOWN GAP: §17 asks for a 44px thumb hit area. The painted thumb is
+    24px and the input is 8px tall, so the drag target is smaller than that
+    today. Enlarging it means changing the track geometry, which is the SIP
+    calculator's layout and belongs to Phase 4.
+  */
   input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 9999px;
-    background: rgb(var(--color-accent-primary));
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: rgb(var(--color-brand));
     border: 3px solid rgb(var(--color-surface));
     box-shadow: var(--shadow-sm);
     cursor: pointer;
-    transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 150ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-instant) var(--ease-out);
   }
 
   input[type='range']:hover::-webkit-slider-thumb {
-    transform: scale(1.12);
+    transform: scale(1.1);
     box-shadow: var(--shadow-md);
   }
 
   input[type='range']:active::-webkit-slider-thumb {
-    transform: scale(1.2);
-  }
-
-  input[type='range']:hover::-moz-range-thumb {
-    transform: scale(1.12);
+    transform: scale(1.18);
   }
 
   input[type='range']::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: rgb(var(--color-brand));
     border: 3px solid rgb(var(--color-surface));
-    border-radius: 9999px;
-    background: rgb(var(--color-accent-primary));
     box-shadow: var(--shadow-sm);
     cursor: pointer;
-    transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-instant) var(--ease-out);
+  }
+
+  input[type='range']:hover::-moz-range-thumb {
+    transform: scale(1.1);
+  }
+
+  /*
+    Theme switching. ThemeProvider sets this attribute on <html> for one
+    frame while the theme changes, which suppresses every transition on the
+    page so the swap lands at once instead of sweeping across it as each
+    element eases at its own rate (Phase 0 §12).
+  */
+  :root[data-theme-switching] *,
+  :root[data-theme-switching] *::before,
+  :root[data-theme-switching] *::after {
+    transition: none !important;
   }
 }
 
-/* Global safety net for anything not already gated behind the
-   usePrefersReducedMotion hook or a Framer Motion variant. */
+/*
+  REDUCED MOTION — Phase 0 §18.2.7.
+  Framer Motion is handled per component through usePrefersReducedMotion;
+  this is the safety net for CSS transitions, plus the smooth-scroll opt-out
+  that in-page anchors would otherwise apply.
+*/
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {

@@ -1,14 +1,17 @@
 import { forwardRef } from 'react';
 import type { TextareaHTMLAttributes } from 'react';
+import { controlBase, controlSizingMultiline } from './controlStyles';
 import { cn } from '@/lib/utils/cn';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  /** See the note on InputProps — prefer `Field` for new work. */
   errorMessage?: string;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, id, errorMessage, rows = 4, ...props }, ref) => {
+  ({ className, id, errorMessage, rows = 4, 'aria-describedby': describedBy, ...props }, ref) => {
     const errorId = errorMessage && id ? `${id}-error` : undefined;
+    const described = [describedBy, errorId].filter(Boolean).join(' ') || undefined;
 
     return (
       <div className="w-full">
@@ -16,20 +19,15 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={id}
           rows={rows}
-          className={cn(
-            'w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-ink',
-            'placeholder:text-ink-muted',
-            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-            errorMessage && 'border-error',
-            className
-          )}
-          aria-invalid={Boolean(errorMessage)}
-          aria-describedby={errorId}
+          className={cn(controlBase, controlSizingMultiline, className)}
+          aria-invalid={errorMessage ? true : props['aria-invalid']}
+          aria-describedby={described}
           {...props}
         />
         {errorMessage && (
-          <p id={errorId} className="mt-1.5 text-small text-error">
-            {errorMessage}
+          <p id={errorId} role="alert" className="mt-2 flex items-start gap-1.5 text-body-sm font-medium text-error">
+            <span aria-hidden="true">!</span>
+            <span>{errorMessage}</span>
           </p>
         )}
       </div>

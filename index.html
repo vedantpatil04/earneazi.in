@@ -1,20 +1,39 @@
 <!doctype html>
-<html lang="en">
+<!--
+  `en-IN` rather than `en` — Phase 0 §29. It is what tells a screen reader to
+  use Indian English pronunciation, and how to read a number and a date.
+-->
+<html lang="en-IN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#F6F5EE" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0F1713" media="(prefers-color-scheme: dark)" />
+
+    <!--
+      One theme-color meta, not a media-scoped pair.
+
+      A pair would be correct if the theme only ever followed the OS, but a
+      user can override it here, and a media-scoped tag cannot express
+      "dark, even though the system is light". The inline script below sets
+      this to match the theme it resolves, and ThemeProvider keeps it in
+      step afterwards. Values match --color-bg per theme in
+      src/styles/tokens.css; the previous #0F1713 (a near-black green)
+      matched nothing in the design system.
+    -->
+    <meta name="theme-color" content="#F6F7F9" />
+
     <title>Earneazi — Financial planning made simple</title>
     <meta
       name="description"
-      content="Earneazi — mutual funds & PMS, insurance, and loans, planned around your goals."
+      content="Earneazi — mutual funds and PMS, insurance, and loans, planned around your goals."
     />
 
     <!--
-      Sets data-theme before first paint so there's no flash of the wrong
+      Sets data-theme before first paint, so there is no flash of the wrong
       theme while React mounts. Kept in sync afterwards by ThemeProvider
-      (src/lib/theme/ThemeProvider.tsx).
+      (src/lib/theme/ThemeProvider.tsx) — the storage key below must match
+      THEME_STORAGE_KEY there.
+
+      No stored value means follow the system, which is the default.
     -->
     <script>
       (function () {
@@ -23,30 +42,23 @@
           var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           var mode = stored === 'light' || stored === 'dark' ? stored : systemDark ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', mode);
+
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', mode === 'dark' ? '#0A1B2E' : '#F6F7F9');
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
         }
       })();
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!--
-      Three families, three jobs:
-        Fraunces        display/headlines. Loaded as a variable font including
-                        the SOFT and WONK axes so headlines can use the sharper,
-                        slightly wonky editorial cut rather than the neutral
-                        default instance (see .font-display-wonk in globals.css).
-                        `opsz` is left on `auto`, so large sizes automatically
-                        pick up the display optical size.
-        Inter           body + interface text.
-        JetBrains Mono  small numeric/technical labels only — step numbers and
-                        the SIP illustration caption. Not used as decoration.
+      No font CDN. Phase 0 §8.2 rules out fonts.googleapis.com: it is a
+      third-party connection on the critical path, it costs a DNS lookup and
+      a TLS handshake on an Indian mobile network before any text can
+      render, and it is an external dependency a static GoDaddy build does
+      not need. The typeface is self-hosted and bundled — see
+      src/styles/fonts.css.
     -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body>
     <div id="root"></div>

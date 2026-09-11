@@ -1,0 +1,43 @@
+/*
+  ═════════════════════════════════════════════════════════════════════════
+  TYPEFACES — SELF-HOSTED
+  ═════════════════════════════════════════════════════════════════════════
+  Phase 0 §8.2 rules this file: self-hosted woff2, no Google Fonts CDN, no
+  third-party connection at runtime. The previous build loaded three
+  families from fonts.googleapis.com; that link is removed from index.html
+  and replaced by the import below, which Vite bundles, hashes and serves
+  from our own origin.
+
+  ── WHAT IS SHIPPED, AND WHY IT IS PROVISIONAL ───────────────────────────
+  Archivo Variable (weight axis only, 100–900), SIL Open Font License 1.1.
+
+  Phase 0 §8.3 names Archivo as the primary display recommendation, and
+  §36.1 item 13 (final pairing plus licences) is still open with the owner.
+  Archivo was chosen as the provisional face because it is the one
+  recommendation that can ship today without a licensing decision:
+
+    · It is a grotesque, which resolves §8.1 — the serif display is retired
+      so the headline voice agrees with the Earneazi wordmark.
+    · Verified present: `tnum` (tabular figures, §8.2) and U+20B9 `₹`.
+      ₹ lives in the latin-ext subset, so both subsets are declared and the
+      browser fetches latin-ext the moment a rupee value renders.
+    · OFL-1.1 permits self-hosting and commercial use, so nothing here is
+      blocked on a licence the owner has not bought.
+    · Weight axis only: latin 35 KB + latin-ext 33 KB = ~68 KB, inside the
+      110 KB font budget in §30. The width-axis build is 176 KB and was
+      rejected for that reason.
+
+  ── HOW TO REPLACE IT ────────────────────────────────────────────────────
+  One family currently serves both the display and body roles, separated by
+  weight, size and tracking rather than by a second face. The role split
+  already exists in the token layer (--font-display / --font-body in
+  globals.css), so adopting an approved pairing is:
+
+    1. add the new face here (an @import of another self-hosted package, or
+       an @font-face block pointing at woff2 files placed in public/fonts/);
+    2. point --font-display and/or --font-body at it in globals.css.
+
+  No component references a font family by name.
+*/
+
+@import '@fontsource-variable/archivo/wght.css';

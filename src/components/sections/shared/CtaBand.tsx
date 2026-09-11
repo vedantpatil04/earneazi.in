@@ -1,10 +1,8 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
 import { Reveal } from '@/components/motion/Reveal';
 import { riseVariants } from '@/lib/motion/variants';
 
@@ -55,7 +53,6 @@ export function CtaBand({ id, title, body, primary, secondary }: CtaBandProps) {
             <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row sm:justify-center sm:gap-8">
               <Button to={primary.to} variant="on-band" size="lg">
                 {primary.label}
-                <Icon icon={ArrowRight} size={18} />
               </Button>
 
               {secondary && (

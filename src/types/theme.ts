@@ -6,8 +6,15 @@ export interface ThemeContextValue {
   mode: ThemeMode;
   /** What the user has chosen — 'system' until they explicitly pick light or dark. */
   preference: ThemePreference;
-  /** Explicitly set light or dark, overriding system preference, and persist it. */
-  setTheme: (mode: ThemeMode) => void;
-  /** Flip between light and dark from the current resolved mode. Used by ThemeToggle. */
+  /**
+   * Set the preference. Accepts 'system', which hands control back to the OS
+   * and clears the stored override — the three-state control needs this, and
+   * without it a user who toggles once can never get back to following their
+   * device.
+   */
+  setPreference: (preference: ThemePreference) => void;
+  /** Flip between light and dark from the current resolved mode. Used by the two-state nav toggle. */
   toggleTheme: () => void;
+  /** LEGACY alias for `setPreference`, kept for call sites written before Phase 1. */
+  setTheme: (mode: ThemeMode) => void;
 }

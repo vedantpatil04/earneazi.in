@@ -1,62 +1,61 @@
-import { Suspense, lazy } from 'react';
+import { lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { site } from '@/config/site';
 import AppLayout from '@/app/AppLayout';
 import HomePage from '@/app/pages/HomePage';
-import ServicesPage from '@/app/pages/ServicesPage';
-import FinancialGoalsPage from '@/app/pages/FinancialGoalsPage';
-import AboutPage from '@/app/pages/AboutPage';
-import FaqPage from '@/app/pages/FaqPage';
-import NotFoundPage from '@/app/pages/NotFoundPage';
 
 /**
- * Two routes carry dependencies nothing else on the site uses, so both are
- * split out and fetched only when visited. Loading them eagerly would mean
- * every visitor to the homepage downloads a charting library to look at a
- * page with no chart, and a form validator to look at a page with no form.
+ * Routing foundation — Phase 0 §31.
  *
- *   sip-calculator  Recharts, roughly as large as the rest of the app
- *   contact         Zod + React Hook Form
+ * `BrowserRouter` with a configurable basename. The GoDaddy plan type and
+ * whether the site is served from the domain root or a subdirectory are
+ * both unconfirmed, so the basename is read from the build environment
+ * (`VITE_BASE_PATH` → Vite's `base` → `import.meta.env.BASE_URL`) rather
+ * than hard-coded. Moving the site into a subdirectory is then a build
+ * variable, not a code change.
+ *
+ * `HashRouter` is the documented fallback for a host that cannot rewrite
+ * unknown paths to index.html. It is deliberately NOT selected: §31 is
+ * explicit that the choice must be a decision rather than a convenience,
+ * and switching changes every internal link and every deep-link format.
+ *
+ * The sitemap is unchanged from the existing build. No route is added,
+ * removed or renamed here.
  */
+
+/*
+  Route-level code splitting on every route except the home page, which is
+  the entry point and would only pay an extra round trip to be split
+  (§30). Two routes carry dependencies nothing else uses and would
+  otherwise be in everyone's first download:
+
+    sip-calculator  Recharts, roughly as large as the rest of the app
+    contact         Zod + React Hook Form
+*/
+const ServicesPage = lazy(() => import('@/app/pages/ServicesPage'));
+const FinancialGoalsPage = lazy(() => import('@/app/pages/FinancialGoalsPage'));
 const SipCalculatorPage = lazy(() => import('@/app/pages/SipCalculatorPage'));
+const AboutPage = lazy(() => import('@/app/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/app/pages/ContactPage'));
+const FaqPage = lazy(() => import('@/app/pages/FaqPage'));
+const NotFoundPage = lazy(() => import('@/app/pages/NotFoundPage'));
 
-/** Holds the vertical space a page occupies so the header and footer don't jump while the chunk arrives. */
-function RouteFallback() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-live="polite">
-      <span className="text-body text-ink-muted">Loading…</span>
-    </div>
-  );
-}
-
-// Route structure mirrors the confirmed sitemap exactly.
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={site.basePath}>
         <Routes>
+          {/* The Suspense boundary for these chunks lives inside AppLayout,
+              around the Outlet — placing it here would unmount the header
+              and footer on every navigation to a split route. */}
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="financial-goals" element={<FinancialGoalsPage />} />
-            <Route
-              path="sip-calculator"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <SipCalculatorPage />
-                </Suspense>
-              }
-            />
+            <Route path="sip-calculator" element={<SipCalculatorPage />} />
             <Route path="about" element={<AboutPage />} />
-            <Route
-              path="contact"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <ContactPage />
-                </Suspense>
-              }
-            />
+            <Route path="contact" element={<ContactPage />} />
             <Route path="faq" element={<FaqPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

@@ -1,14 +1,34 @@
 import type { ElementType, ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 
-type SectionSpacing = 'sm' | 'md' | 'lg' | 'xl';
-type SectionBackground = 'bg' | 'surface' | 'surface-2' | 'band';
+/**
+ * Section — Phase 0 §13.
+ *
+ * Owns the vertical rhythm of the page so no section invents its own.
+ * The `standard` scale is 64/72 → 88 → 120; the `chapter` scale, for an
+ * inverted band, is 80 → 104 → 160.
+ *
+ * Backgrounds alternate rather than being separated by rules. `band` is the
+ * one full-bleed high-contrast surface: it is dark in BOTH themes by design
+ * (§27), which is what gives the site a consistent close, and it can carry
+ * the `radius-band` top corners that make the page read as stacked layers
+ * rather than as a list of blocks (§19.1).
+ */
+
+type SectionSpacing = 'sm' | 'md' | 'lg' | 'xl' | 'chapter' | 'none';
+type SectionBackground = 'bg' | 'surface' | 'sunken' | 'band' | 'none' | 'surface-2';
 
 interface SectionProps {
   as?: ElementType;
   id?: string;
   spacing?: SectionSpacing;
   background?: SectionBackground;
+  /**
+   * Rounds the top corners and lifts the section over the one above it, so
+   * a band reads as a layer. Only inverted bands and the footer may do this
+   * (§19.1); a section with a paper ground must not.
+   */
+  slab?: boolean;
   className?: string;
   children: ReactNode;
   'aria-label'?: string;
@@ -16,34 +36,51 @@ interface SectionProps {
 }
 
 const spacingStyles: Record<SectionSpacing, string> = {
-  sm: 'py-10 md:py-14',
-  md: 'py-14 md:py-20',
-  lg: 'py-16 md:py-28',
-  xl: 'py-20 md:py-32',
+  none: '',
+  sm: 'py-12 md:py-16 lg:py-20',
+  md: 'py-16 md:py-[5.5rem] lg:py-24',
+  /* The standard section rhythm from §13. */
+  lg: 'py-16 md:py-[5.5rem] lg:py-[7.5rem]',
+  xl: 'py-20 md:py-24 lg:py-32',
+  /* Chapter (inverted band) rhythm from §13. */
+  chapter: 'py-20 md:py-[6.5rem] lg:py-40',
 };
 
 const backgroundStyles: Record<SectionBackground, string> = {
+  none: '',
   bg: 'bg-bg',
   surface: 'bg-surface',
-  'surface-2': 'bg-surface-2',
-  // The single full-bleed high-contrast band on the page (the closing
-  // consultation CTA). Dark in both themes — see --color-band. Not for
-  // routine section alternation.
-  band: 'bg-band',
+  sunken: 'bg-surface-sunken',
+  /* LEGACY name for `sunken`. */
+  'surface-2': 'bg-surface-sunken',
+  band: 'bg-band text-on-band',
 };
 
-/** Establishes the vertical rhythm for a page — alternate `background` between sections rather than adding borders or shadows to separate them. */
 export function Section({
   as: Tag = 'section',
   id,
-  spacing = 'md',
+  spacing = 'lg',
   background = 'bg',
+  slab = false,
   className,
   children,
   ...aria
 }: SectionProps) {
   return (
-    <Tag id={id} className={cn(spacingStyles[spacing], backgroundStyles[background], className)} {...aria}>
+    <Tag
+      id={id}
+      className={cn(
+        'relative',
+        spacingStyles[spacing],
+        backgroundStyles[background],
+        /* The overlap is the section's own margin, not a negative offset on
+           the one above, so it cannot leave a gap if the previous section
+           changes. */
+        slab && '-mt-6 rounded-t-band md:-mt-8',
+        className
+      )}
+      {...aria}
+    >
       {children}
     </Tag>
   );

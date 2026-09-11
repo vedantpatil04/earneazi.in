@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
 import { Reveal, RevealGroup } from '@/components/motion/Reveal';
 import { growFromBaseVariants, riseVariants, transitions, withMotionSafety } from '@/lib/motion/variants';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -42,7 +40,6 @@ export function SipTeaser() {
             <Reveal variants={riseVariants} delay={0.1} className="mt-8">
               <Button to="/sip-calculator" size="lg">
                 Open the SIP calculator
-                <Icon icon={ArrowRight} size={18} />
               </Button>
             </Reveal>
           </div>

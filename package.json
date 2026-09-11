@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Earneazi frontend V1 \u2014 React + TypeScript + Vite + Tailwind. Phase 3: SIP calculator & financial tools.",
+  "description": "Earneazi frontend V1 — React + TypeScript + Vite + Tailwind. Phase 1: global shell & brand system.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -13,6 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.445.0",
     "react": "^18.3.1",

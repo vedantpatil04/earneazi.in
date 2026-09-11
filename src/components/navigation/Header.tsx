@@ -1,53 +1,70 @@
 import { useRef, useState } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { headerCta, headerNav, primaryNav } from '@/data/nav';
+import { contactWhatsApp } from '@/data/contact';
+import { Logo } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 import { useHasScrolled } from '@/hooks/useHasScrolled';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import { transitions, withMotionSafety } from '@/lib/motion/variants';
+import { springUi } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils/cn';
 import { MobileNav } from './MobileNav';
+import { MenuTrigger } from './MenuTrigger';
 
 /**
- * The header keeps a constant height and only changes its *surface* on
- * scroll — from transparent over the hero to a bordered, blurred bar once
- * the page moves. Animating the height instead would reflow every section
- * below it on every scroll, which is the usual cause of a sticky header
- * feeling unstable on a phone.
+ * The site header — Phase 0 §15.
+ *
+ * Its job is to keep two things one tap away at every scroll position: who
+ * to talk to, and where the goals are. Three zones on the shell container,
+ * so the logo shares its left edge with every page's content:
+ *
+ *   left    the logo, linking home
+ *   centre  primary navigation
+ *   right   theme control, an optional direct contact channel, and the
+ *           single call to action
+ *
+ * Scroll behaviour
+ * ────────────────
+ * Two states. `rest` is transparent with no border; `engaged`, after 24px,
+ * is a solid theme surface with a hairline and `shadow-sm`. The transition
+ * is on colour only.
+ *
+ * The header does NOT change height, which is a deliberate departure from
+ * the 76px→60px in §15. §18.2.6 is the stronger rule — only `transform` and
+ * `opacity` may animate in a scroll-linked context, and no `height` — and a
+ * sticky element that shrinks moves every section below it, which is a
+ * layout shift against the CLS budget in §30. The state change is carried
+ * by the surface instead, which is what §15 actually asks for when it says
+ * to replace the previous build's smeared gradient with a discrete change.
+ *
+ * It also does not hide on scroll-down: on a conversion-led site the call
+ * to action is never allowed to be more than zero taps away (§15).
  */
 export function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const hasScrolled = useHasScrolled(8);
+  const engaged = useHasScrolled(24);
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 transition-[background-color,border-color,box-shadow] motion-safe:duration-300 ease-signature',
-        hasScrolled
-          ? 'border-b border-divider bg-bg/85 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-bg/70'
+        'sticky top-0 z-header',
+        'transition-[background-color,border-color,box-shadow] motion-safe:duration-fast ease-out',
+        engaged
+          ? 'border-b border-divider bg-bg/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-bg/75'
           : 'border-b border-transparent bg-transparent'
       )}
     >
-      <Container size="wide">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
-          <Link
-            to="/"
-            className="group inline-flex items-baseline gap-0.5 rounded-sm font-display text-[1.375rem] font-medium tracking-tight text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus md:text-[1.5rem]"
-          >
-            Earneazi
-            <span
-              aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-brass transition-transform motion-safe:duration-300 ease-signature group-hover:scale-125"
-            />
-          </Link>
+      <Container size="shell">
+        <div className="flex h-header items-center justify-between gap-4">
+          <Logo lockup="primary" className="lg:-ml-px" />
 
           <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-1">
+            <ul className="flex items-center gap-0.5">
               {headerNav.map((item) => (
                 <li key={item.path}>
                   <HeaderLink to={item.path} label={item.label} />
@@ -59,22 +76,38 @@ export function Header() {
           <div className="flex items-center gap-2 md:gap-3">
             <ThemeToggle />
 
+            {/* A direct channel beside the CTA, so "book a consultation" is
+                not the only way to reach anyone. It renders only when the
+                owner has confirmed a monitored WhatsApp number in
+                data/contact.ts — Phase 0 §25 requires exactly one number to
+                be designated, and none has been, so nothing appears yet
+                rather than a placeholder. */}
+            {contactWhatsApp && (
+              <a
+                href={`https://wa.me/${contactWhatsApp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Message Earneazi on WhatsApp — opens WhatsApp"
+                className={cn(
+                  'hidden h-11 w-11 shrink-0 items-center justify-center rounded-action border border-divider',
+                  'text-ink-secondary transition-[background-color,border-color,color] motion-safe:duration-instant ease-out',
+                  'hover:border-border hover:bg-hovered hover:text-ink xl:inline-flex'
+                )}
+              >
+                <MessageCircle size={19} strokeWidth={1.5} aria-hidden="true" />
+              </a>
+            )}
+
             <Button to={headerCta.path} variant="primary" size="sm" className="hidden sm:inline-flex">
               {headerCta.label}
             </Button>
 
-            <button
+            <MenuTrigger
               ref={menuButtonRef}
-              type="button"
-              onClick={() => setMobileNavOpen(true)}
-              aria-label="Open menu"
-              aria-haspopup="dialog"
-              aria-expanded={mobileNavOpen}
-              aria-controls="mobile-nav-panel"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-divider text-ink transition-colors motion-safe:duration-200 hover:border-border hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus lg:hidden"
-            >
-              <Menu size={20} aria-hidden="true" />
-            </button>
+              open={mobileNavOpen}
+              onClick={() => setMobileNavOpen((open) => !open)}
+              className="lg:hidden"
+            />
           </div>
         </div>
       </Container>
@@ -90,10 +123,15 @@ export function Header() {
 }
 
 /**
- * The active route is marked with a brass rule that slides between items on
- * navigation, rather than each link fading its own underline in and out —
- * one object moving reads as "you are here", where several fading reads as
- * decoration. Falls back to a static rule when motion is reduced.
+ * A primary navigation item.
+ *
+ * The active route carries a 2px brand underline that moves between items
+ * as one shared element rather than each link fading its own in and out —
+ * one object travelling reads as "you are here", where several fading reads
+ * as decoration. Under reduced motion it jumps.
+ *
+ * `aria-current="page"` is what actually conveys the state; the underline
+ * is the visual form of it, never the only form.
  */
 function HeaderLink({ to, label }: { to: string; label: string }) {
   const location = useLocation();
@@ -105,21 +143,21 @@ function HeaderLink({ to, label }: { to: string; label: string }) {
       to={to}
       end={to === '/'}
       className={cn(
-        'relative inline-flex h-10 items-center rounded-sm px-3 text-small font-medium transition-colors motion-safe:duration-200',
-        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+        'relative inline-flex h-11 items-center rounded-action px-3 text-body-sm font-medium',
+        'transition-colors motion-safe:duration-instant ease-out',
         isActive ? 'text-ink' : 'text-ink-secondary hover:text-ink'
       )}
     >
       {label}
       {isActive &&
         (prefersReducedMotion ? (
-          <span aria-hidden="true" className="absolute inset-x-3 bottom-1 h-px bg-brass" />
+          <span aria-hidden="true" className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-pill bg-brand" />
         ) : (
           <motion.span
             aria-hidden="true"
             layoutId="header-nav-indicator"
-            className="absolute inset-x-3 bottom-1 h-px bg-brass"
-            transition={withMotionSafety(prefersReducedMotion, transitions.base)}
+            className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-pill bg-brand"
+            transition={springUi}
           />
         ))}
     </NavLink>

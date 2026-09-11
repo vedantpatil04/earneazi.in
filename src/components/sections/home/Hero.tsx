@@ -1,9 +1,7 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
 import { RevealGroup } from '@/components/motion/Reveal';
 import { staggerItemVariants } from '@/lib/motion/variants';
 import { HeroGrowthCurve } from './HeroGrowthCurve';
@@ -40,7 +38,6 @@ export function Hero() {
             >
               <Button to="/financial-goals" size="lg">
                 Start with your goals
-                <Icon icon={ArrowRight} size={18} />
               </Button>
               <Button to="/contact" variant="outline" size="lg">
                 Book a consultation

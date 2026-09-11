@@ -1,0 +1,331 @@
+/*
+  ═════════════════════════════════════════════════════════════════════════
+  EARNEAZI DESIGN TOKENS — PHASE 1
+  ═════════════════════════════════════════════════════════════════════════
+  This file is the ONLY place a colour, radius, shadow, spacing step,
+  container width, duration or easing value is defined. Tailwind
+  (tailwind.config.ts) exposes these as utilities; components consume the
+  utilities. A component that needs a value not present here adds the token
+  here first — it never writes a literal.
+
+  Colour is written as space-separated sRGB channels rather than hex, so
+  Tailwind's alpha modifiers (bg-brand/10) work against a theme that is
+  swapped at runtime — see the rgb(var(--x) / <alpha-value>) pattern in
+  tailwind.config.ts.
+
+  Layering, top to bottom:
+    1. PRIMITIVES   raw ramps. Never referenced by a component.
+    2. SEMANTIC     role tokens (--color-text-secondary). What components use.
+    3. STRUCTURE    spacing, containers, radius, motion, depth.
+
+  Light and dark are specified independently (Phase 0 §11, §12). Dark is not
+  an inversion: its surfaces rise toward light, its shadows are replaced by
+  surface lightening plus a light edge, and its brand colour is a lighter
+  instance so it clears 4.5:1 on ink.
+
+  ── PROVISIONAL VALUES ───────────────────────────────────────────────────
+  The brand blue below is PROVISIONAL. Phase 0 §7/§10.2 require it to be
+  sampled from the approved Earneazi logo vector, which has not been
+  supplied. When it arrives, change the --brand-* ramp in this block and
+  nothing else — no component carries a hex.
+  ─────────────────────────────────────────────────────────────────────────
+*/
+
+:root {
+  /* ══ 1. PRIMITIVES ═══════════════════════════════════════════════════ */
+
+  /* Brand blue — PROVISIONAL, pending the official logo vector. */
+  --brand-050: 231 240 253; /* #E7F0FD  light tint fill */
+  --brand-400: 107 165 245; /* #6BA5F5  dark-theme brand text/icon on surfaces */
+  --brand-500: 61 135 240; /* #3D87F0  dark-theme primary */
+  --brand-600: 22 104 220; /* #1668DC  primary */
+  --brand-700: 17 83 176; /* #1153B0  hover-dark */
+  --brand-800: 14 66 144; /* #0E4290  pressed */
+  --brand-950: 19 48 79; /* #13304F  dark tint fill */
+
+  /* Ink — the dark ground, and the light theme's display colour. */
+  --ink-950: 7 23 38; /* #071726 */
+  --ink-900: 10 27 46; /* #0A1B2E */
+  --ink-800: 16 42 68; /* #102A44 */
+  --ink-700: 22 48 75; /* #16304B */
+
+  /* Cool neutral ramp. Deliberately not warm — the cream ground is retired. */
+  --neutral-000: 255 255 255; /* #FFFFFF */
+  --neutral-050: 246 247 249; /* #F6F7F9 */
+  --neutral-100: 237 239 243; /* #EDEFF3 */
+  --neutral-200: 227 230 235; /* #E3E6EB */
+  --neutral-300: 207 213 222; /* #CFD5DE */
+  --neutral-400: 124 135 151; /* #7C8797 */
+  --neutral-450: 118 128 142; /* #76808E */
+  --neutral-500: 92 103 117; /* #5C6775 */
+  --neutral-600: 74 85 99; /* #4A5563 */
+
+  /* Neutrals that only ever appear on an ink ground. */
+  --on-ink-100: 233 238 245; /* #E9EEF5 */
+  --on-ink-200: 188 199 214; /* #BCC7D6 */
+  --on-ink-300: 169 182 199; /* #A9B6C7 */
+  --on-ink-400: 154 166 181; /* #9AA6B5 */
+  --on-ink-500: 122 138 158; /* #7A8A9E */
+  --on-ink-border: 110 130 155; /* #6E829B */
+  --on-ink-divider: 35 64 92; /* #23405C */
+
+  /* Signals. Data visualisation and validation only — never decorative. */
+  --signal-positive: 23 114 69; /* #177245 */
+  --signal-caution: 138 83 0; /* #8A5300 */
+  --signal-critical: 179 38 30; /* #B3261E */
+
+  /* ══ 2. SEMANTIC — LIGHT THEME ═══════════════════════════════════════
+     Measured contrast ratios are recorded beside each pair. Phase 0 §10.3
+     requires them to be recorded, and a failing pair to be changed rather
+     than shipped with a note. Every pair below passes.                    */
+
+  /* Grounds and surfaces. Elevation reads as lighter than the ground. */
+  --color-bg: var(--neutral-050);
+  --color-surface: var(--neutral-000);
+  --color-surface-sunken: var(--neutral-100);
+  --color-surface-raised: var(--neutral-000);
+
+  /* Lines. `divider` is decorative; `border` bounds something interactive
+     and therefore has to clear 3:1 (WCAG 2.2 SC 1.4.11). */
+  --color-divider: var(--neutral-200);
+  --color-border: var(--neutral-400); /* 3.40:1 on bg · 3.64:1 on surface · 3.16:1 on sunken */
+  --color-border-strong: var(--neutral-600);
+
+  /* Text. */
+  --color-text-primary: var(--ink-900); /* 16.20:1 on bg · 17.37:1 on surface */
+  --color-text-display: var(--ink-900);
+  --color-text-secondary: var(--neutral-600); /*  7.07:1 on bg ·  7.58:1 on surface */
+  --color-text-muted: var(--neutral-500); /*  5.36:1 on bg ·  4.99:1 on sunken */
+  --color-text-disabled: var(--neutral-450); /*  3.73:1 on bg — disabled text is exempt, kept legible anyway */
+
+  /* Brand. `brand` fills; `brand-on-surface` is the text/icon instance. */
+  --color-brand: var(--brand-600); /* white on it: 5.19:1 */
+  --color-brand-hover: var(--brand-700);
+  --color-brand-pressed: var(--brand-800);
+  --color-brand-subtle: var(--brand-050);
+  --color-brand-on-surface: var(--brand-600); /*  4.84:1 on bg ·  5.19:1 on surface */
+  --color-on-brand: var(--neutral-000);
+
+  /* Interaction states. Selection is never signalled by border colour
+     alone — it always pairs a surface change with the border. */
+  --color-selected-surface: var(--brand-050);
+  --color-selected-border: var(--brand-600);
+  --color-hover-surface: var(--neutral-100);
+  --color-pressed-surface: var(--neutral-200);
+  --color-disabled-surface: var(--neutral-100);
+  --color-disabled-border: var(--neutral-300);
+
+  /* Focus. Two rings: the brand ring, plus a contrasting inner ring so the
+     indicator survives on a brand-coloured fill as well as on paper. */
+  --color-focus-ring: var(--brand-600); /*  4.84:1 on bg */
+  --color-focus-ring-inner: var(--neutral-000);
+
+  /* Ink band — the chapter / footer surface. Dark in BOTH themes by design
+     (Phase 0 §27), so the page always closes the same way. */
+  --color-band: var(--ink-900);
+  --color-band-surface: var(--ink-700);
+  --color-on-band: var(--on-ink-100); /* 14.90:1 on band */
+  --color-on-band-muted: var(--on-ink-300); /*  8.44:1 on band */
+  --color-band-brand: var(--brand-500); /*  4.90:1 on band */
+
+  /* Validation. */
+  --color-success: var(--signal-positive); /* 5.55:1 on bg */
+  --color-warning: var(--signal-caution); /* 5.90:1 on bg */
+  --color-error: var(--signal-critical); /* 6.10:1 on bg */
+
+  /* Charts. Series must also be distinguishable without colour. */
+  --color-chart-1: var(--brand-600);
+  --color-chart-2: var(--signal-positive);
+  --color-chart-3: 90 115 153; /* #5A7399 */
+  --color-chart-4: var(--signal-caution);
+  --color-chart-5: var(--neutral-500);
+  --color-chart-grid: 212 217 224; /* #D4D9E0 */
+  --color-chart-axis: var(--neutral-500);
+
+  /* Shadows. Tinted with ink, never neutral black. Three steps only;
+     `lg` is reserved for overlays and the mobile navigation sheet. */
+  --shadow-sm: 0 1px 2px 0 rgb(10 27 46 / 0.06);
+  --shadow-md: 0 4px 12px 0 rgb(10 27 46 / 0.08);
+  --shadow-lg: 0 16px 40px -8px rgb(10 27 46 / 0.1);
+
+  /* Display weight. The variable display face is set one step heavier on
+     paper than on ink, because ink optically bolds type (Phase 0 §12). */
+  --weight-display: 650;
+  --weight-title: 600;
+
+  /* ── LEGACY ALIASES ──────────────────────────────────────────────────
+     Variable names used directly (in an inline `style` or an SVG `fill`)
+     by components written before Phase 1. They are aliases onto the role
+     tokens above, never independent values, so there is still one source
+     of truth. Each disappears when its component is rebuilt in the phase
+     that owns it.
+
+     `--color-brass` was the warm gold accent, which §6.3 and §10.1 retire
+     entirely; it now resolves to the brand colour, which is the role it
+     was actually filling. */
+  --color-accent-primary: var(--color-brand);
+  --color-accent-primary-hover: var(--color-brand-hover);
+  --color-on-accent-primary: var(--color-on-brand);
+  --color-brass: var(--color-brand-on-surface);
+  --color-brass-hover: var(--color-brand-hover);
+  --color-on-brass: var(--color-on-brand);
+  --color-surface-2: var(--color-surface-sunken);
+  --color-focus: var(--color-focus-ring);
+
+  color-scheme: light;
+}
+
+/* ══ 2b. SEMANTIC — DARK THEME ═══════════════════════════════════════════
+   Independently specified, not derived. Surfaces rise toward light; shadow
+   elevation is replaced by surface lightening plus a light top edge; the
+   brand lightens so text and icons clear 4.5:1 on ink.                    */
+[data-theme='dark'] {
+  --color-bg: var(--ink-900);
+  --color-surface: var(--ink-800);
+  --color-surface-sunken: var(--ink-950);
+  --color-surface-raised: var(--ink-700);
+
+  --color-divider: var(--on-ink-divider);
+  --color-border: var(--on-ink-border); /* 4.41:1 on bg · 3.71:1 on surface · 3.42:1 on raised */
+  --color-border-strong: var(--on-ink-200);
+
+  /* Body text on ink is never pure white; #FFFFFF is reserved for display. */
+  --color-text-primary: 232 236 242; /* #E8ECF2 — 14.65:1 on bg · 12.33:1 on surface */
+  --color-text-display: var(--neutral-000); /* 17.37:1 on bg */
+  --color-text-secondary: var(--on-ink-200); /*  9.86:1 on bg ·  8.29:1 on surface */
+  --color-text-muted: var(--on-ink-400); /*  7.03:1 on bg ·  5.91:1 on surface ·  5.45:1 on raised */
+  --color-text-disabled: var(--on-ink-500); /*  4.15:1 on surface */
+
+  /* The solid button keeps the brand-600 fill with white text (5.19:1);
+     text and icons use the lighter instance so they clear AA on ink. */
+  --color-brand: var(--brand-600);
+  --color-brand-hover: var(--brand-500);
+  --color-brand-pressed: var(--brand-700);
+  --color-brand-subtle: var(--brand-950);
+  --color-brand-on-surface: var(--brand-400); /*  6.89:1 on bg ·  5.80:1 on surface ·  5.34:1 on raised */
+  --color-on-brand: var(--neutral-000);
+
+  --color-selected-surface: var(--brand-950);
+  --color-selected-border: var(--brand-400);
+  --color-hover-surface: var(--ink-700);
+  --color-pressed-surface: var(--ink-800);
+  --color-disabled-surface: var(--ink-950);
+  --color-disabled-border: var(--on-ink-divider);
+
+  --color-focus-ring: var(--brand-400); /*  6.89:1 on bg ·  5.80:1 on surface */
+  --color-focus-ring-inner: var(--ink-900);
+
+  /* The band is the same ink in both themes — only its edge treatment
+     differs, which is what gives the site one consistent close. */
+  --color-band: var(--ink-900);
+  --color-band-surface: var(--ink-700);
+  --color-on-band: var(--on-ink-100);
+  --color-on-band-muted: var(--on-ink-300);
+  --color-band-brand: var(--brand-400);
+
+  --color-success: 63 191 127; /* #3FBF7F — 7.42:1 on bg */
+  --color-warning: 224 163 60; /* #E0A33C — 7.84:1 on bg */
+  --color-error: 255 155 145; /* #FF9B91 — 8.56:1 on bg */
+
+  --color-chart-1: var(--brand-400);
+  --color-chart-2: 63 191 127;
+  --color-chart-3: 138 170 214; /* #8AAAD6 */
+  --color-chart-4: 224 163 60;
+  --color-chart-5: var(--on-ink-400);
+  --color-chart-grid: 255 255 255;
+  --color-chart-axis: var(--on-ink-400);
+
+  /* Shadow barely reads on ink. `sm` becomes a hairline ring, and only the
+     overlay step keeps a real ambient shadow. */
+  --shadow-sm: 0 0 0 1px rgb(255 255 255 / 0.05);
+  --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 24px 60px -12px rgb(0 0 0 / 0.6);
+
+  --weight-display: 600;
+  --weight-title: 550;
+
+  color-scheme: dark;
+}
+
+/* ══ 3. STRUCTURE — theme-independent ═══════════════════════════════════ */
+:root {
+  /* Spacing. Base unit 4px; every value is a multiple (Phase 0 §13). */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --space-40: 10rem;
+
+  /* Containers (Phase 0 §14). Three widths, no fourth. */
+  --container-shell: 90rem; /* 1440px — nav, footer band, inverted bands  */
+  --container-content: 75rem; /* 1200px — the default content column        */
+  --container-prose: 45rem; /*  720px — legal, FAQ answers, long-form     */
+
+  /* Gutters, stepped at the breakpoints in §14. Consumed by Container. */
+  --gutter: 1.25rem; /* 20px  <480 */
+
+  /* Radius (Phase 0 §17). Three values, deliberately not one — a single
+     radius on every surface is part of the templated look being removed. */
+  --radius-action: 0.5rem; /*  8px — buttons, inputs, chips       */
+  --radius-surface: 0.75rem; /* 12px — cards, panels, icon tiles    */
+  --radius-band: 1.5rem; /* 24px — inverted band / footer slab  */
+  --radius-pill: 9999px;
+
+  /* Motion (Phase 0 §18.1). Mirrored in TypeScript by lib/motion/tokens.ts
+     for Framer Motion — change both together. */
+  --dur-instant: 120ms; /* hover / focus feedback            */
+  --dur-fast: 180ms; /* small transitions, theme surfaces */
+  --dur-base: 240ms; /* panels, accordions, tabs          */
+  --dur-slow: 400ms; /* sheets, section elements          */
+  --dur-story: 700ms; /* one signature moment per section  */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Travel budget. Nothing on this site moves further than `lg`. */
+  --travel-sm: 12px; /* UI feedback       */
+  --travel-md: 24px; /* content entrance  */
+  --travel-lg: 40px; /* section device    */
+
+  /* Header. One source of truth, because scroll-margin-top on every anchor
+     target has to match it or the sticky bar eats the heading. */
+  --header-height: 4rem; /* 64px <1024 */
+  --header-offset: 5rem; /* header height plus breathing room */
+
+  /* Dimensional type (Phase 0 §9). Infrastructure only — see
+     components/brand/DimensionalText.tsx. Flat below 768px, half depth
+     between 768–1023px, full from 1024px up. */
+  --depth-steps: 0;
+  --depth-unit: 0.016em;
+}
+
+@media (min-width: 480px) {
+  :root {
+    --gutter: 1.5rem; /* 24px */
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 2rem; /* 32px */
+    --depth-steps: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 3rem; /* 48px */
+    --header-height: 4.5rem; /* 72px */
+    --header-offset: 5.5rem;
+    --depth-steps: 5;
+  }
+}

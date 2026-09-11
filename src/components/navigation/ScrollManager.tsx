@@ -2,8 +2,19 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
-/** Clearance for the sticky header, so an anchored heading doesn't land underneath it. */
-const HEADER_OFFSET = 96;
+/**
+ * Clearance for the sticky header, read from the same `--header-offset`
+ * token the CSS `scroll-margin-top` uses, so the two cannot drift apart.
+ * Falls back to the desktop value if the variable is unreadable.
+ */
+function headerOffset(): number {
+  if (typeof window === 'undefined') return 88;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--header-offset').trim();
+  const rem = Number.parseFloat(raw);
+  if (Number.isNaN(rem)) return 88;
+  const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  return raw.endsWith('rem') ? rem * rootFontSize : rem;
+}
 
 /**
  * Restores scroll position on navigation, which React Router deliberately
@@ -43,7 +54,7 @@ export function ScrollManager() {
       const target = document.getElementById(decodeURIComponent(hash.slice(1)));
 
       if (target) {
-        const top = target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset();
         window.scrollTo({ top, behavior });
 
         // Focus without stealing it visually: the element gets a temporary

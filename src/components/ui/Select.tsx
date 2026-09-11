@@ -1,36 +1,39 @@
 import { forwardRef } from 'react';
 import type { SelectHTMLAttributes, ReactNode } from 'react';
+import { controlBase, controlSizing } from './controlStyles';
 import { cn } from '@/lib/utils/cn';
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  /** See the note on InputProps — prefer `Field` for new work. */
   errorMessage?: string;
   children: ReactNode;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, id, errorMessage, children, ...props }, ref) => {
+  ({ className, id, errorMessage, children, 'aria-describedby': describedBy, ...props }, ref) => {
     const errorId = errorMessage && id ? `${id}-error` : undefined;
+    const described = [describedBy, errorId].filter(Boolean).join(' ') || undefined;
 
     return (
       <div className="w-full">
         <select
           ref={ref}
           id={id}
-          className={cn(
-            'h-11 w-full rounded-md border border-border bg-surface px-3 text-body text-ink',
-            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-            errorMessage && 'border-error',
-            className
-          )}
-          aria-invalid={Boolean(errorMessage)}
-          aria-describedby={errorId}
+          /* `appearance-none` plus our own chevron would mean drawing and
+             theming a control the platform already draws correctly; the
+             native arrow follows `color-scheme`, which the token layer
+             sets per theme. */
+          className={cn(controlBase, controlSizing, 'pr-10', className)}
+          aria-invalid={errorMessage ? true : props['aria-invalid']}
+          aria-describedby={described}
           {...props}
         >
           {children}
         </select>
         {errorMessage && (
-          <p id={errorId} className="mt-1.5 text-small text-error">
-            {errorMessage}
+          <p id={errorId} role="alert" className="mt-2 flex items-start gap-1.5 text-body-sm font-medium text-error">
+            <span aria-hidden="true">!</span>
+            <span>{errorMessage}</span>
           </p>
         )}
       </div>

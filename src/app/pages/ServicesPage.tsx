@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
@@ -98,7 +97,6 @@ function ServiceSection({ service, background }: { service: ServicePillar; backg
 
             <Button to={service.nextStep.to} size="lg" className="mt-8">
               {service.nextStep.label}
-              <Icon icon={ArrowRight} size={18} />
             </Button>
           </Reveal>
 

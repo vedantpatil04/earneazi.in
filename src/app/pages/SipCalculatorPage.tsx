@@ -25,8 +25,9 @@ export default function SipCalculatorPage() {
 
       <Section spacing="lg" background="surface-2" aria-labelledby="sip-explainers-heading">
         <Container size="wide">
-          <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
-          <h2 id="sip-explainers-heading" className="mt-6 text-h2 font-display-sharp">
+          {/* The eyebrow rule that sat here is retired as a global device —
+              Phase 0 §17 and §34. */}
+          <h2 id="sip-explainers-heading" className="text-display-md">
             What the calculator is actually showing you.
           </h2>
 
