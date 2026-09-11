@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  ─────────────────────────────────────────────────────────────────────────
+  DESIGN TOKENS
+  ─────────────────────────────────────────────────────────────────────────
+  Every colour, shadow and surface in the app resolves to one of the
+  variables below. Components never hard-code a hex value — change a token
+  here and the whole site (both themes) follows.
+
+  Colour values are space-separated RGB channels rather than hex, so
+  Tailwind's opacity modifiers (`bg-brass/10`) work against a
+  runtime-swappable theme — see the `rgb(var(--x) / <alpha-value>)` pattern
+  in tailwind.config.ts.
+
+  The named groups the Phase 2 brief asks to be adjustable:
+
+    warm paper   --color-bg, --color-surface, --color-surface-2
+    forest/ink   --color-text-*, --color-accent-primary*, --color-band
+    muted brass  --color-brass, --color-brass-hover, --color-on-brass
+    borders      --color-border (interactive, >=3:1), --color-divider (decorative)
+    surfaces     --color-surface, --color-surface-2, --color-band
+    shadows      --shadow-sm, --shadow-md, --shadow-lg
+    accent states --color-accent-primary-hover, --color-brass-hover, --color-focus
+
+  Dark is its own hierarchy, not an inversion of light: each value is chosen
+  and contrast-checked independently (ratios in /README.md).
+*/
+:root {
+  /* Warm paper — an oat-toned paper stack, deliberately warmer than a
+     neutral grey and cooler than a cream. */
+  --color-bg: 246 245 238; /* #F6F5EE */
+  --color-surface: 255 255 255; /* #FFFFFF */
+  --color-surface-2: 234 234 222; /* #EAEADE */
+
+  --color-border: 127 142 110; /* #7F8E6E — interactive boundaries, >=3:1 */
+  --color-divider: 224 224 212; /* #E0E0D4 — decorative hairlines only */
+
+  /* Forest ink */
+  --color-text-primary: 18 33 28; /* #12211C */
+  --color-text-secondary: 63 76 69; /* #3F4C45 */
+  --color-text-muted: 102 113 103; /* #667167 */
+
+  --color-accent-primary: 31 111 82; /* #1F6F52 */
+  --color-accent-primary-hover: 23 87 63; /* #17573F */
+  --color-on-accent-primary: 255 255 255;
+
+  /* Muted brass — the single warm accent. Used for emphasis, selected
+     states and rules; never as a large fill. */
+  --color-brass: 140 101 38; /* #8C6526 */
+  --color-brass-hover: 113 79 29; /* #714F1D */
+  --color-on-brass: 255 255 255;
+
+  /* Deep forest band — the one full-bleed high-contrast surface on the
+     page (the closing consultation CTA). Kept separate from
+     --color-accent-primary so the band can be dark in BOTH themes, rather
+     than flipping to a bright mint fill in dark mode. */
+  --color-band: 20 61 44; /* #143D2C */
+  --color-on-band: 244 246 239; /* #F4F6EF */
+
+  --color-success: 46 125 79; /* #2E7D4F */
+  --color-warning: 138 90 0; /* #8A5A00 */
+  --color-error: 179 57 43; /* #B3392B */
+  --color-focus: 31 111 82; /* #1F6F52 */
+
+  --color-chart-1: 31 111 82;
+  --color-chart-2: 140 101 38;
+  --color-chart-3: 43 110 134;
+  --color-chart-4: 149 75 73;
+  --color-chart-5: 85 96 107;
+
+  /* Shadows are tinted with the ink colour, never neutral black — a soft
+     grey drop shadow under every card is the tell we're avoiding. They are
+     tokens (not Tailwind literals) so dark mode gets its own, heavier set. */
+  --shadow-sm: 0 1px 2px 0 rgb(18 33 28 / 0.06);
+  --shadow-md: 0 8px 28px -10px rgb(18 33 28 / 0.18);
+  --shadow-lg: 0 28px 64px -28px rgb(18 33 28 / 0.28);
+
+  /* Fine paper grain. Light theme only — dark gets a soft overhead lift
+     instead, since dark noise on a dark ground is invisible. */
+  --paper-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+  --paper-texture-opacity: 0.055;
+
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --color-bg: 15 23 19; /* #0F1713 */
+  --color-surface: 22 33 28; /* #16211C */
+  --color-surface-2: 29 42 35; /* #1D2A23 */
+
+  --color-border: 93 119 103; /* #5D7767 */
+  --color-divider: 35 49 42; /* #23312A */
+
+  --color-text-primary: 242 244 239; /* #F2F4EF */
+  --color-text-secondary: 198 205 196; /* #C6CDC4 */
+  --color-text-muted: 147 160 147; /* #93A093 */
+
+  --color-accent-primary: 87 199 147; /* #57C793 */
+  --color-accent-primary-hover: 120 214 171; /* #78D6AB */
+  --color-on-accent-primary: 15 23 19;
+
+  --color-brass: 217 169 77; /* #D9A94D */
+  --color-brass-hover: 230 189 112; /* #E6BD70 */
+  --color-on-brass: 15 23 19;
+
+  --color-band: 22 48 36; /* #163024 */
+  --color-on-band: 242 244 239; /* #F2F4EF */
+
+  --color-success: 87 199 147;
+  --color-warning: 217 169 77;
+  --color-error: 226 104 92; /* #E2685C */
+  --color-focus: 87 199 147;
+
+  --color-chart-1: 87 199 147;
+  --color-chart-2: 217 169 77;
+  --color-chart-3: 95 168 194;
+  --color-chart-4: 200 124 121;
+  --color-chart-5: 154 166 172;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 10px 30px -12px rgb(0 0 0 / 0.6);
+  --shadow-lg: 0 30px 70px -30px rgb(0 0 0 / 0.75);
+
+  --paper-texture: radial-gradient(120% 80% at 50% -10%, rgb(87 199 147 / 0.06), transparent 60%);
+  --paper-texture-opacity: 1;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+    /* `clip` (not `hidden`) so this can't silently create a scroll
+       container and break `position: sticky` on the header. Safety net
+       only — layouts are built not to overflow in the first place. */
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-body text-ink antialiased;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+    /* Inter's `cv05` gives the lowercase l a tail — worth switching on when
+       the page is full of figures and fund names. */
+    font-feature-settings: 'cv05' 1;
+  }
+
+  /* Paper grain sits above the background colour and below all content.
+     A single fixed layer rather than a per-section background image, so it
+     costs one composited layer instead of one repaint per section. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--paper-texture);
+    opacity: var(--paper-texture-opacity);
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+    font-optical-sizing: auto;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: rgb(var(--color-brass));
+    color: rgb(var(--color-on-brass));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-focus));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Native controls should follow the theme (date pickers, scrollbars,
+     the range track in the Slider primitive). */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  /* Fraunces' sharper, slightly wonky editorial instance. Applied to
+     display-scale headlines only — at body sizes the wonk reads as noise. */
+  .font-display-wonk {
+    font-variation-settings: 'SOFT' 0, 'WONK' 1;
+  }
+
+  /* For financial figures and step numbers — keeps digits from jittering
+     in width as a value updates. */
+  .font-numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Visible only when the wrapped element receives focus — the "skip to
+     main content" link. */
+  .sr-only-focusable {
+    @apply sr-only focus:not-sr-only;
+  }
+
+  /* Hairline that fades out at one end — used to close editorial rules
+     without a hard stop. Decorative; never used to separate interactive rows. */
+  .rule-fade {
+    background-image: linear-gradient(to right, rgb(var(--color-brass) / 0.55), rgb(var(--color-divider) / 0));
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: rgb(var(--color-accent-primary));
+    border: 3px solid rgb(var(--color-surface));
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgb(var(--color-surface));
+    border-radius: 9999px;
+    background: rgb(var(--color-accent-primary));
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+}
+
+/* Global safety net for anything not already gated behind the
+   usePrefersReducedMotion hook or a Framer Motion variant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
