@@ -1,26 +1,89 @@
+import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
+import { Accordion } from '@/components/ui/Accordion';
+import { Reveal } from '@/components/motion/Reveal';
+import { riseVariants } from '@/lib/motion/variants';
+import { faqCategoryOrder, faqItems } from '@/data/faq';
+import { CtaBand } from '@/components/sections/shared/CtaBand';
 
-
-// Phase 1 route. Full content for this page belongs to a later phase — the
-// only change made here in Phase 2 was removing internal phase/placeholder
-// wording from what a visitor actually sees.
+/**
+ * Questions grouped by subject rather than presented as one long list, so
+ * someone who came about insurance isn't reading through six questions on
+ * SIPs to reach theirs.
+ *
+ * One accordion per group, each opening one panel at a time. Groups are
+ * separate accordions on purpose: arrow-key navigation then moves within a
+ * subject, which is how someone actually reads this page.
+ */
 export default function FaqPage() {
   return (
     <PageShell title="Frequently asked questions">
-      <Section spacing="lg">
-        <Container size="narrow">
-          <h1 className="text-h1 font-display-wonk">Frequently asked questions</h1>
-          <p className="mt-5 max-w-prose text-lead text-ink-secondary">
-            The questions people ask us most often about mutual funds, insurance and loans &mdash; answered in plain language.
-          </p>
-          <Button to="/contact" size="lg" className="mt-8">
-            Book a consultation
-          </Button>
+      <PageHeader
+        title="Questions people ask us first."
+        lead="Short, plain answers to the things that come up most often. If yours isn’t here, it’s worth a conversation."
+      />
+
+      <Section spacing="md">
+        {/* `wide` to match PageHeader and every other route, so the section
+            headings line up with the h1 above them rather than sitting in
+            from it. The readable measure is set on the inner column instead. */}
+        <Container size="wide">
+          <div className="flex max-w-reading flex-col gap-14 md:gap-20">
+            {faqCategoryOrder.map((category) => {
+              const items = faqItems.filter((item) => item.category === category);
+              if (items.length === 0) return null;
+
+              const headingId = `faq-${category.toLowerCase().replace(/\s+/g, '-')}`;
+
+              return (
+                <Reveal key={category} variants={riseVariants}>
+                  <section aria-labelledby={headingId}>
+                    <span aria-hidden="true" className="block h-px w-16 rounded-full rule-fade" />
+                    <h2 id={headingId} className="mt-5 text-h2 font-display-wonk">
+                      {category}
+                    </h2>
+
+                    <Accordion
+                      className="mt-8"
+                      idPrefix={headingId}
+                      headingLevel="h3"
+                      items={items.map((item) => ({
+                        id: item.id,
+                        title: item.question,
+                        content: <p>{item.answer}</p>,
+                      }))}
+                    />
+                  </section>
+                </Reveal>
+              );
+            })}
+          </div>
+
+          <Reveal variants={riseVariants} className="mt-16 max-w-reading">
+            <p className="text-body text-ink-secondary">
+              Wondering what a monthly investment adds up to?{' '}
+              <Link
+                to="/sip-calculator"
+                className="text-ink underline decoration-brass decoration-1 underline-offset-4 transition-colors motion-safe:duration-200 hover:text-brass focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              >
+                Try the SIP calculator
+              </Link>
+              .
+            </p>
+          </Reveal>
         </Container>
       </Section>
+
+      <CtaBand
+        id="faq-cta"
+        title="Still have a question?"
+        body="The ones worth asking usually don't fit on a page like this. Ask us directly and you'll get a straight answer."
+        primary={{ label: 'Ask us directly', to: '/contact' }}
+        secondary={{ label: 'See what we do', to: '/services' }}
+      />
     </PageShell>
   );
 }

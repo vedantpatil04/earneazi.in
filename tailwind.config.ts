@@ -74,6 +74,11 @@ export default {
         small: ['0.875rem', { lineHeight: '1.55' }],
         label: ['0.8125rem', { lineHeight: '1.4', letterSpacing: '0.01em' }],
         marker: ['0.75rem', { lineHeight: '1', letterSpacing: '0.04em' }],
+        /** The single headline figure on the calculator — the largest number anywhere on the site. */
+        'financial-display': [
+          'clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem)',
+          { lineHeight: '1', letterSpacing: '-0.018em' },
+        ],
         'financial-lg': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.01em' }],
         financial: ['1.25rem', { lineHeight: '1.3' }],
       },
@@ -91,6 +96,8 @@ export default {
       maxWidth: {
         prose: '68ch',
         measure: '54ch',
+        /** Reading column for long-form pages (FAQ, explanatory copy) that sit inside a `wide` container. */
+        reading: '54rem',
       },
       transitionTimingFunction: {
         signature: 'cubic-bezier(0.22, 1, 0.36, 1)',

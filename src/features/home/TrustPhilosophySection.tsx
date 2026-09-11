@@ -7,7 +7,7 @@ import { trustPrinciples, bankingPartners, trustHighlights } from '@/data/home';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { withMotionSafety, transitions } from '@/lib/motion/variants';
 
-const principleIcons = {
+const principleIcons: Record<string, typeof Scale> = {
   Scale,
   Sparkles,
   Users,

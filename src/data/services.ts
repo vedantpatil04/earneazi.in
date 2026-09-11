@@ -1,4 +1,14 @@
-import { LineChart, ShieldCheck, Landmark, Sprout, Heart, Home, Receipt, Compass } from 'lucide-react';
+import {
+  LineChart,
+  ShieldCheck,
+  Landmark,
+  Sprout,
+  Heart,
+  Home,
+  Receipt,
+  Compass,
+  GraduationCap,
+} from 'lucide-react';
 import type { ServicePillar, GoalEntry } from '@/types/content';
 
 /**
@@ -12,6 +22,7 @@ export const servicePillars: ServicePillar[] = [
     id: 'mutual-funds-pms',
     title: 'Mutual Funds & PMS',
     shortTitle: 'Mutual funds',
+    tagline: 'Built around your timeline, not this month’s trending fund.',
     summary:
       'Investing built around what you’re trying to do, not whichever fund is trending this month. For larger portfolios, our PMS option adds more active, hands-on management.',
     href: '/services#mutual-funds-pms',
@@ -21,11 +32,17 @@ export const servicePillars: ServicePillar[] = [
       'Portfolio Management Services for larger, more actively managed portfolios',
       'Regular reviews as markets move and your goals change',
     ],
+    whoItsFor:
+      'People with money set aside for something years away rather than months — and anyone whose investments have accumulated one at a time, without a plan holding them together.',
+    whyItMatters:
+      'Two funds can look similar and behave nothing alike over a decade. What matters is whether the mix suits how long you can leave the money alone, and how much movement you can sit through without selling at the wrong moment.',
+    nextStep: { label: 'Try the SIP calculator', to: '/sip-calculator' },
   },
   {
     id: 'insurance',
     title: 'Insurance',
     shortTitle: 'Insurance',
+    tagline: 'Cover sized against what you can’t afford to lose.',
     summary:
       'Life, health and asset cover chosen to protect what you can’t afford to lose — explained in plain language rather than policy fine print.',
     href: '/services#insurance',
@@ -35,11 +52,17 @@ export const servicePillars: ServicePillar[] = [
       'Options compared across insurers, not one company’s shelf',
       'Someone on your side when a claim needs to be filed',
     ],
+    whoItsFor:
+      'Anyone other people depend on financially, and anyone whose savings would take the hit if a hospital bill or a lost income arrived without warning.',
+    whyItMatters:
+      'Cover is the part of a plan you only find out about when you need it. Getting the amount and the exclusions right at the start is the difference between a policy that holds and one that merely exists.',
+    nextStep: { label: 'Talk through your cover', to: '/contact' },
   },
   {
     id: 'loans',
     title: 'Loans',
     shortTitle: 'Loans',
+    tagline: 'Borrowing that still leaves room for everything else.',
     summary:
       'Home, personal and business loans through our lending partners, with one person in your corner from application through to disbursal.',
     href: '/services#loans',
@@ -49,6 +72,11 @@ export const servicePillars: ServicePillar[] = [
       'Help comparing rates and terms before you commit',
       'One point of contact through approval and disbursal',
     ],
+    whoItsFor:
+      'People buying a home, refinancing something expensive, or funding a business — especially where the borrowing has to sit alongside investments and cover already in place.',
+    whyItMatters:
+      'A loan is agreed once and lived with for years. The repayment has to leave room for everything else you are trying to do, which makes it a planning question before it is a lending one.',
+    nextStep: { label: 'Start a conversation', to: '/contact' },
   },
 ];
 
@@ -109,6 +137,19 @@ export const goalEntries: GoalEntry[] = [
     ],
     relatedServiceIds: ['mutual-funds-pms', 'insurance'],
     icon: Receipt,
+  },
+  {
+    id: 'fund-education',
+    title: 'Fund education',
+    description:
+      'Build toward a fee bill that arrives on a date you already know — school, a degree here, or a course abroad.',
+    considerations: [
+      'Roughly what the course costs today, and when the first payment falls due',
+      'How much of it you would rather fund from savings than borrow',
+      'Whether the money needs to be safe by then, or still has years to grow',
+    ],
+    relatedServiceIds: ['mutual-funds-pms', 'loans'],
+    icon: GraduationCap,
   },
   {
     id: 'plan-retirement',

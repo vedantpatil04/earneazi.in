@@ -32,17 +32,19 @@ const sizeStyles: Record<ButtonSize, string> = {
 };
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-on-accent hover:bg-accent-hover shadow-sm hover:shadow-md',
-  brass: 'bg-brass text-on-brass hover:bg-brass-hover shadow-sm hover:shadow-md',
+  primary: 'bg-accent text-on-accent hover:bg-accent-hover shadow-sm hover:shadow-md motion-safe:hover:-translate-y-px',
+  brass: 'bg-brass text-on-brass hover:bg-brass-hover shadow-sm hover:shadow-md motion-safe:hover:-translate-y-px',
   outline: 'border border-border text-ink bg-transparent hover:bg-surface-2 hover:border-accent',
   ghost: 'text-ink bg-transparent hover:bg-surface-2',
   // For use inside the deep forest band, where the accent fill would sit too
   // close to the background to read as a button.
-  'on-band': 'bg-on-band text-band hover:bg-on-band/90 shadow-md',
+  'on-band': 'bg-on-band text-band hover:bg-on-band/90 shadow-md motion-safe:hover:-translate-y-px',
 };
 
-// `active:translate-y-px` is the whole of the press feedback: enough to
-// confirm the tap on a phone, not enough to read as a bouncing button.
+// A pixel up on hover, a pixel down on press. Enough that a pointer and a
+// thumb each get an acknowledgement, not enough to read as a bouncing button.
+// `active` is listed after `hover` so a press always wins on a device that
+// reports both.
 const baseStyles =
   'inline-flex items-center justify-center gap-2 rounded-md font-body font-medium ' +
   'transition-[background-color,border-color,box-shadow,transform,color] motion-safe:duration-200 ease-signature ' +

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 
-type BadgeVariant = 'neutral' | 'success' | 'warning' | 'error';
+type BadgeVariant = 'neutral' | 'accent' | 'success' | 'warning' | 'error';
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -11,6 +11,7 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
   neutral: 'bg-surface-2 text-ink-secondary',
+  accent: 'bg-accent/10 text-accent',
   success: 'bg-success/10 text-success',
   warning: 'bg-warning/10 text-warning',
   error: 'bg-error/10 text-error',

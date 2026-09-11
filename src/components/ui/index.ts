@@ -1,3 +1,5 @@
+export { Accordion } from './Accordion';
+export type { AccordionItem } from './Accordion';
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
 export { Card } from './Card';

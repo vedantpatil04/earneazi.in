@@ -1,14 +1,10 @@
 /**
- * Type contracts for the SIP calculator (Phase 0 Blueprint, Section N).
+ * Type contracts for the SIP calculator.
  *
- * This file defines the feature's input/output shape only. The actual
- * calculateSip() implementation — pure function, annuity-due convention,
- * unit-tested, cross-checked against at least two independent reference
- * calculators — is Day 4 / Phase 3 work per the blueprint's sequence
- * (Section Q), not Phase 1.
- *
- * features/sip-calculator can be built against this contract now and wired
- * to the real implementation later without changing call sites.
+ * The calculation itself lives in ./calculateSip.ts — pure, deterministic,
+ * unit-tested, annuity-due convention. This file is the shared vocabulary
+ * between that engine and the feature UI in features/sip-calculator, so
+ * neither side needs to import the other's internals.
  */
 export interface SipCalculatorInput {
   /** Monthly investment amount in INR. */
@@ -19,13 +15,34 @@ export interface SipCalculatorInput {
   durationYears: number;
 }
 
+export type SipFieldName = keyof SipCalculatorInput;
+
+/** Accepted range for one input. The UI derives both its slider bounds and its numeric min/max from these. */
+export interface SipFieldLimits {
+  min: number;
+  max: number;
+  /** Slider granularity. The numeric field accepts any value in range, not just multiples of this. */
+  step: number;
+}
+
+export type SipInputLimits = Record<SipFieldName, SipFieldLimits>;
+
+/** Discriminated union so a caller cannot read `.input` without first proving the values were valid. */
+export type SipValidationResult =
+  | { ok: true; input: SipCalculatorInput }
+  | { ok: false; errors: Partial<Record<SipFieldName, string>> };
+
 export interface SipCalculatorResult {
-  /** Total amount invested over the duration (monthlyInvestment * months). */
+  /** Total amount invested over the duration (monthlyInvestment × instalments). */
   totalInvested: number;
   /** Projected future value at full precision — round only for display. */
   futureValue: number;
-  /** futureValue - totalInvested, at full precision. */
+  /** futureValue − totalInvested, at full precision. */
   estimatedGains: number;
+  /** The monthly rate actually used, exposed so the UI can state the assumption rather than restate the formula. */
+  monthlyRate: number;
+  /** Number of monthly instalments (durationYears × 12). */
+  installments: number;
 }
 
 export interface SipYearlyBreakdownPoint {

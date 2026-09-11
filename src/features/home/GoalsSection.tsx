@@ -52,7 +52,10 @@ export function GoalsSection() {
         {/* Goals Grid */}
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {goalEntries.map((goal, idx) => {
-            const IconComponent = iconMap[goal.iconName] || TrendingUp;
+            const IconComponent =
+              (goal.iconName && (iconMap as Record<string, any>)[goal.iconName]) ||
+              goal.icon ||
+              TrendingUp;
 
             return (
               <motion.div
@@ -66,7 +69,7 @@ export function GoalsSection() {
                 })}
               >
                 <Link
-                  to={goal.targetHref}
+                  to={goal.targetHref || `/financial-goals#${goal.id}`}
                   className="group block h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus rounded-lg"
                 >
                   <Card

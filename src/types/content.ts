@@ -6,10 +6,20 @@ export interface ServicePillar {
   /** Short form for tight contexts (nav rows, chips) where the full title would wrap. */
   shortTitle: string;
   summary: string;
+  /** One clause, for tight contexts like the homepage hero. A compression of `summary`, never a new claim. */
+  tagline: string;
   href: string;
   icon: LucideIcon;
   /** Short, non-quantified "what this covers" points — no figures, rates, returns or guarantees. */
   highlights: string[];
+  /** Who tends to need this, in plain language. Describes a situation, never a recommendation. */
+  whoItsFor: string;
+  /** Why the decision matters. Explains a trade-off; states no outcome, rate or return. */
+  whyItMatters: string;
+  /** The concrete next action for this service. Every service page section ends with one. */
+  nextStep: { label: string; to: string };
+  badge?: string;
+  categoryLabel?: string;
 }
 
 export interface GoalEntry {
@@ -24,6 +34,9 @@ export interface GoalEntry {
   considerations: string[];
   relatedServiceIds: string[];
   icon: LucideIcon;
+  iconName?: string;
+  targetHref?: string;
+  timeline?: string;
 }
 
 /**
@@ -51,10 +64,38 @@ export interface TrustPoint {
   icon: LucideIcon;
 }
 
+export type FaqCategory = 'Getting started' | 'Investing' | 'Insurance' | 'Loans';
+
 export interface FaqItem {
   id: string;
   question: string;
   answer: string;
+  category: FaqCategory;
+}
+
+/**
+ * One way of getting in touch. `value` stays null and `verified` stays false
+ * until the client supplies the real detail — the UI renders nothing at all
+ * for an unverified channel rather than showing a placeholder that could be
+ * mistaken for a working number or address.
+ */
+export interface ContactChannel {
+  id: string;
+  kind: 'phone' | 'whatsapp' | 'email' | 'office' | 'hours';
+  label: string;
+  /** What to show. Null until supplied. */
+  value: string | null;
+  /** One line of context under the value, e.g. when this channel is answered. */
+  note?: string;
+  verified: boolean;
+}
+
+/** How the firm works, as a stated principle rather than a measured claim. */
+export interface AboutPrinciple {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
 }
 
 /**
@@ -87,4 +128,23 @@ export interface FundListing {
   oneYearReturnPct: number | null;
   threeYearReturnPct: number | null;
   verified: boolean;
+}
+
+export interface TrustPrinciple {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string;
+}
+
+export interface ProcessStep {
+  number: string;
+  title: string;
+  description: string;
+  highlight: string;
+}
+
+export interface BankingPartner {
+  name: string;
+  tagline: string;
 }

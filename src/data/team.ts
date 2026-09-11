@@ -15,7 +15,7 @@ export const teamMembers: TeamMember[] = [
     role: 'Founder & CEO',
     photoUrl: null,
     photoVerified: false,
-    bio: 'Bio pending verification — Section D.5.',
+    bio: '',
     bioVerified: false,
   },
   {
@@ -24,7 +24,7 @@ export const teamMembers: TeamMember[] = [
     role: 'Co-Founder & COO',
     photoUrl: null,
     photoVerified: false,
-    bio: 'Bio pending verification — Section D.5.',
+    bio: '',
     bioVerified: false,
   },
 ];
