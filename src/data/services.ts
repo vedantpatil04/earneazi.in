@@ -6,6 +6,12 @@ import type { ServicePillar, GoalEntry } from '@/types/content';
  * describes what each category generally covers — no client-specific
  * figures, rates, returns or guarantees appear anywhere in this file, and
  * none should be added without client sign-off.
+ *
+ * `categories` restores the breadth the previous site showed in its
+ * insurance and loan grids (§21), as plain category names only. Every one is
+ * [VERIFY]: the owner confirms which Earneazi actually places. Rates,
+ * limits, insurer names and lender names are deliberately absent and must
+ * stay absent — they are volatile, unverified, or both (§3.4).
  */
 export const servicePillars: ServicePillar[] = [
   {
@@ -27,6 +33,19 @@ export const servicePillars: ServicePillar[] = [
     whyItMatters:
       'Two funds can look similar and behave nothing alike over a decade. What matters is whether the mix suits how long you can leave the money alone, and how much movement you can sit through without selling at the wrong moment.',
     nextStep: { label: 'Try the SIP calculator', to: '/sip-calculator' },
+    categories: {
+      label: 'What we work with',
+      items: [
+        'Equity funds',
+        'Debt funds',
+        'Hybrid funds',
+        'Index funds and ETFs',
+        'Tax-saving funds (ELSS)',
+        'SIP and STP',
+        'Portfolio Management Services',
+        'Goal-based portfolios',
+      ],
+    },
   },
   {
     id: 'insurance',
@@ -47,6 +66,19 @@ export const servicePillars: ServicePillar[] = [
     whyItMatters:
       'Cover is the part of a plan you only find out about when you need it. Getting the amount and the exclusions right at the start is the difference between a policy that holds and one that merely exists.',
     nextStep: { label: 'Talk through your cover', to: '/contact' },
+    categories: {
+      label: 'Cover we arrange',
+      items: [
+        'Term life cover',
+        'Health insurance',
+        'Family floater',
+        'Critical illness',
+        'Personal accident',
+        'Motor insurance',
+        'Home and property',
+        'Travel insurance',
+      ],
+    },
   },
   {
     id: 'loans',
@@ -67,6 +99,19 @@ export const servicePillars: ServicePillar[] = [
     whyItMatters:
       'A loan is agreed once and lived with for years. The repayment has to leave room for everything else you are trying to do, which makes it a planning question before it is a lending one.',
     nextStep: { label: 'Start a conversation', to: '/contact' },
+    categories: {
+      label: 'Borrowing we arrange',
+      items: [
+        'Home loan',
+        'Loan against property',
+        'Personal loan',
+        'Business loan',
+        'Working capital',
+        'Car loan',
+        'Education loan',
+        'Balance transfer and top-up',
+      ],
+    },
   },
 ];
 

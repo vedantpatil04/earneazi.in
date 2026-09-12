@@ -18,8 +18,35 @@ export interface ServicePillar {
   whyItMatters: string;
   /** The concrete next action for this service. Every service page section ends with one. */
   nextStep: { label: string; to: string };
+  /**
+   * The product categories this service covers.
+   *
+   * This is the "we really do all of this" signal the previous site carried
+   * in its eight-item insurance and loan grids, restored as a labelled
+   * sub-list inside the service rather than as a wall of cards (§21).
+   *
+   * Category names only. No rate, no limit, no lender name, no insurer name
+   * and no product-specific term appears here or may be added — those are
+   * volatile, unverified, or both (§3.4).
+   */
+  categories: ServiceCategories;
   badge?: string;
   categoryLabel?: string;
+}
+
+export interface ServiceCategories {
+  /** What the list is, e.g. "Cover we arrange". */
+  label: string;
+  /**
+   * Plain category names, in the order they should read.
+   *
+   * [VERIFY] These are the standard categories a mutual fund distributor and
+   * DSA in this market places, restored to recover the breadth the previous
+   * site showed. The owner must confirm which of them Earneazi actually
+   * arranges before launch — listing one it does not place is a claim, and
+   * removing an item is an edit to this array and nothing else.
+   */
+  items: string[];
 }
 
 export interface GoalEntry {

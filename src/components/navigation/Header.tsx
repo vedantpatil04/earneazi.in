@@ -16,55 +16,48 @@ import { MobileNav } from './MobileNav';
 import { MenuTrigger } from './MenuTrigger';
 
 /**
- * The site header — Phase 0 §15.
+ * Premium Financial-Advisory Header / Navbar
  *
- * Its job is to keep two things one tap away at every scroll position: who
- * to talk to, and where the goals are. Three zones on the shell container,
- * so the logo shares its left edge with every page's content:
- *
- *   left    the logo, linking home
- *   centre  primary navigation
- *   right   theme control, an optional direct contact channel, and the
- *           single call to action
- *
- * Scroll behaviour
- * ────────────────
- * Two states. `rest` is transparent with no border; `engaged`, after 24px,
- * is a solid theme surface with a hairline and `shadow-sm`. The transition
- * is on colour only.
- *
- * The header does NOT change height, which is a deliberate departure from
- * the 76px→60px in §15. §18.2.6 is the stronger rule — only `transform` and
- * `opacity` may animate in a scroll-linked context, and no `height` — and a
- * sticky element that shrinks moves every section below it, which is a
- * layout shift against the CLS budget in §30. The state change is carried
- * by the surface instead, which is what §15 actually asks for when it says
- * to replace the previous build's smeared gradient with a discrete change.
- *
- * It also does not hide on scroll-down: on a conversion-led site the call
- * to action is never allowed to be more than zero taps away (§15).
+ * Requirements:
+ * - Dark/deep navy background in dark mode, crisp clean surface in light mode
+ * - Clean minimal Earneazi logo on the left
+ * - Main navigation centered: Services, Financial Goals, SIP Calculator, About, FAQ
+ * - Theme toggle on the right
+ * - Prominent "Book a consultation" CTA on the right
+ * - Refined horizontal spacing, subtle border, smooth hover states
  */
 export function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const engaged = useHasScrolled(24);
+  const engaged = useHasScrolled(16);
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-header',
-        'transition-[background-color,border-color,box-shadow] motion-safe:duration-fast ease-out',
-        engaged
-          ? 'border-b border-divider bg-bg/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-bg/75'
-          : 'border-b border-transparent bg-transparent'
+        'sticky top-0 z-header transition-all duration-fast ease-out',
+        /* Light mode: crisp clean surface with high contrast */
+        'bg-white/95 text-slate-900 border-b border-slate-200/90 shadow-sm backdrop-blur-md',
+        /* Dark mode: deep navy background */
+        'dark:bg-[#061424]/95 dark:text-white dark:border-[#14263b]',
+        engaged && 'shadow-md'
       )}
     >
       <Container size="shell">
-        <div className="flex h-header items-center justify-between gap-4">
-          <Logo lockup="primary" className="lg:-ml-px" />
+        <div className="flex h-header items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_1fr_auto]">
+          {/* Left: Earneazi Logo */}
+          <div className="flex items-center justify-start">
+            <Logo
+              lockup="primary"
+              className="lg:-ml-px text-slate-900 dark:text-white"
+            />
+          </div>
 
-          <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-0.5">
+          {/* Center: Main navigation links */}
+          <nav
+            aria-label="Primary"
+            className="hidden lg:flex items-center justify-center"
+          >
+            <ul className="flex items-center gap-1.5 xl:gap-2.5">
               {headerNav.map((item) => (
                 <li key={item.path}>
                   <HeaderLink to={item.path} label={item.label} />
@@ -73,15 +66,10 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          {/* Right: Theme toggle & CTA actions */}
+          <div className="flex items-center justify-end gap-2.5 sm:gap-3.5">
             <ThemeToggle />
 
-            {/* A direct channel beside the CTA, so "book a consultation" is
-                not the only way to reach anyone. It renders only when the
-                owner has confirmed a monitored WhatsApp number in
-                data/contact.ts — Phase 0 §25 requires exactly one number to
-                be designated, and none has been, so nothing appears yet
-                rather than a placeholder. */}
             {contactWhatsApp && (
               <a
                 href={`https://wa.me/${contactWhatsApp.replace(/\D/g, '')}`}
@@ -89,16 +77,21 @@ export function Header() {
                 rel="noopener noreferrer"
                 aria-label="Message Earneazi on WhatsApp — opens WhatsApp"
                 className={cn(
-                  'hidden h-11 w-11 shrink-0 items-center justify-center rounded-action border border-divider',
-                  'text-ink-secondary transition-[background-color,border-color,color] motion-safe:duration-instant ease-out',
-                  'hover:border-border hover:bg-hovered hover:text-ink xl:inline-flex'
+                  'hidden h-10 w-10 shrink-0 items-center justify-center rounded-action border',
+                  'border-slate-300 text-slate-600 hover:bg-slate-100 transition-colors duration-instant ease-out',
+                  'dark:border-white/15 dark:text-slate-300 dark:hover:border-white/30 dark:hover:bg-white/10 dark:hover:text-white xl:inline-flex'
                 )}
               >
-                <MessageCircle size={19} strokeWidth={1.5} aria-hidden="true" />
+                <MessageCircle size={18} strokeWidth={1.75} aria-hidden="true" />
               </a>
             )}
 
-            <Button to={headerCta.path} variant="primary" size="sm" className="hidden sm:inline-flex">
+            <Button
+              to={headerCta.path}
+              variant="primary"
+              size="sm"
+              className="hidden sm:inline-flex shadow-sm px-5 py-2 text-sm font-semibold tracking-tight"
+            >
               {headerCta.label}
             </Button>
 
@@ -106,7 +99,7 @@ export function Header() {
               ref={menuButtonRef}
               open={mobileNavOpen}
               onClick={() => setMobileNavOpen((open) => !open)}
-              className="lg:hidden"
+              className="lg:hidden text-slate-800 dark:text-white"
             />
           </div>
         </div>
@@ -123,15 +116,7 @@ export function Header() {
 }
 
 /**
- * A primary navigation item.
- *
- * The active route carries a 2px brand underline that moves between items
- * as one shared element rather than each link fading its own in and out —
- * one object travelling reads as "you are here", where several fading reads
- * as decoration. Under reduced motion it jumps.
- *
- * `aria-current="page"` is what actually conveys the state; the underline
- * is the visual form of it, never the only form.
+ * Navigation link with active state indicator and smooth micro-interactions
  */
 function HeaderLink({ to, label }: { to: string; label: string }) {
   const location = useLocation();
@@ -143,20 +128,27 @@ function HeaderLink({ to, label }: { to: string; label: string }) {
       to={to}
       end={to === '/'}
       className={cn(
-        'relative inline-flex h-11 items-center rounded-action px-3 text-body-sm font-medium',
-        'transition-colors motion-safe:duration-instant ease-out',
-        isActive ? 'text-ink' : 'text-ink-secondary hover:text-ink'
+        'relative inline-flex h-10 items-center rounded-action px-3.5 text-[14px] font-medium transition-colors duration-instant ease-out',
+        /* Light mode */
+        'text-slate-600 hover:text-slate-950 hover:bg-slate-100/80',
+        isActive && 'text-slate-950 font-semibold',
+        /* Dark mode */
+        'dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/5',
+        isActive && 'dark:text-white dark:font-semibold'
       )}
     >
       {label}
       {isActive &&
         (prefersReducedMotion ? (
-          <span aria-hidden="true" className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-pill bg-brand" />
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-3.5 bottom-1 h-[2.5px] rounded-pill bg-brand"
+          />
         ) : (
           <motion.span
             aria-hidden="true"
             layoutId="header-nav-indicator"
-            className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-pill bg-brand"
+            className="absolute inset-x-3.5 bottom-1 h-[2.5px] rounded-pill bg-brand"
             transition={springUi}
           />
         ))}

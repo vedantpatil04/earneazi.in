@@ -1,4 +1,5 @@
 import { PageShell } from '@/components/layout/PageShell';
+import { ServicesStrip } from '@/components/sections/home/ServicesStrip';
 import { Hero } from '@/components/sections/home/Hero';
 import { GoalsGrid } from '@/components/sections/home/GoalsGrid';
 import { ServicesShowcase } from '@/components/sections/home/ServicesShowcase';
@@ -15,7 +16,8 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  * grows into the whole page.
  *
  * The order is the argument the page is making:
- *   hero            what this firm is, in one line
+ *   services strip  core offerings directly under header
+ *   hero            what this firm is, in one cinematic line
  *   goals           your situation, before our products
  *   services        what we actually do about it
  *   trust           how we work
@@ -23,14 +25,11 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  *   people          who you'd be dealing with
  *   SIP teaser      one concrete thing you can try right now
  *   consultation    the ask
- *
- * Background alternates bg → surface → bg → surface-2 → bg → surface → bg →
- * band, so no two adjacent sections share a ground and the page has a
- * rhythm without needing rules between sections.
  */
 export default function HomePage() {
   return (
     <PageShell title="Financial planning, made simple">
+      <ServicesStrip />
       <Hero />
       <GoalsGrid />
       <ServicesShowcase />

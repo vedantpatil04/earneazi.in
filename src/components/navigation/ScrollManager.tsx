@@ -44,35 +44,105 @@ export function ScrollManager() {
       return;
     }
 
-    // The target may belong to a route that is still loading (the SIP
-    // calculator is code-split), so retry across a few frames rather than
-    // giving up on the first miss.
-    let attempts = 0;
+    /*
+      Two separate problems, and the first one masks the second.
+
+      The target may belong to a route that is still loading — every route is
+      code-split — so the element does not exist on the frame the URL
+      changes, and we have to wait for it.
+
+      But arriving on the first frame the element exists is not enough
+      either. At that point the rest of the page is still laying out: images
+      resolve, fonts swap, and sections below the fold gain height. Scrolling
+      once, then, lands the reader hundreds of pixels short of where the
+      heading ends up — which is exactly what the hero's goal milestones did
+      before this loop existed.
+
+      So: find the element, scroll to it, then keep re-measuring until its
+      position stops moving, and stop early the moment the reader takes over.
+    */
+    const TOLERANCE = 2;
+    const MAX_FRAMES = 90; // ~1.5s at 60fps, then give up rather than fight.
+    let frames = 0;
     let frame = 0;
+    let settled = 0;
+    let aimed = false;
+    let userScrolled = false;
+    let lastDocumentTop: number | null = null;
 
-    const tryScroll = () => {
-      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    const onUserScroll = () => {
+      userScrolled = true;
+    };
+    // `wheel` and `touchstart` rather than `scroll`, because our own
+    // `scrollTo` fires `scroll` and would cancel the loop immediately.
+    window.addEventListener('wheel', onUserScroll, { passive: true, once: true });
+    window.addEventListener('touchstart', onUserScroll, { passive: true, once: true });
+    window.addEventListener('keydown', onUserScroll, { once: true });
 
-      if (target) {
-        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset();
-        window.scrollTo({ top, behavior });
-
-        // Focus without stealing it visually: the element gets a temporary
-        // tabindex so it can receive focus, which is removed again on blur.
-        if (!target.hasAttribute('tabindex')) {
-          target.setAttribute('tabindex', '-1');
-          target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
-        }
-        target.focus({ preventScroll: true });
-        return;
+    const focusTarget = (target: HTMLElement) => {
+      // Focus without stealing it visually: the element gets a temporary
+      // tabindex so it can receive focus, which is removed again on blur.
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+        target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
       }
-
-      attempts += 1;
-      if (attempts < 20) frame = window.requestAnimationFrame(tryScroll);
+      target.focus({ preventScroll: true });
     };
 
-    frame = window.requestAnimationFrame(tryScroll);
-    return () => window.cancelAnimationFrame(frame);
+    const tick = () => {
+      frames += 1;
+      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+
+      if (target && !userScrolled) {
+        /*
+          The signal to re-aim is the TARGET moving, not the scroll being
+          short of it. Measuring the gap to the target instead would re-aim
+          on every frame of the first smooth scroll — which cancels that
+          scroll and restarts it, forever.
+
+          `documentTop` is the target's absolute position in the document, so
+          it only changes when the layout above it actually shifts.
+        */
+        const documentTop = target.getBoundingClientRect().top + window.scrollY;
+
+        if (lastDocumentTop === null || Math.abs(documentTop - lastDocumentTop) > TOLERANCE) {
+          /*
+            First sight, or the page grew above the target. Aim again — the
+            opening pass animates, later corrections jump, because a second
+            animation chasing a moving target reads as a glitch.
+
+            `'instant'` rather than `'auto'`: `auto` defers to the CSS
+            `scroll-behavior`, which is `smooth` document-wide.
+          */
+          window.scrollTo({ top: documentTop - headerOffset(), behavior: aimed ? 'instant' : behavior });
+          aimed = true;
+          lastDocumentTop = documentTop;
+          settled = 0;
+        } else {
+          settled += 1;
+          // Steady for several frames running — the layout has stopped moving.
+          if (settled >= 5) {
+            focusTarget(target);
+            return;
+          }
+        }
+      }
+
+      if (!userScrolled && frames < MAX_FRAMES) {
+        frame = window.requestAnimationFrame(tick);
+      } else if (target) {
+        focusTarget(target);
+      }
+    };
+
+    frame = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('wheel', onUserScroll);
+      window.removeEventListener('touchstart', onUserScroll);
+      window.removeEventListener('keydown', onUserScroll);
+    };
   }, [pathname, hash, prefersReducedMotion]);
 
   return null;
