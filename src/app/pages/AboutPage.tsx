@@ -6,20 +6,12 @@ import { Section } from '@/components/layout/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Icon } from '@/components/ui/Icon';
 import { CtaBand } from '@/components/sections/shared/CtaBand';
+import { FounderCards } from '@/components/sections/shared/FounderCards';
+import { CredentialLedger } from '@/components/sections/shared/CredentialLedger';
 import { RevealGroup } from '@/components/motion/Reveal';
 import { settleVariants } from '@/lib/motion/variants';
 import { aboutPrinciples, aboutSummary } from '@/data/about';
-import { teamMembers } from '@/data/team';
 import { journeySteps } from '@/data/journey';
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 /**
  * The About page states an approach and names the people behind it. It
@@ -31,11 +23,15 @@ function initials(name: string): string {
  * them have been verified. This is the page most likely to attract an
  * invented statistic, so the content types behind it have nowhere to put one.
  *
- * Founder names and roles are confirmed. Photography and bios are not, and
- * a stock portrait standing in for a named real person would be a false
- * representation of an actual employee — a harder line than "temporary
- * imagery is fine". The monogram is the design, not a gap: set `photoUrl`
- * and `photoVerified` in src/data/team.ts when real photography arrives.
+ * Founder names and roles are confirmed. Photography, tenure, responsibility
+ * and bios are not, and none are invented: the shared `FounderCards`
+ * component renders each field only when it exists. A stock portrait
+ * standing in for a named real person would be a false representation of an
+ * actual employee — a harder line than "temporary imagery is fine".
+ *
+ * The credential ledger below the founders is the same discipline: it
+ * renders nothing at all until a credential has an identifier behind it
+ * (§24), rather than showing pending badges that still read as credentials.
  */
 export default function AboutPage() {
   return (
@@ -110,28 +106,15 @@ export default function AboutPage() {
             lead="Earneazi was founded to make financial planning easier to understand for people who don’t work in finance."
           />
 
-          <RevealGroup
-            as="ul"
-            stagger={0.12}
-            className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-divider bg-divider sm:grid-cols-2 lg:mt-16"
-          >
-            {teamMembers.map((member) => (
-              <motion.li key={member.id} variants={settleVariants} className="flex items-center gap-6 bg-bg p-8 sm:p-10">
-                <span
-                  aria-hidden="true"
-                  className="inline-flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-md border border-brass/30 bg-brass/[0.08] font-display text-[1.75rem] font-medium text-brass"
-                >
-                  {initials(member.name)}
-                </span>
-                <div>
-                  <p className="font-display text-h3 text-ink">{member.name}</p>
-                  <p className="mt-1 text-body text-ink-secondary">{member.role}</p>
-                </div>
-              </motion.li>
-            ))}
-          </RevealGroup>
+          {/* The same cards as the homepage section, from one component, so
+              the two cannot drift into two treatments of the same people —
+              and so the duplicated-monogram defect §24 names has one place
+              to be wrong rather than two. */}
+          <FounderCards className="mt-10 lg:mt-14" />
         </Container>
       </Section>
+
+      <CredentialLedger />
 
       <CtaBand
         id="about-cta"

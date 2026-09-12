@@ -1,41 +1,44 @@
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Eyebrow } from '@/components/ui/Eyebrow';
-import { Button } from '@/components/ui/Button';
-import { Reveal, RevealGroup } from '@/components/motion/Reveal';
-import { growFromBaseVariants, riseVariants, transitions, withMotionSafety } from '@/lib/motion/variants';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-
-/** Twelve equal columns — one per month of a year of equal contributions. Equal on purpose: that regularity is the whole idea of a SIP. */
-const CONTRIBUTION_COLUMNS = 12;
+import { Link } from '@/components/ui/Link';
+import { Reveal } from '@/components/motion/Reveal';
+import { riseVariants } from '@/lib/motion/variants';
+import { SipMiniCalculator } from '@/features/sip-calculator/SipMiniCalculator';
 
 /**
- * A teaser, not a calculator.
+ * The homepage SIP section.
  *
- * There is no arithmetic in this file and no figures anywhere in it. The
- * illustration shows the *shape* of a SIP — twelve identical monthly
- * contributions, with a rising line above them standing for the passage of
- * time — with no axis, no scale, no currency and no numbers to misread as a
- * projection. The caption says so in as many words.
+ * ── What Phase 4 changed here ───────────────────────────────────────────
  *
- * The real calculation belongs to the SIP calculator and runs through the
- * shared engine in lib/finance. Nothing here duplicates, approximates or
- * pre-empts it.
+ * This used to be an illustration with no figures in it at all: twelve
+ * identical bars standing for twelve equal contributions, with a rising line
+ * above them standing for time, and a caption explaining that it was a
+ * picture of an idea rather than a forecast. That was the right call while
+ * the calculator lived only on its own route — a decorative chart with
+ * invented numbers next to a real one would have been worse than nothing.
  *
- * It is the last thing before the closing ask, and it is the one section
- * that offers something to *do* rather than something to read — which is
- * why the action is a full-size button rather than a text link.
+ * Phase 4 requires the homepage to carry a genuine SIP experience running
+ * the same calculation as the standalone page, so the picture of the idea is
+ * replaced by the idea working. The panel beside this copy is live: move a
+ * slider and the projection moves, through the same engine, with the same
+ * bounds and the same assumption line as `/sip-calculator`.
+ *
+ * The section keeps its job in the page's argument. It is the one thing on
+ * the homepage that offers something to *do* rather than something to read,
+ * and it is the last beat before the closing ask — which is why it sits
+ * where it does and why its action is a full-size button.
+ *
+ * Nothing here computes anything. The panel owns its own state and defers
+ * every figure to `lib/finance`, and this file does not import the chart, so
+ * the entry bundle stays clear of Recharts.
  */
 export function SipTeaser() {
-  const prefersReducedMotion = usePrefersReducedMotion();
-
   return (
     <Section spacing="lg" aria-labelledby="sip-teaser-heading">
       <Container size="content">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <Eyebrow>Start small</Eyebrow>
 
@@ -46,66 +49,32 @@ export function SipTeaser() {
               intro="A SIP is the same amount, invested on the same date, month after month. It’s the least dramatic way to build a portfolio, and it’s how most plans actually get built."
             />
 
-            <Reveal variants={riseVariants} delay={0.1} className="mt-8">
-              <Button to="/sip-calculator" size="lg" trailingIcon={<ArrowRight size={18} aria-hidden="true" />}>
-                Open the SIP calculator
-              </Button>
+            <Reveal variants={riseVariants} delay={0.08} className="mt-6">
+              <p className="max-w-measure text-body text-ink-secondary">
+                The panel here runs the same calculation as the full calculator — set an amount and a period and see
+                what the arithmetic says. The return rate is an assumption you pick, not one anyone is offering.
+              </p>
+              <p className="mt-5">
+                <Link
+                  to="/sip-calculator"
+                  variant="standalone"
+                  trailingIcon={<span aria-hidden="true">→</span>}
+                >
+                  Open the full calculator, with the chart and the year-by-year table
+                </Link>
+              </p>
             </Reveal>
           </div>
 
-          <Reveal variants={riseVariants} delay={0.12} className="lg:col-span-7">
-            <figure className="rounded-band border border-divider bg-surface p-6 shadow-md sm:p-8">
-              <div className="relative h-40 sm:h-52">
-                <RevealGroup stagger={0.05} delay={0.1} className="absolute inset-0 flex items-end gap-1.5 sm:gap-2">
-                  {Array.from({ length: CONTRIBUTION_COLUMNS }, (_, index) => (
-                    <motion.span
-                      key={index}
-                      aria-hidden="true"
-                      variants={growFromBaseVariants}
-                      className="h-1/2 flex-1 origin-bottom rounded-action bg-brand/80"
-                    />
-                  ))}
-                </RevealGroup>
-
-                {/* The rising line stands for time passing, nothing more.
-                    `vectorEffect` keeps it an even 2px after the viewBox is
-                    stretched to the container. */}
-                <svg
-                  viewBox="0 0 600 200"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 h-full w-full"
-                >
-                  <motion.path
-                    d="M6,178 C150,158 300,112 450,62 L594,26"
-                    fill="none"
-                    stroke="rgb(var(--color-brand-on-surface))"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    whileInView={{ pathLength: 1, opacity: 1 }}
-                    viewport={{ once: true, margin: '-72px 0px' }}
-                    transition={{
-                      ...withMotionSafety(prefersReducedMotion, transitions.story),
-                      delay: prefersReducedMotion ? 0 : 0.5,
-                    }}
-                  />
-                </svg>
-              </div>
-
-              <figcaption className="mt-6 border-t border-divider pt-4">
-                <span className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
-                  Illustration only — no figures
-                </span>
-                <p className="mt-2 max-w-prose text-body-sm text-ink-secondary">
-                  Equal columns for equal monthly contributions. This is a picture of the idea, not a forecast: what a
-                  SIP is actually worth later depends on the fund, the amount and the market. The calculator does the
-                  arithmetic.
-                </p>
-              </figcaption>
-            </figure>
-          </Reveal>
+          {/*
+            No entrance wrapper on the panel. It is an interactive control,
+            and a control that starts at opacity 0 and waits for an
+            IntersectionObserver is a control that might never arrive
+            (§18.2.4). It renders its final state in base CSS.
+          */}
+          <div className="lg:col-span-7">
+            <SipMiniCalculator />
+          </div>
         </div>
       </Container>
     </Section>

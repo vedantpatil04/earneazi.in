@@ -1,38 +1,71 @@
-import { Link } from 'react-router-dom';
-import { Mail, MapPin, MessageCircle, Phone, Clock } from 'lucide-react';
+import { Clock, Mail, MapPin, Phone } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
-import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/ui/Link';
 import { Reveal } from '@/components/motion/Reveal';
-import { riseVariants } from '@/lib/motion/variants';
-import { ContactForm } from '@/features/contact/ContactForm';
+import { clipRevealVariants, riseVariants } from '@/lib/motion/variants';
+import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
+import { ConsultationForm } from '@/features/contact/ConsultationForm';
 import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
 import type { ContactChannel } from '@/types/content';
+import { cn } from '@/lib/utils/cn';
 
+/**
+ * The conversion surface.
+ *
+ * ── The form is the page ────────────────────────────────────────────────
+ *
+ * §25 sets out three permissible options for a frontend-only V1 and
+ * recommends the second: compose-and-send. That is what this is. The form
+ * builds a structured message from what the person typed and hands it to
+ * their own WhatsApp (or mail client) to send. Nothing posts anywhere,
+ * nothing is stored, and no success state is shown for something that did
+ * not happen.
+ *
+ * ── The channel column is verified-only ─────────────────────────────────
+ *
+ * It renders exactly what the client has confirmed in data/contact.ts and
+ * nothing else. A phone number or an address that might not be current is
+ * worse on a financial-services site than no number at all — someone acts on
+ * it. Until details are filled in, the column carries what actually happens
+ * next instead, so the layout holds either way rather than collapsing into a
+ * gap.
+ *
+ * ── No closing CTA band ─────────────────────────────────────────────────
+ *
+ * This page *is* the call to action, and a "book a consultation" button under
+ * a consultation form is noise. The floating contact control also removes
+ * itself on this route for the same reason.
+ *
+ * `data-conversion-surface` marks the channel block so the floating control
+ * stays out of its way if the route ever changes.
+ */
 const CHANNEL_ICONS: Record<ContactChannel['kind'], LucideIcon> = {
   phone: Phone,
-  whatsapp: MessageCircle,
+  whatsapp: Mail, // replaced below by the brand glyph; never rendered
   email: Mail,
   office: MapPin,
   hours: Clock,
 };
 
-/**
- * The enquiry form is the page, with the direct channels alongside it for
- * people who would rather just call.
- *
- * The channel list renders only what the client has confirmed in
- * src/data/contact.ts — a phone number or address that might not be real is
- * worse on a financial-services site than no number at all. Until details
- * are filled in, the column carries what actually happens next instead, so
- * the layout holds either way rather than collapsing into a gap.
- *
- * No closing CTA band here: this page *is* the call to action, and a
- * "book a consultation" button under a consultation form is noise.
- */
+const NEXT_STEPS = [
+  {
+    title: 'A person reads it',
+    body: 'Not a queue and not an autoresponder. Whoever picks it up will have read what you wrote before they reply.',
+  },
+  {
+    title: 'We come back with questions',
+    body: 'Usually a few, because the useful advice depends on details a form can’t ask for.',
+  },
+  {
+    title: 'Then a conversation',
+    body: 'Where you are, where you’d like to get to, and what it would take. Nothing is bought or signed at this stage.',
+  },
+];
+
 export default function ContactPage() {
   const hasChannels = verifiedContactChannels.length > 0;
 
@@ -43,111 +76,134 @@ export default function ContactPage() {
         lead="Where you are now, what you’d like to sort out. A sentence or two is enough to start with — the detail can come later."
       />
 
-      <Section spacing="md" aria-labelledby="enquiry-heading">
-        <Container size="wide">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-            <Reveal variants={riseVariants} className="lg:col-span-7">
-              <h2 id="enquiry-heading" className="text-h3 text-ink">
-                Send us an enquiry
+      <Section spacing="md" aria-labelledby="consultation-heading">
+        <Container size="content">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+            <Reveal variants={clipRevealVariants} className="lg:col-span-7">
+              <h2 id="consultation-heading" className="text-display-md text-ink-display">
+                Book a consultation
               </h2>
+              <p className="mt-3 max-w-measure text-body text-ink-secondary">
+                Fill this in and we&rsquo;ll write the message for you. You read it, change anything you like, and
+                send it yourself — so you can see exactly what leaves.
+              </p>
+
               <div className="mt-8">
-                <ContactForm />
+                <ConsultationForm />
               </div>
             </Reveal>
 
-            <Reveal variants={riseVariants} delay={0.08} className="lg:col-span-5">
+            <div className="lg:col-span-5" data-conversion-surface>
               {hasChannels && (
-                <section aria-labelledby="channels-heading" className="mb-12">
-                  <h2 id="channels-heading" className="text-h3 text-ink">
-                    Or reach us directly
-                  </h2>
+                <Reveal variants={riseVariants} delay={0.06}>
+                  <section aria-labelledby="channels-heading" className="mb-8">
+                    <h2 id="channels-heading" className="text-display-xs text-ink-display">
+                      Or reach us directly
+                    </h2>
 
-                  <ul className="mt-6 flex flex-col border-t border-divider">
-                    {verifiedContactChannels.map((channel) => {
-                      const href = contactChannelHref(channel);
-                      const body = (
-                        <>
-                          <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-surface-2 text-brass">
-                            <Icon icon={CHANNEL_ICONS[channel.kind]} size={18} />
-                          </span>
-                          <span>
-                            <span className="block text-label font-semibold text-ink">{channel.label}</span>
-                            <span className="mt-1 block whitespace-pre-line text-body text-ink-secondary">
-                              {channel.value}
-                            </span>
-                            {channel.note && <span className="mt-1 block text-small text-ink-muted">{channel.note}</span>}
-                          </span>
-                        </>
-                      );
-
-                      return (
-                        <li key={channel.id} className="border-b border-divider">
-                          {href ? (
-                            <a
-                              href={href}
-                              {...(channel.kind === 'whatsapp'
-                                ? { target: '_blank', rel: 'noreferrer noopener' }
-                                : {})}
-                              className="flex items-start gap-4 py-5 transition-colors motion-safe:duration-200 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-                            >
-                              {body}
-                            </a>
-                          ) : (
-                            <div className="flex items-start gap-4 py-5">{body}</div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </section>
+                    <ul className="mt-5 flex flex-col border-t border-divider">
+                      {verifiedContactChannels.map((channel) => (
+                        <ChannelRow key={channel.id} channel={channel} />
+                      ))}
+                    </ul>
+                  </section>
+                </Reveal>
               )}
 
-              <section aria-labelledby="next-heading" className="rounded-lg border border-divider bg-surface p-6 sm:p-8">
-                <h2 id="next-heading" className="text-h3 text-ink">
-                  What happens next
-                </h2>
-                <ol className="mt-6 flex flex-col gap-6">
-                  {[
-                    {
-                      title: 'A person reads it',
-                      body: 'Not a queue and not an autoresponder. Whoever picks it up will have read what you wrote before they reply.',
-                    },
-                    {
-                      title: 'We come back with questions',
-                      body: 'Usually a few, because the useful advice depends on details a form can’t ask for.',
-                    },
-                    {
-                      title: 'Then a conversation',
-                      body: 'Where you are, where you’d like to get to, and what it would take. Nothing is bought or signed at this stage.',
-                    },
-                  ].map((step, index) => (
-                    <li key={step.title} className="flex gap-4">
-                      <span className="font-mono text-marker font-medium font-numeric text-brass" aria-hidden="true">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <span>
-                        <span className="block text-body font-medium text-ink">{step.title}</span>
-                        <span className="mt-1.5 block text-small text-ink-secondary">{step.body}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-
-              <p className="mt-8 text-small text-ink-muted">
-                Want the short answers first?{' '}
-                <Link
-                  to="/faq"
-                  className="text-ink underline decoration-brass decoration-1 underline-offset-4 transition-colors motion-safe:duration-200 hover:text-brass focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              <Reveal variants={riseVariants} delay={0.1}>
+                <section
+                  aria-labelledby="next-heading"
+                  className="rounded-band border border-divider bg-surface p-5 sm:p-6"
                 >
-                  Read the FAQ
-                </Link>
-                .
-              </p>
-            </Reveal>
+                  <h2 id="next-heading" className="text-display-xs text-ink-display">
+                    What happens next
+                  </h2>
+                  <ol className="mt-5 flex flex-col gap-5">
+                    {NEXT_STEPS.map((step, index) => (
+                      <li key={step.title} className="flex gap-4">
+                        <span
+                          aria-hidden="true"
+                          className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand-subtle font-display text-legal font-semibold tabular text-brand-ink"
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-body-sm font-semibold text-ink">{step.title}</span>
+                          <span className="mt-1 block text-body-sm text-ink-secondary">{step.body}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+
+                <p className="mt-6 text-body-sm text-ink-muted">
+                  Want the short answers first?{' '}
+                  <Link to="/faq" variant="inline">
+                    Read the FAQ
+                  </Link>
+                  .
+                </p>
+              </Reveal>
+            </div>
           </div>
         </Container>
       </Section>
     </PageShell>
+  );
+}
+
+/**
+ * One confirmed channel. Actionable where it can be — `tel:`, `mailto:`, a
+ * maps URL, a WhatsApp deep link — and plain text where it cannot, which is
+ * what the working-hours row is.
+ */
+function ChannelRow({ channel }: { channel: ContactChannel }) {
+  const href = contactChannelHref(channel);
+  const isWhatsApp = channel.kind === 'whatsapp';
+  /* WhatsApp and a maps URL both leave the site; `tel:` and `mailto:` hand
+     off to another app on the same device and keep the current context. */
+  const opensNewTab = isWhatsApp || channel.kind === 'office';
+
+  const body = (
+    <>
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-action bg-surface-sunken text-brand-ink">
+        {isWhatsApp ? (
+          <WhatsAppGlyph size={18} />
+        ) : (
+          (() => {
+            const Glyph = CHANNEL_ICONS[channel.kind];
+            return <Glyph size={18} strokeWidth={1.75} aria-hidden="true" />;
+          })()
+        )}
+      </span>
+      <span className="min-w-0">
+        <span className="block font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          {channel.label}
+        </span>
+        <span className="mt-1 block whitespace-pre-line text-body font-medium text-ink">{channel.value}</span>
+        {channel.note && <span className="mt-1 block text-body-sm text-ink-secondary">{channel.note}</span>}
+      </span>
+    </>
+  );
+
+  return (
+    <li className="border-b border-divider">
+      {href ? (
+        <a
+          href={href}
+          {...(opensNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          className={cn(
+            /* 44px minimum on the whole row, and the row is the target. */
+            'flex min-h-14 items-start gap-4 py-4',
+            'transition-colors duration-instant ease-out hover:text-brand-ink'
+          )}
+        >
+          {body}
+          {opensNewTab && <span className="sr-only"> (opens in a new tab)</span>}
+        </a>
+      ) : (
+        <div className="flex min-h-14 items-start gap-4 py-4">{body}</div>
+      )}
+    </li>
   );
 }

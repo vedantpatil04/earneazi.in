@@ -1,37 +1,34 @@
-import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Link } from '@/components/ui/Link';
-import { RevealGroup } from '@/components/motion/Reveal';
-import { settleVariants } from '@/lib/motion/variants';
-import { teamMembers } from '@/data/team';
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { ConversationCta } from '@/components/conversion/ConversationCta';
+import { FounderCards } from '@/components/sections/shared/FounderCards';
+import { generalConversation } from '@/lib/contact/conversation';
 
 /**
  * The people.
  *
- * Names and roles are confirmed. Photography and bios are not, and neither
- * is invented here: a stock portrait standing in for a named real person
- * would be a false representation of an actual employee, which is a harder
- * line than "temporary imagery is fine".
+ * Names and roles are confirmed. Photography, tenure, responsibility and bios
+ * are not, and none of them are invented here — the cards render each field
+ * only when it exists (see components/sections/shared/FounderCards.tsx and
+ * data/team.ts), which is why this section is legible today and complete the
+ * moment the client supplies the rest.
  *
- * So the monogram is the design, not a gap waiting to be filled. Set in the
- * display face on a brand-tinted plate, at the same radius and weight as
- * every other surface on the page, it reads as a deliberate mark rather
- * than as a missing avatar. When real photography arrives, set `photoUrl`
- * and `photoVerified` in src/data/team.ts and swap the plate for an
- * EditorialImage; nothing else here changes.
+ * ── What Phase 5 changed ────────────────────────────────────────────────
+ *
+ * The previous version rendered both founders with the monogram "AS", because
+ * it derived initials from the full name and "Abhishek Sharma" and "Anil
+ * Souza" collide. That is the defect §24 opens on, and the fix is in the data
+ * rather than in a formula.
+ *
+ * It also ends somewhere now. A section about the two people you would be
+ * dealing with that offers no way to reach either of them was the clearest
+ * gap in the conversion path, so it closes on the shared conversation CTA —
+ * the same control, with the same wording and destination, as every other
+ * "talk to us" action on the site.
  */
 export function FounderSection() {
   return (
@@ -51,28 +48,16 @@ export function FounderSection() {
           }
         />
 
-        {/* A one-pixel grid gap over a divider ground draws the rules
-            between cells without each cell carrying its own border. */}
-        <RevealGroup
-          as="ul"
-          stagger={0.12}
-          className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-band border border-divider bg-divider sm:grid-cols-2 lg:mt-16"
-        >
-          {teamMembers.map((member) => (
-            <motion.li key={member.id} variants={settleVariants} className="flex items-center gap-6 bg-bg p-8 sm:p-10">
-              <span
-                aria-hidden="true"
-                className="inline-flex h-20 w-20 shrink-0 items-center justify-center rounded-surface border border-brand/25 bg-brand-subtle font-display text-display-xs font-semibold text-brand-ink"
-              >
-                {initials(member.name)}
-              </span>
-              <div className="min-w-0">
-                <p className="text-display-xs text-ink-display">{member.name}</p>
-                <p className="mt-1 text-body text-ink-secondary">{member.role}</p>
-              </div>
-            </motion.li>
-          ))}
-        </RevealGroup>
+        <FounderCards className="mt-10 lg:mt-14" />
+
+        <div className="mt-8 flex flex-col gap-4 rounded-band border border-divider bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <p className="max-w-measure text-body text-ink-secondary">
+            Whichever of them picks it up, you&rsquo;ll be talking to someone who has read what you wrote.
+          </p>
+          <ConversationCta context={generalConversation} variant="secondary" size="md" className="shrink-0">
+            Start a conversation
+          </ConversationCta>
+        </div>
       </Container>
     </Section>
   );

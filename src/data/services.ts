@@ -46,6 +46,13 @@ export const servicePillars: ServicePillar[] = [
         'Goal-based portfolios',
       ],
     },
+    categoryGroups: [
+      { label: 'Fund types', items: ['Equity funds', 'Debt funds', 'Hybrid funds', 'Index funds and ETFs'] },
+      {
+        label: 'How you invest',
+        items: ['SIP and STP', 'Tax-saving funds (ELSS)', 'Goal-based portfolios', 'Portfolio Management Services'],
+      },
+    ],
   },
   {
     id: 'insurance',
@@ -79,6 +86,13 @@ export const servicePillars: ServicePillar[] = [
         'Travel insurance',
       ],
     },
+    categoryGroups: [
+      { label: 'People', items: ['Term life cover', 'Health insurance', 'Family floater', 'Critical illness'] },
+      {
+        label: 'Assets and liability',
+        items: ['Personal accident', 'Motor insurance', 'Home and property', 'Travel insurance'],
+      },
+    ],
   },
   {
     id: 'loans',
@@ -112,6 +126,13 @@ export const servicePillars: ServicePillar[] = [
         'Balance transfer and top-up',
       ],
     },
+    categoryGroups: [
+      {
+        label: 'Against an asset',
+        items: ['Home loan', 'Loan against property', 'Car loan', 'Balance transfer and top-up'],
+      },
+      { label: 'Personal and business', items: ['Personal loan', 'Business loan', 'Working capital', 'Education loan'] },
+    ],
   },
 ];
 
@@ -132,6 +153,10 @@ export const goalEntries: GoalEntry[] = [
       'How much of a fall you could sit through without selling',
       'Whether a lump sum, a monthly SIP, or both fits your cash flow',
     ],
+    focus: 'Long-horizon investing',
+    horizon: 'Years, not months',
+    startsWith:
+      'Establishing how long this money can genuinely be left alone before anything gets chosen.',
     relatedServiceIds: ['mutual-funds-pms'],
     icon: TrendingUp,
   },
@@ -145,6 +170,10 @@ export const goalEntries: GoalEntry[] = [
       'What existing cover, including anything through work, already handles',
       'Which health costs would otherwise come out of your savings',
     ],
+    focus: 'Downside cover',
+    horizon: 'From day one',
+    startsWith:
+      'Adding up what your household actually runs on each month, before looking at any policy.',
     relatedServiceIds: ['insurance'],
     icon: Users,
   },
@@ -157,6 +186,10 @@ export const goalEntries: GoalEntry[] = [
       'How the down payment gets built without breaking other plans',
       'How the loan sits alongside your existing investments',
     ],
+    focus: 'Borrowing and cash flow',
+    horizon: 'A fixed date, a long repayment',
+    startsWith:
+      'Working out which repayment still leaves room for everything else you are doing.',
     relatedServiceIds: ['loans', 'insurance'],
     icon: Home,
   },
@@ -170,6 +203,10 @@ export const goalEntries: GoalEntry[] = [
       'Which lock-in periods you’d be comfortable committing to',
       'Whether a tax-saving choice still makes sense as an investment',
     ],
+    focus: 'Deductions and lock-ins',
+    horizon: 'Every financial year',
+    startsWith:
+      'Checking which deductions your situation actually lets you claim this year.',
     relatedServiceIds: ['mutual-funds-pms', 'insurance'],
     icon: Receipt,
   },
@@ -183,6 +220,10 @@ export const goalEntries: GoalEntry[] = [
       'How much of it you would rather fund from savings than borrow',
       'Whether the money needs to be safe by then, or still has years to grow',
     ],
+    focus: 'A dated commitment',
+    horizon: 'A date you already know',
+    startsWith:
+      'Pinning down what the course costs today, and when the first payment falls due.',
     relatedServiceIds: ['mutual-funds-pms', 'loans'],
     icon: GraduationCap,
   },
@@ -196,6 +237,10 @@ export const goalEntries: GoalEntry[] = [
       'What’s already accumulating through EPF, NPS or existing investments',
       'How the plan changes if you stop earlier, or later, than planned',
     ],
+    focus: 'Income after income stops',
+    horizon: 'The longest one you have',
+    startsWith:
+      'Working backward from what a month would need to cost once you stop working.',
     relatedServiceIds: ['mutual-funds-pms', 'insurance'],
     icon: Armchair,
   },

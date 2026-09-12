@@ -5,6 +5,7 @@ import { Footer } from '@/components/navigation/Footer';
 import { ScrollManager } from '@/components/navigation/ScrollManager';
 import { RouteAnnouncer } from '@/components/navigation/RouteAnnouncer';
 import { PageTransition } from '@/components/motion/PageTransition';
+import { FloatingContact } from '@/components/conversion/FloatingContact';
 
 /**
  * The application shell. Every route renders inside it, so the landmark
@@ -47,6 +48,16 @@ export default function AppLayout() {
       </main>
 
       <Footer />
+
+      {/*
+        The persistent conversation affordance (§25). Mounted here rather
+        than per page so it survives navigation, and last in the document so
+        it comes after the footer in the tab order — a control that floats
+        over everything should not interrupt the reading order to get there.
+        It removes itself on /contact and hides behind the mobile sheet; see
+        the component for the full suppression rules.
+      */}
+      <FloatingContact />
     </div>
   );
 }

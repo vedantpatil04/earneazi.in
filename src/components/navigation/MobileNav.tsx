@@ -66,6 +66,26 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
   useInert('#root', open);
 
   /*
+    Publish the sheet's open state on the document element.
+
+    §25 requires the floating contact control to be suppressed while this
+    is open. `useInert('#root')` above already stops it being reachable —
+    the control lives inside #root — but inert does not hide anything, so a
+    blue pill would still float over the sheet.
+
+    An attribute rather than shared state or a context: the two components
+    have no other reason to know about each other, and a provider for one
+    boolean is a heavier contract than the problem. This is the whole API
+    between them, and FloatingContact watches it with a MutationObserver.
+  */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (open) root.setAttribute('data-nav-open', '');
+    else root.removeAttribute('data-nav-open');
+    return () => root.removeAttribute('data-nav-open');
+  }, [open]);
+
+  /*
     Focus returns to the trigger only after the sheet has closed. It cannot
     be done inside the close handler: the trigger lives inside #root, which
     is `inert` while the sheet is open, and an inert element cannot take

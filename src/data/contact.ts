@@ -19,8 +19,15 @@ import type { ContactChannel } from '@/types/content';
  *   phone     display form, e.g. '+91 98765 43210'
  *   whatsapp  digits only including country code, e.g. '919876543210'
  *   email     a plain address
- *   office    a short address; line breaks are fine
+ *   office    a short address; line breaks are fine, plus `mapsUrl`
  *   hours     e.g. 'Monday to Saturday, 10am – 7pm'
+ *
+ * The WhatsApp entry is the one §25 singles out: exactly one number must be
+ * designated as the actively monitored line before it is used anywhere. The
+ * old site used two different numbers in two different places, which is how
+ * a monitored line stops being monitored. Until this one is confirmed, every
+ * WhatsApp CTA on the site resolves to the contact route instead — see
+ * lib/contact/conversation.ts, which is the only place that decision is made.
  */
 export const contactChannels: ContactChannel[] = [
   {
@@ -52,6 +59,10 @@ export const contactChannels: ContactChannel[] = [
     kind: 'office',
     label: 'Office',
     value: null,
+    /* A maps URL, once someone has confirmed both the address and which
+       pin actually corresponds to it. Absent means the address renders as
+       text: a link to the wrong building is worse than no link. */
+    mapsUrl: null,
     note: 'Visits by appointment.',
     verified: false,
   },
@@ -76,6 +87,15 @@ function findVerified(kind: ContactChannel['kind']): string | null {
 export const contactEmail = findVerified('email');
 export const contactPhone = findVerified('phone');
 export const contactWhatsApp = findVerified('whatsapp');
+export const contactOffice = findVerified('office');
+export const contactHours = findVerified('hours');
+
+/** The maps destination for the office, or null when either half is unconfirmed. */
+export const contactMapsUrl: string | null =
+  verifiedContactChannels.find((channel) => channel.kind === 'office')?.mapsUrl ?? null;
+
+/** True once the business can be reached by any confirmed channel at all. */
+export const hasVerifiedContactChannel = verifiedContactChannels.length > 0;
 
 /** Builds the `href` for a channel, or null where the channel isn't actionable (office, hours). */
 export function contactChannelHref(channel: ContactChannel): string | null {
@@ -88,6 +108,11 @@ export function contactChannelHref(channel: ContactChannel): string | null {
       return `https://wa.me/${channel.value.replace(/\D/g, '')}`;
     case 'email':
       return `mailto:${channel.value}`;
+    case 'office':
+      /* Only when a maps URL was supplied. The address itself is not a
+         destination, and guessing a search URL from a free-text address
+         sends people to whatever the map decides it meant. */
+      return channel.mapsUrl ?? null;
     default:
       return null;
   }

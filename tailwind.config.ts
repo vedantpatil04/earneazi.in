@@ -78,6 +78,22 @@ export default {
         },
         'on-brass': color('on-brand'),
 
+        /* ── Subject tone channel (Phase 3) ───────────────────────────
+           Not a colour: the accent of whatever subject the nearest
+           data-tone ancestor declares. See the SUBJECT TONE CHANNEL block
+           in globals.css and the accent tokens in tokens.css. One panel
+           component renders nine differently-coloured subjects through it,
+           in both themes, without naming a single one. */
+        tone: {
+          /* Text and icons. Clears 4.5:1 on bg, surface and sunken. */
+          DEFAULT: 'rgb(var(--tone) / <alpha-value>)',
+          /* Solid fill. White label clears 4.5:1 on it in both themes. */
+          fill: 'rgb(var(--tone-fill) / <alpha-value>)',
+          /* Tinted surface. Body text still reads on it in both themes. */
+          tint: 'rgb(var(--tone-tint) / <alpha-value>)',
+        },
+        'on-tone': color('on-brand'),
+
         /* ── Interaction states ───────────────────────────────────────── */
         selected: {
           DEFAULT: color('selected-surface'),

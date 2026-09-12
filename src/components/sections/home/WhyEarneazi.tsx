@@ -30,35 +30,35 @@ import { trustPoints } from '@/data/trust';
  */
 export function WhyEarneazi() {
   /*
-    ── This section is the service stack's closing move ───────────────────
+    ── This section closes the services chapter ──────────────────────────
 
-    In the reference, the panel that follows the cards does not wait for them
-    to leave: it rides up *over* the pinned stack and eats it from the bottom
-    while the cards' top edges stay exactly where they are. Measured across
-    the capture, the covered card holds its top at a constant offset while
-    its visible height falls 146 → 100 → 79 → 65px. That overlap is the last
-    beat of the interaction, and it is what stops the section change reading
-    as a cut.
+    Phase 3 replaced the services stack with a pinned premise and travelling
+    panels, which ends where its content ends rather than across a viewport
+    of runway. The 78vh negative margin that used to pull this panel up over
+    that runway went with it — it was one number expressed in two files, and
+    with nothing to ride over it would simply have eaten the last panel.
 
-    Three things make it work here, and all three are required:
+    What stays is the layer reading: `slab` gives this section the
+    rounded leading edge and the small overlap that make the boundary a
+    surface arriving over another rather than a cut (§19.1). The overlap
+    is this section's own margin, so it cannot leave a seam if the
+    services section changes height.
 
-      -mt-[78vh]  pulls this panel up across the stack's runway, so it
-                  travels over the cards rather than after them. It must
-                  match the runway height in ServicesShowcase.
-      z-10        puts it above the sticky cards, which carry z-index 1-3.
-      opaque      `sunken` is a solid ground; a translucent one would show
-                  the cards through it and the occlusion would read as a
-                  glitch rather than as a panel.
+    The content is unchanged and still deliberately the quietest on the page:
+    opacity-only reveals, no card surfaces, no hover states. After two told
+    sections the page needs somewhere to put its hands down, and how the firm
+    works should read as settled fact rather than as another performance.
 
-    `rounded-t-band` gives the arriving panel a visible leading edge, which
-    is what makes it legible as a surface sliding over another rather than as
-    content appearing.
+    It is also the section most likely to attract invented statistics — a
+    client count, an AUM figure, years in business. None are verified, so
+    none are here, and `TrustPoint` has no field one could be dropped into.
   */
   return (
     <Section
       spacing="lg"
       background="bg"
-      className="z-20 -mt-[78vh] rounded-t-band shadow-2xl"
+      slab
+      className="relative z-20 shadow-md"
       aria-labelledby="why-heading"
     >
       <Container size="content">

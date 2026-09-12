@@ -61,6 +61,10 @@ export const sipDisclaimer = {
     'The figures on this page are estimates produced from the values you entered, not a quote and not a guarantee.',
     'The return rate is an assumption you chose. Nobody is offering it to you, and no fund is obliged to deliver it.',
     'Actual returns can be higher, lower, or negative. Past performance of any fund does not indicate future performance.',
+    // §23.5 requires the exclusions to be stated with the result, not only in
+    // the assumptions list further down the page. This describes what the
+    // arithmetic leaves out; it is not a regulatory statement.
+    'The figure does not account for fund expense ratios, exit loads, taxes or inflation, so the real value of the amount shown would be lower.',
     'Mutual fund investments are subject to market risks. Please read all scheme-related documents carefully before investing.',
   ],
 } as const;

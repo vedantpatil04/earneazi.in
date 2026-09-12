@@ -30,6 +30,19 @@ export interface ServicePillar {
    * volatile, unverified, or both (§3.4).
    */
   categories: ServiceCategories;
+  /**
+   * The same categories as `categories`, split into the two groups a
+   * reader actually sorts them into (Phase 3).
+   *
+   * A flat run of eight chips reads as a word cloud; two labelled groups of
+   * four read as a service's shape — "people" and "assets" for insurance,
+   * "secured" and "unsecured" for loans. Same items, same rules: category
+   * names only, no rate, limit, lender or insurer, ever.
+   *
+   * Optional so a service can be added with the flat list alone; the
+   * services section falls back to `categories` when it is absent.
+   */
+  categoryGroups?: ServiceCategories[];
   badge?: string;
   categoryLabel?: string;
 }
@@ -59,6 +72,27 @@ export interface GoalEntry {
    * may imply a return, a rate, or a result.
    */
   considerations: string[];
+  /**
+   * Two or three words naming the kind of decision this is (Phase 3).
+   * Context, not a claim — it tells a reader which conversation they are
+   * about to have before they read the questions underneath.
+   */
+  focus: string;
+  /**
+   * How far out this goal usually sits, qualitatively (Phase 3).
+   *
+   * Deliberately never a number of years: a horizon stated as a figure
+   * reads as a recommendation about holding period, and this file states no
+   * recommendations. "Years, not months" is framing; "7–10 years" would not
+   * be.
+   */
+  horizon: string;
+  /**
+   * The first thing an advisor would actually establish for this goal
+   * (Phase 3). One sentence, describing a step in a conversation — never an
+   * outcome, a product or a result.
+   */
+  startsWith: string;
   relatedServiceIds: string[];
   icon: LucideIcon;
   iconName?: string;
@@ -114,6 +148,15 @@ export interface ContactChannel {
   value: string | null;
   /** One line of context under the value, e.g. when this channel is answered. */
   note?: string;
+  /**
+   * Office only: a maps URL for the address (Phase 5, §25).
+   *
+   * Separate from `value` because the address is text a person reads and
+   * this is a destination a person taps, and because an address can be
+   * confirmed before anyone has agreed which map service to point at.
+   * Absent means the address renders as text rather than as a link.
+   */
+  mapsUrl?: string | null;
   verified: boolean;
 }
 
@@ -134,17 +177,67 @@ export interface TeamMember {
   id: string;
   name: string;
   role: string;
+  /**
+   * The mark shown when there is no verified photograph — authored per
+   * person, never derived. Initials-of-full-name gave both current
+   * founders "AS", which is the duplicated-monogram defect §24 names.
+   */
+  monogram: string;
+  /** A Phase 3 subject-accent id, so two founders are told apart by colour too. */
+  toneId: string;
   photoUrl: string | null;
   photoVerified: boolean;
   bio: string;
   bioVerified: boolean;
+  /** e.g. "In financial services since 2011". [VERIFY] — null until confirmed. */
+  tenure: string | null;
+  tenureVerified: boolean;
+  /** What this person is accountable for. [VERIFY] — never inferred from the job title. */
+  responsibility: string | null;
+  /** Two to four short specialism tags. Empty until supplied. */
+  focus: string[];
+  /** A registration identifier the client can evidence. Null until supplied. */
+  credentialId: string | null;
 }
 
+/**
+ * One row of the credential ledger (§24).
+ *
+ * A credential is a registration, an arrangement, or a fact about the
+ * business that a document can prove. It is never a number about outcomes:
+ * client counts, AUM, average returns and satisfaction figures are forbidden
+ * on this section, and there is deliberately no field one could live in.
+ *
+ * `identifier` is what makes the row evidence rather than a badge. A row
+ * without one is not shown, however true it is.
+ */
+export interface Credential {
+  id: string;
+  /** The claim, e.g. "AMFI-registered mutual fund distributor". */
+  label: string;
+  /** What the identifier is called, e.g. "ARN". */
+  identifierLabel: string;
+  /** The evidence. Null until the client supplies it — the row stays hidden. */
+  identifier: string | null;
+  /** One plain sentence of context. */
+  detail: string;
+  verified: boolean;
+}
+
+/**
+ * A testimonial, gated on written consent (§24).
+ *
+ * There is no field for an amount, a return or a duration, and that is the
+ * point: the old site's testimonials carried rupee figures and performance
+ * claims, and §3.4 rules them out permanently. A quote that needs a number
+ * to work is not a quote this site can carry.
+ */
 export interface Testimonial {
   id: string;
   name: string;
   city: string;
   quote: string;
+  /** Written consent, per person, on file. Nothing renders without it. */
   consentVerified: boolean;
 }
 

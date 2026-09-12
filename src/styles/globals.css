@@ -140,6 +140,65 @@
   }
 
   /*
+    SUBJECT TONE CHANNEL — Phase 3.
+
+    Nine subjects (three services, six goals), six accents (tokens.css), one
+    generic panel component. A card declares which subject it is
+    (`data-tone="insurance"`) and every accent-coloured thing inside it —
+    the icon tile, the rule above the heading, the marker discs, the chips,
+    the SVG mark's strokes and fills — reads `--tone`, `--tone-fill` and
+    `--tone-tint` through the `tone-*` Tailwind colours.
+
+    Why a data attribute rather than an inline `style`: the mapping is a
+    design decision, and design decisions belong in the token layer rather
+    than in nine object literals in a data file. It also means the dark
+    instances swap with the theme without a single component knowing that
+    themes exist.
+
+    A goal that leans on one service wears that service's accent, so the
+    colour of "Protect family" in the goals section and the colour of
+    "Insurance" in the services section are the same statement.
+  */
+  [data-tone='mutual-funds-pms'],
+  [data-tone='grow-wealth'] {
+    --tone: var(--accent-invest);
+    --tone-fill: var(--accent-invest-fill);
+    --tone-tint: var(--accent-invest-tint);
+  }
+
+  [data-tone='insurance'],
+  [data-tone='protect-family'] {
+    --tone: var(--accent-protect);
+    --tone-fill: var(--accent-protect-fill);
+    --tone-tint: var(--accent-protect-tint);
+  }
+
+  [data-tone='loans'],
+  [data-tone='buy-a-home'] {
+    --tone: var(--accent-borrow);
+    --tone-fill: var(--accent-borrow-fill);
+    --tone-tint: var(--accent-borrow-tint);
+  }
+
+  [data-tone='save-tax'] {
+    --tone: var(--accent-tax);
+    --tone-fill: var(--accent-tax-fill);
+    --tone-tint: var(--accent-tax-tint);
+  }
+
+  [data-tone='fund-education'] {
+    --tone: var(--accent-learn);
+    --tone-fill: var(--accent-learn-fill);
+    --tone-tint: var(--accent-learn-tint);
+  }
+
+  [data-tone='plan-retirement'] {
+    --tone: var(--accent-retire);
+    --tone-fill: var(--accent-retire-fill);
+    --tone-tint: var(--accent-retire-tint);
+  }
+
+  /*
     DIMENSIONAL TYPE — Phase 0 §9, infrastructure only.
     Paired with components/brand/DimensionalText.tsx. Not applied anywhere
     yet; its intended home is the oversized footer wordmark (Phase 6).
@@ -211,6 +270,44 @@
 
 @layer utilities {
   /*
+    DESIGNED SCROLLERS — Phase 3.
+
+    §14 allows exactly one kind of horizontal scroll on this site: a scroller
+    that was designed to be one (the mobile service tab strip, the goal chip
+    rail). This is that scroller, defined once so neither section invents its
+    own.
+
+    `overscroll-behavior-x: contain` is the part that matters on iOS: without
+    it, swiping past the last chip hands the gesture to the document and
+    triggers the browser's back-navigation.
+
+    `proximity` rather than `mandatory` snapping, because these rails are
+    also driven programmatically — a chip scrolled into view by the keyboard
+    must be allowed to land where it was put rather than be pulled to the
+    nearest snap point.
+
+    The scrollbar is hidden because the rails carry their own affordance: an
+    active state, edge fades, and a selected chip that scrolls itself into
+    view.
+  */
+  .rail-x {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .rail-x::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rail-x > * {
+    scroll-snap-align: start;
+  }
+
+  /*
     Financial values. Tabular lining figures keep digits from changing
     width as a number updates, which is required for every monetary value
     on the site (Phase 0 §8.2). Archivo carries `tnum`; this is verified,
@@ -275,24 +372,64 @@
   }
 
   /*
-    Range thumb. The Slider primitive sets `appearance: none` on the input,
-    which removes the platform thumb entirely, so it has to be redrawn —
-    and it has to be redrawn once, here, because the pseudo-element cannot
-    be reached from a component's class list.
+    THE SLIDER — Phase 4.
 
-    Transform only on hover and press: animating width or height would
+    `appearance: none` on the input removes the platform control entirely, so
+    the track and the thumb both have to be redrawn, and they have to be
+    redrawn here: a pseudo-element cannot be reached from a component's class
+    list or given an inline style.
+
+    ── The 44px target ──────────────────────────────────────────────────
+    This used to be an 8px-tall input with a 24px thumb painted on it, which
+    left a drag target well under the 44px minimum — the known gap recorded
+    against §17, deferred to the phase that owns the calculator's layout.
+
+    The hit area and the paint are now separate things. The input is 44px
+    tall and transparent (see components/ui/Slider.tsx); the visible 8px
+    track is this pseudo-element, optically centred inside those 44px by the
+    thumb's negative top margin. Every pixel of the 44 drags, and the control
+    looks no larger than it did.
+
+    ── The fill ─────────────────────────────────────────────────────────
+    The travelled portion is a hard-stop gradient built from `--slider-fill`,
+    a percentage the component publishes on the input. Two stops, no overlaid
+    element: one paint, and nothing sitting above the input intercepting
+    pointer events.
+
+    Transform only on hover and press — animating width or height would
     relayout the track on every frame of a drag.
-
-    KNOWN GAP: §17 asks for a 44px thumb hit area. The painted thumb is
-    24px and the input is 8px tall, so the drag target is smaller than that
-    today. Enlarging it means changing the track geometry, which is the SIP
-    calculator's layout and belongs to Phase 4.
   */
-  input[type='range']::-webkit-slider-thumb {
+  .slider-control::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
+      rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
+    );
+    /* The unfilled half is a surface a control sits on, so it needs the
+       3:1 boundary SC 1.4.11 asks for rather than a divider hairline. */
+    box-shadow: inset 0 0 0 1px rgb(var(--color-border) / 0.45);
+  }
+
+  .slider-control::-moz-range-track {
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
+      rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
+    );
+    box-shadow: inset 0 0 0 1px rgb(var(--color-border) / 0.45);
+  }
+
+  .slider-control::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 24px;
     height: 24px;
+    /* Centres the 24px thumb on the 8px track: (24 − 8) ÷ 2. */
+    margin-top: -8px;
     border-radius: var(--radius-pill);
     background: rgb(var(--color-brand));
     border: 3px solid rgb(var(--color-surface));
@@ -301,16 +438,7 @@
     transition: transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-instant) var(--ease-out);
   }
 
-  input[type='range']:hover::-webkit-slider-thumb {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
-  }
-
-  input[type='range']:active::-webkit-slider-thumb {
-    transform: scale(1.18);
-  }
-
-  input[type='range']::-moz-range-thumb {
+  .slider-control::-moz-range-thumb {
     width: 24px;
     height: 24px;
     border-radius: var(--radius-pill);
@@ -321,8 +449,30 @@
     transition: transform var(--dur-instant) var(--ease-out);
   }
 
-  input[type='range']:hover::-moz-range-thumb {
+  .slider-control:hover::-webkit-slider-thumb {
     transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+  }
+
+  .slider-control:active::-webkit-slider-thumb {
+    transform: scale(1.18);
+  }
+
+  .slider-control:hover::-moz-range-thumb {
+    transform: scale(1.1);
+  }
+
+  .slider-control:active::-moz-range-thumb {
+    transform: scale(1.18);
+  }
+
+  /* Windows high-contrast strips background images, which would leave the
+     track invisible. A system-coloured outline restores the boundary. */
+  @media (forced-colors: active) {
+    .slider-control::-webkit-slider-runnable-track,
+    .slider-control::-moz-range-track {
+      border: 1px solid CanvasText;
+    }
   }
 
   /*

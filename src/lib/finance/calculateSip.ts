@@ -1,3 +1,4 @@
+import { formatPercent, formatRupees, formatYears } from './format';
 import type {
   SipCalculatorInput,
   SipCalculatorResult,
@@ -53,15 +54,70 @@ import type {
  * engine would reject.
  */
 export const SIP_INPUT_LIMITS: SipInputLimits = {
-  monthlyInvestment: { min: 500, max: 500000, step: 500 },
-  annualReturnPct: { min: 0, max: 30, step: 0.1 },
+  monthlyInvestment: { min: 500, max: 1000000, step: 500 },
+  annualReturnPct: { min: 0, max: 30, step: 0.5 },
   durationYears: { min: 1, max: 40, step: 1 },
 };
 
+/**
+ * The values the calculator opens on, shared by every surface that renders
+ * one so the standalone page and the homepage panel can never drift apart.
+ *
+ * [VERIFY] The 12% rate is the one number here that is a claim rather than a
+ * neutral starting point. It is what the previous site used and what the
+ * published cross-check figures in the test suite are built on, but §23.1 is
+ * explicit that a default return rate needs client sign-off. Changing it is a
+ * one-line edit here; nothing else hard-codes a starting value.
+ */
+export const SIP_DEFAULT_INPUT: SipCalculatorInput = {
+  monthlyInvestment: 5000,
+  annualReturnPct: 12,
+  durationYears: 10,
+};
+
+/**
+ * Pulls a value back inside its accepted range.
+ *
+ * Used on blur, never on keystroke (§23.2). Clamping while someone is still
+ * typing is hostile: typing "1" on the way to "15" would rewrite the field to
+ * the minimum under the cursor. So the field is allowed to hold an
+ * out-of-range value, the error says so, the results hold on the last good
+ * figures, and the value is corrected once the field is left.
+ *
+ * A value that is not a real number at all has nothing to clamp toward, so it
+ * falls back to the default for that field rather than to a bound — landing
+ * on "₹500" after typing letters reads as a broken field, not a corrected one.
+ */
+export function clampSipValue(field: SipFieldName, value: number): number {
+  const limits = SIP_INPUT_LIMITS[field];
+  if (!isRealNumber(value)) return SIP_DEFAULT_INPUT[field];
+  return Math.min(limits.max, Math.max(limits.min, value));
+}
+
 const FIELD_LABELS: Record<SipFieldName, string> = {
   monthlyInvestment: 'Monthly investment',
-  annualReturnPct: 'Expected return rate',
+  annualReturnPct: 'Assumed annual return',
   durationYears: 'Investment period',
+};
+
+/**
+ * How each field's bounds are written when they appear in an error message.
+ *
+ * "must be 1000000 or less" is a developer's sentence: it states the bound in
+ * the unit the engine happens to store rather than the one the field is
+ * labelled in. A person reading that field sees rupees, so the message says
+ * "₹10,00,000 or less".
+ *
+ * This is the one place display formatting reaches into the engine, and it is
+ * deliberate: these messages are already written for the person filling in the
+ * form rather than for a caller, so the numbers inside them belong in the same
+ * units as the rest of the sentence. ./format.ts is pure and imports nothing,
+ * so there is no cycle and nothing about the UI reaches in with it.
+ */
+const FIELD_BOUND_FORMATTERS: Record<SipFieldName, (value: number) => string> = {
+  monthlyInvestment: formatRupees,
+  annualReturnPct: formatPercent,
+  durationYears: formatYears,
 };
 
 const MONTHS_PER_YEAR = 12;
@@ -133,13 +189,15 @@ export function validateSipInput(raw: {
       return;
     }
 
+    const bound = FIELD_BOUND_FORMATTERS[field];
+
     if (numeric < limits.min) {
-      errors[field] = `${label} must be at least ${limits.min}.`;
+      errors[field] = `${label} must be at least ${bound(limits.min)}.`;
       return;
     }
 
     if (numeric > limits.max) {
-      errors[field] = `${label} must be ${limits.max} or less.`;
+      errors[field] = `${label} must be ${bound(limits.max)} or less.`;
       return;
     }
 

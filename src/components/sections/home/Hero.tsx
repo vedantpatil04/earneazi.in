@@ -1,11 +1,12 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Target, ShieldCheck, Layers, MessageCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Target, ShieldCheck, Layers, ArrowRight, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
-import { contactWhatsApp } from '@/data/contact';
+import { ConversationCta } from '@/components/conversion/ConversationCta';
+import { generalConversation } from '@/lib/contact/conversation';
 import {
   heroActions,
   heroEyebrow,
@@ -168,23 +169,21 @@ export function Hero() {
               {heroActions.primary.label.replace(/\s*→\s*$/, '')}
             </Button>
 
-            {contactWhatsApp ? (
-              <Button
-                href={`https://wa.me/${contactWhatsApp.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="secondary"
-                size="lg"
-                leadingIcon={<MessageCircle size={18} strokeWidth={1.5} aria-hidden="true" />}
-                className="w-full sm:w-auto"
-              >
-                Message on WhatsApp
-              </Button>
-            ) : (
-              <Button to={heroActions.secondary.to} variant="secondary" size="lg" className="w-full sm:w-auto">
-                {heroActions.secondary.label}
-              </Button>
-            )}
+            {/*
+              The hero's conversation entry point. It used to branch on the
+              WhatsApp number itself and label itself differently in each
+              case; the shared control now makes that decision once, for
+              every entry point on the site, and keeps one label either way.
+            */}
+            <ConversationCta
+              context={generalConversation}
+              variant="secondary"
+              size="lg"
+              showChannelIcon
+              className="w-full sm:w-auto"
+            >
+              {heroActions.secondary.label}
+            </ConversationCta>
           </motion.div>
 
           <motion.ul

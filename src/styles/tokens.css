@@ -153,6 +153,69 @@
      the site allowed the largest one. */
   --shadow-2xl: 0 32px 80px -24px rgb(10 27 46 / 0.18), 0 2px 8px -2px rgb(10 27 46 / 0.06);
 
+  /* ── SUBJECT ACCENTS ─────────────────────────────────────────────────
+     Phase 3. Six accents, one per subject the site advises on, so a service
+     or a goal can be told in its own colour instead of every panel being the
+     same blue box.
+
+     They are a system, not a palette of moods:
+
+       · One arc. Blue → teal → violet → plum → bronze → steel. Every hue
+         sits within one sweep, all at comparable chroma and lightness, so
+         six subjects on one page read as a set rather than as a crayon box.
+       · The brand blue is a member of it, not an exception — `invest` IS
+         `brand/600`, which is what keeps the section inside the identity.
+       · Colour carries meaning across sections. A goal that leans on one
+         service wears that service's accent: "Grow wealth" is the same blue
+         as Mutual Funds & PMS, "Protect family" the same teal as Insurance,
+         "Buy a home" the same violet as Loans. Three goals have no single
+         service behind them and take their own place in the arc.
+       · Three instances each, because one value cannot do three jobs:
+           `*`       text and icons. ≥4.5:1 on bg, surface and sunken.
+           `*-fill`  a solid fill carrying white (light) / white (dark) text.
+           `*-tint`  a tinted surface that body text still reads on.
+       · §10.3's three-colour ceiling still holds per viewport: only the
+         active subject shows its accent at strength. Inactive ones are
+         neutral, which is also what makes the active state legible.
+
+     `--signal-*` is untouched and still means validation only. `learn`'s
+     bronze is a different value from `signal/caution` and never appears on
+     a control that could be read as a warning.
+
+     Measured ratios are recorded beside each value, per §10.3.             */
+  --accent-invest: 22 104 220; /* #1668DC — 4.84:1 bg · 5.19:1 surface · 4.51:1 sunken */
+  --accent-invest-fill: 22 104 220; /* white on it: 5.19:1 */
+  --accent-invest-tint: 231 240 253; /* #E7F0FD — accent on it 4.52:1 · ink 15.12:1 */
+
+  --accent-protect: 11 110 115; /* #0B6E73 — 5.61:1 bg · 6.01:1 surface · 5.22:1 sunken */
+  --accent-protect-fill: 11 110 115; /* white on it: 6.01:1 */
+  --accent-protect-tint: 224 242 242; /* #E0F2F2 — accent on it 5.20:1 · ink 15.01:1 */
+
+  --accent-borrow: 91 69 192; /* #5B45C0 — 6.41:1 bg · 6.87:1 surface · 5.97:1 sunken */
+  --accent-borrow-fill: 91 69 192; /* white on it: 6.87:1 */
+  --accent-borrow-tint: 238 235 251; /* #EEEBFB — accent on it 5.86:1 · ink 14.81:1 */
+
+  --accent-tax: 138 56 120; /* #8A3878 — 6.71:1 bg · 7.20:1 surface · 6.25:1 sunken */
+  --accent-tax-fill: 138 56 120; /* white on it: 7.20:1 */
+  --accent-tax-tint: 247 233 243; /* #F7E9F3 — accent on it 6.14:1 · ink 14.81:1 */
+
+  --accent-learn: 138 90 18; /* #8A5A12 — 5.52:1 bg · 5.91:1 surface · 5.14:1 sunken */
+  --accent-learn-fill: 138 90 18; /* white on it: 5.91:1 */
+  --accent-learn-tint: 246 238 220; /* #F6EEDC — accent on it 5.12:1 · ink 15.04:1 */
+
+  --accent-retire: 31 97 120; /* #1F6178 — 6.45:1 bg · 6.91:1 surface · 6.00:1 sunken */
+  --accent-retire-fill: 31 97 120; /* white on it: 6.91:1 */
+  --accent-retire-tint: 228 240 245; /* #E4F0F5 — accent on it 5.95:1 · ink 14.95:1 */
+
+  /* The active channel. A component never names an accent: it sets
+     `data-tone="<subject id>"` (see globals.css) and reads these three, so
+     one panel component tells nine different subjects and picking up the
+     theme swap is automatic. Defaults to brand so the channel is never
+     unresolved. */
+  --tone: var(--color-brand);
+  --tone-fill: var(--color-brand);
+  --tone-tint: var(--color-brand-subtle);
+
   /* ── AMBIENCE, VEIL AND SPINE ────────────────────────────────────────
      Three devices the redesign adds, each defined once so a section cannot
      invent its own version.
@@ -258,7 +321,16 @@
   --color-chart-3: 138 170 214; /* #8AAAD6 */
   --color-chart-4: 224 163 60;
   --color-chart-5: var(--on-ink-400);
-  --color-chart-grid: 255 255 255;
+  /*
+     §12 specifies dark grid lines as white at 8% alpha. This token is a
+     flattened instance of exactly that — white at 0.08 over the ink ground
+     — rather than the alpha pair, because the only consumer is the SIP
+     chart and Recharts writes the value straight into an SVG `stroke`
+     attribute, where an unapplied alpha channel is simply dropped. Held as
+     `255 255 255` it rendered as solid white gridlines across the chart on
+     dark, which is the loudest thing that has ever been on this page.
+  */
+  --color-chart-grid: 30 45 63;
   --color-chart-axis: var(--on-ink-400);
 
   /* Shadow barely reads on ink. `sm` becomes a hairline ring, and only the
@@ -271,6 +343,37 @@
      ambient shadow with a light top edge — the same construction the rest
      of the dark theme uses for elevation, at the stage's scale. */
   --shadow-2xl: 0 40px 90px -30px rgb(0 0 0 / 0.75), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+
+
+  /* ── SUBJECT ACCENTS — DARK ──────────────────────────────────────────
+     Independently tuned, not lightened algorithmically. The text instance
+     rises far enough to clear AA on ink; the fill instance stays mid-tone so
+     white still reads on it AND the fill itself clears 3:1 against the
+     ground it sits on (SC 1.4.11); the tint becomes a deep, desaturated
+     wash of the same hue rather than a pale one.                          */
+  --accent-invest: 107 165 245; /* #6BA5F5 — 6.89:1 bg · 5.80:1 surface · 5.34:1 raised */
+  --accent-invest-fill: 22 104 220; /* white 5.19:1 · 3.35:1 vs bg */
+  --accent-invest-tint: 19 48 79; /* #13304F — accent on it 5.33:1 · body 11.33:1 */
+
+  --accent-protect: 77 199 205; /* #4DC7CD — 8.57:1 bg · 7.22:1 surface · 6.65:1 raised */
+  --accent-protect-fill: 15 126 133; /* white 4.83:1 · 3.59:1 vs bg */
+  --accent-protect-tint: 12 47 56; /* #0C2F38 — accent on it 7.01:1 · body 11.97:1 */
+
+  --accent-borrow: 167 156 247; /* #A79CF7 — 7.23:1 bg · 6.08:1 surface · 5.61:1 raised */
+  --accent-borrow-fill: 107 85 214; /* white 5.39:1 · 3.22:1 vs bg */
+  --accent-borrow-tint: 34 30 74; /* #221E4A — accent on it 6.46:1 · body 13.09:1 */
+
+  --accent-tax: 238 156 221; /* #EE9CDD — 8.63:1 bg · 7.26:1 surface · 6.70:1 raised */
+  --accent-tax-fill: 163 71 144; /* white 5.44:1 · 3.19:1 vs bg */
+  --accent-tax-tint: 54 26 49; /* #361A31 — accent on it 7.74:1 · body 13.13:1 */
+
+  --accent-learn: 224 178 100; /* #E0B264 — 8.87:1 bg · 7.46:1 surface · 6.88:1 raised */
+  --accent-learn-fill: 156 106 27; /* white 4.68:1 · 3.71:1 vs bg */
+  --accent-learn-tint: 51 40 15; /* #33280F — accent on it 7.39:1 · body 12.20:1 */
+
+  --accent-retire: 121 192 223; /* #79C0DF — 8.62:1 bg · 7.25:1 surface · 6.68:1 raised */
+  --accent-retire-fill: 39 113 140; /* white 5.49:1 · 3.17:1 vs bg */
+  --accent-retire-tint: 18 46 60; /* #122E3C — accent on it 7.03:1 · body 11.95:1 */
 
   /* Ambience is the lighter brand instance on ink, and slightly stronger:
      the same alpha over a dark ground reads as roughly half as much light. */

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { MessageCircle, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { headerCta, headerNav, primaryNav } from '@/data/nav';
-import { contactWhatsApp } from '@/data/contact';
+import { generalConversation, resolveConversation } from '@/lib/contact/conversation';
+import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
 import { Logo } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
@@ -45,6 +46,10 @@ import { MenuTrigger } from './MenuTrigger';
  * animating element is exactly what has been opted out of.
  */
 export function Header() {
+  /* Resolved once per render: where a "talk to us" action goes, decided in
+     one place for the whole site (lib/contact/conversation.ts). */
+  const navConversation = resolveConversation(generalConversation, 'Message Earneazi');
+
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const engaged = useHasScrolled(16);
@@ -83,16 +88,24 @@ export function Header() {
           <div className="flex items-center justify-end gap-2 sm:gap-2.5">
             <ThemeToggle />
 
-            {contactWhatsApp && (
+            {/*
+              The navbar's conversation entry point (§25). It used to build
+              its own wa.me URL and write its own accessible name, which is
+              one of the three separate WhatsApp implementations Phase 5
+              consolidates. It now asks the shared resolver where this goes
+              and renders only when that destination is WhatsApp — a second
+              icon pointing at /contact would duplicate the button beside it.
+            */}
+            {navConversation.channel === 'whatsapp' && (
               <Button
-                href={`https://wa.me/${contactWhatsApp.replace(/\D/g, '')}`}
+                href={navConversation.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="icon"
-                aria-label="Message Earneazi on WhatsApp — opens WhatsApp"
+                aria-label={navConversation.ariaLabel}
                 className="hidden xl:inline-flex"
               >
-                <MessageCircle size={18} strokeWidth={1.5} aria-hidden="true" />
+                <WhatsAppGlyph size={18} />
               </Button>
             )}
 

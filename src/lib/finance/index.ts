@@ -1,6 +1,8 @@
 export {
+  SIP_DEFAULT_INPUT,
   SIP_INPUT_LIMITS,
   calculateSip,
+  clampSipValue,
   calculateSipYearlyBreakdown,
   monthlyRateFromAnnualPct,
   validateSipInput,

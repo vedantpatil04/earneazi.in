@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SIP_DEFAULT_INPUT,
   SIP_INPUT_LIMITS,
   calculateSip,
   calculateSipYearlyBreakdown,
+  clampSipValue,
   monthlyRateFromAnnualPct,
   validateSipInput,
 } from './calculateSip';
+import { formatRupees } from './format';
 
 /**
  * The engine's contract, pinned.
@@ -68,17 +71,23 @@ describe('calculateSip — edge cases', () => {
   });
 
   it('handles the longest allowed duration without overflowing', () => {
-    const result = calculateSip({ monthlyInvestment: 500000, annualReturnPct: 30, durationYears: 40 });
+    const result = calculateSip({
+      monthlyInvestment: SIP_INPUT_LIMITS.monthlyInvestment.max,
+      annualReturnPct: SIP_INPUT_LIMITS.annualReturnPct.max,
+      durationYears: SIP_INPUT_LIMITS.durationYears.max,
+    });
     expect(Number.isFinite(result.futureValue)).toBe(true);
     expect(result.futureValue).toBeGreaterThan(result.totalInvested);
   });
 
   it('handles the smallest and largest allowed monthly investments', () => {
-    const small = calculateSip({ monthlyInvestment: 500, annualReturnPct: 10, durationYears: 5 });
-    const large = calculateSip({ monthlyInvestment: 500000, annualReturnPct: 10, durationYears: 5 });
+    const { min, max } = SIP_INPUT_LIMITS.monthlyInvestment;
+    const small = calculateSip({ monthlyInvestment: min, annualReturnPct: 10, durationYears: 5 });
+    const large = calculateSip({ monthlyInvestment: max, annualReturnPct: 10, durationYears: 5 });
     expect(small.futureValue).toBeGreaterThan(0);
-    // The formula is linear in the contribution, so 1000x the input is 1000x the output.
-    expect(large.futureValue / small.futureValue).toBeCloseTo(1000, 6);
+    // The formula is linear in the contribution, so the ratio of the outputs
+    // is exactly the ratio of the inputs.
+    expect(large.futureValue / small.futureValue).toBeCloseTo(max / min, 6);
   });
 
   it('is deterministic across repeated calls', () => {
@@ -176,5 +185,102 @@ describe('calculateSipYearlyBreakdown', () => {
   it('shows no growth in any year at a zero return rate', () => {
     const rows = calculateSipYearlyBreakdown({ ...input, annualReturnPct: 0 });
     rows.forEach((row) => expect(row.estimatedGains).toBe(0));
+  });
+});
+
+/**
+ * Phase 4 additions: the bounds the UI is built on, the blur-clamp, and the
+ * formatted output the verification checklist names by value.
+ */
+describe('SIP_INPUT_LIMITS — the bounds the controls are built from', () => {
+  it('matches the locked Phase 0 §23.2 ranges', () => {
+    expect(SIP_INPUT_LIMITS.monthlyInvestment).toEqual({ min: 500, max: 1000000, step: 500 });
+    expect(SIP_INPUT_LIMITS.annualReturnPct.max).toBe(30);
+    expect(SIP_INPUT_LIMITS.annualReturnPct.step).toBe(0.5);
+    expect(SIP_INPUT_LIMITS.durationYears).toEqual({ min: 1, max: 40, step: 1 });
+  });
+
+  it('keeps zero reachable on the return slider, so the zero-rate branch is a real state', () => {
+    expect(SIP_INPUT_LIMITS.annualReturnPct.min).toBe(0);
+    expect(validateSipInput({ ...SIP_DEFAULT_INPUT, annualReturnPct: 0 }).ok).toBe(true);
+  });
+
+  it('opens on values that are themselves inside the limits', () => {
+    expect(validateSipInput(SIP_DEFAULT_INPUT).ok).toBe(true);
+  });
+});
+
+describe('clampSipValue', () => {
+  it('pulls a value back to the nearest bound', () => {
+    expect(clampSipValue('monthlyInvestment', 10)).toBe(500);
+    expect(clampSipValue('monthlyInvestment', 99999999)).toBe(1000000);
+    expect(clampSipValue('annualReturnPct', -4)).toBe(0);
+    expect(clampSipValue('annualReturnPct', 120)).toBe(30);
+    expect(clampSipValue('durationYears', 0)).toBe(1);
+    expect(clampSipValue('durationYears', 99)).toBe(40);
+  });
+
+  it('leaves a value already inside the range alone', () => {
+    expect(clampSipValue('monthlyInvestment', 7500)).toBe(7500);
+    expect(clampSipValue('annualReturnPct', 11.7)).toBe(11.7);
+  });
+
+  it('falls back to the default rather than to a bound for something that is not a number', () => {
+    // Landing on "₹500" after typing letters reads as a broken field; landing
+    // back on the starting value reads as a corrected one.
+    expect(clampSipValue('monthlyInvestment', Number.NaN)).toBe(SIP_DEFAULT_INPUT.monthlyInvestment);
+    expect(clampSipValue('durationYears', Number.POSITIVE_INFINITY)).toBe(SIP_DEFAULT_INPUT.durationYears);
+  });
+});
+
+describe('the figures the Phase 4 checklist names', () => {
+  it('renders ₹11,61,695 and ₹6,00,000 for ₹5,000 a month at 12% over 10 years', () => {
+    const result = calculateSip({ monthlyInvestment: 5000, annualReturnPct: 12, durationYears: 10 });
+    expect(formatRupees(result.futureValue)).toBe('₹11,61,695');
+    expect(formatRupees(result.totalInvested)).toBe('₹6,00,000');
+    expect(formatRupees(result.estimatedGains)).toBe('₹5,61,695');
+  });
+
+  it('groups in the Indian 2-2-3 pattern rather than in thousands', () => {
+    expect(formatRupees(1161695)).toBe('₹11,61,695');
+    expect(formatRupees(10000000)).toBe('₹1,00,00,000');
+  });
+
+  it('states the invested amount exactly at a zero return rate', () => {
+    const result = calculateSip({ monthlyInvestment: 5000, annualReturnPct: 0, durationYears: 10 });
+    expect(formatRupees(result.futureValue)).toBe('₹6,00,000');
+    expect(formatRupees(result.estimatedGains)).toBe('₹0');
+  });
+});
+
+describe('validation messages speak in the field\u2019s own units', () => {
+  it('states a rupee bound in rupees, not in raw digits', () => {
+    const tooBig = validateSipInput({ monthlyInvestment: 99999999, annualReturnPct: 12, durationYears: 10 });
+    expect(tooBig.ok).toBe(false);
+    if (!tooBig.ok) expect(tooBig.errors.monthlyInvestment).toBe('Monthly investment must be ₹10,00,000 or less.');
+
+    const tooSmall = validateSipInput({ monthlyInvestment: 12, annualReturnPct: 12, durationYears: 10 });
+    expect(tooSmall.ok).toBe(false);
+    if (!tooSmall.ok) expect(tooSmall.errors.monthlyInvestment).toBe('Monthly investment must be at least ₹500.');
+  });
+
+  it('states a percentage bound as a percentage and a tenure in years', () => {
+    const result = validateSipInput({ monthlyInvestment: 5000, annualReturnPct: 99, durationYears: 99 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.annualReturnPct).toBe('Assumed annual return must be 30% or less.');
+      expect(result.errors.durationYears).toBe('Investment period must be 40 years or less.');
+    }
+  });
+
+  it('keeps empty and zero as different states', () => {
+    const empty = validateSipInput({ monthlyInvestment: '', annualReturnPct: 12, durationYears: 10 });
+    const zero = validateSipInput({ monthlyInvestment: 0, annualReturnPct: 12, durationYears: 10 });
+    expect(empty.ok).toBe(false);
+    expect(zero.ok).toBe(false);
+    if (!empty.ok && !zero.ok) {
+      expect(empty.errors.monthlyInvestment).toBe('Monthly investment is required.');
+      expect(zero.errors.monthlyInvestment).not.toBe(empty.errors.monthlyInvestment);
+    }
   });
 });

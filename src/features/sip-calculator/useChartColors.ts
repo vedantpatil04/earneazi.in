@@ -26,11 +26,17 @@ function readToken(name: string, fallback: string): string {
 export function useChartColors(): ChartColors {
   const { mode } = useTheme();
 
+  /*
+    The fallbacks are the light-theme token values, used only where
+    `getComputedStyle` is unavailable. They are the current palette rather
+    than the retired one the first version of this file carried — a fallback
+    nobody checks is exactly where a dead colour survives a redesign.
+  */
   const read = (): ChartColors => ({
-    invested: readToken('--color-chart-1', 'rgb(31 111 82)'),
-    growth: readToken('--color-chart-2', 'rgb(140 101 38)'),
-    axis: readToken('--color-text-muted', 'rgb(102 113 103)'),
-    grid: readToken('--color-divider', 'rgb(224 224 212)'),
+    invested: readToken('--color-chart-1', 'rgb(22 104 220)'),
+    growth: readToken('--color-chart-2', 'rgb(23 114 69)'),
+    axis: readToken('--color-chart-axis', 'rgb(92 103 117)'),
+    grid: readToken('--color-chart-grid', 'rgb(212 217 224)'),
   });
 
   const [colors, setColors] = useState<ChartColors>(read);
