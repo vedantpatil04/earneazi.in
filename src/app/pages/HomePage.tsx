@@ -1,6 +1,6 @@
 import { PageShell } from '@/components/layout/PageShell';
-import { ServicesStrip } from '@/components/sections/home/ServicesStrip';
 import { Hero } from '@/components/sections/home/Hero';
+import { ServicesStrip } from '@/components/sections/home/ServicesStrip';
 import { GoalsGrid } from '@/components/sections/home/GoalsGrid';
 import { ServicesShowcase } from '@/components/sections/home/ServicesShowcase';
 import { WhyEarneazi } from '@/components/sections/home/WhyEarneazi';
@@ -16,8 +16,8 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  * grows into the whole page.
  *
  * The order is the argument the page is making:
- *   services strip  core offerings directly under header
  *   hero            what this firm is, in one cinematic line
+ *   services strip  an index of what's here, bridging hero into the page
  *   goals           your situation, before our products
  *   services        what we actually do about it
  *   trust           how we work
@@ -29,8 +29,8 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
 export default function HomePage() {
   return (
     <PageShell title="Financial planning, made simple">
-      <ServicesStrip />
       <Hero />
+      <ServicesStrip />
       <GoalsGrid />
       <ServicesShowcase />
       <WhyEarneazi />

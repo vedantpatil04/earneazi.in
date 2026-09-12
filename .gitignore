@@ -8,3 +8,5 @@ dist-ssr
 !.env.example
 *.tsbuildinfo
 .vercel
+reference1/
+.claude/

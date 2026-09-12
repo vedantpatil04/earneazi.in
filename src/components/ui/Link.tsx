@@ -44,7 +44,11 @@ const baseStyles =
 
 const variantStyles: Record<LinkVariant, string> = {
   inline: 'underline underline-offset-[3px] decoration-1 hover:decoration-2',
-  standalone: 'group no-underline hover:underline underline-offset-[6px] decoration-1',
+  /* A standalone link is a target in its own right rather than a word inside
+     a sentence, so WCAG 2.2's 24px minimum applies to it; inline links keep
+     the exemption and stay on the text baseline. 28px rather than exactly 24
+     so sub-pixel line-box rounding cannot leave it a fraction short. */
+  standalone: 'group min-h-7 no-underline hover:underline underline-offset-[6px] decoration-1',
 };
 
 const toneStyles = {

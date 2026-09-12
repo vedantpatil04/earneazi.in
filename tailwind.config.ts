@@ -108,6 +108,17 @@ export default {
         focus: color('focus-ring'),
         'focus-inner': color('focus-ring-inner'),
 
+        /* ── The three redesign devices (see tokens.css) ──────────────── */
+        /* A field behind a pinned stage, never a glow on a component. */
+        ambient: color('ambient'),
+        /* Translucent panel base — pair with `backdrop-blur`. */
+        veil: color('veil'),
+        /* The hairline threading the page, and its active instance. */
+        spine: {
+          DEFAULT: color('spine'),
+          active: color('spine-active'),
+        },
+
         chart: {
           1: color('chart-1'),
           2: color('chart-2'),
@@ -153,6 +164,39 @@ export default {
           'clamp(1.625rem, 1.43rem + 0.98vw, 2.25rem)',
           { lineHeight: '1.12', letterSpacing: '-0.015em', fontWeight: '650' },
         ],
+        /*
+          `sm` and `xs` complete the display ramp. They were referenced by
+          the pinned sections before they existed, which meant those
+          headings silently fell back to the browser's default h2/h3 — the
+          scale has to carry every step a section actually asks for.
+          `xs` is the smallest size still set as display rather than as a
+          title: it is what a heading inside a card uses.
+        */
+        'display-sm': [
+          'clamp(1.4375rem, 1.31rem + 0.63vw, 1.875rem)',
+          { lineHeight: '1.15', letterSpacing: '-0.015em', fontWeight: '650' },
+        ],
+        'display-xs': [
+          'clamp(1.25rem, 1.17rem + 0.39vw, 1.5rem)',
+          { lineHeight: '1.2', letterSpacing: '-0.012em', fontWeight: '650' },
+        ],
+        /*
+          The hero headline, and the only step above `display-xl`. It is
+          sized against the viewport rather than the container so it holds
+          its three-line break from 360px to 1920px — see the
+          `.hero-headline` rule, which remains the container-query version
+          used inside the narrative column.
+        */
+        'display-hero': [
+          /*
+            Tuned against the measure rather than picked: the headline has
+            to set in three lines from 1024px up, and the narrative column
+            is ~34rem there. A steeper ramp gave 64px at 1024, which bought
+            a fourth line and left "decision" stranded on its own.
+          */
+          'clamp(2.375rem, 1.04rem + 3.85vw, 4.5rem)',
+          { lineHeight: '1.04', letterSpacing: '-0.028em', fontWeight: '700' },
+        ],
         'title-lg': [
           'clamp(1.25rem, 1.17rem + 0.39vw, 1.5rem)',
           { lineHeight: '1.25', letterSpacing: '-0.01em', fontWeight: '600' },
@@ -160,6 +204,9 @@ export default {
         'title-sm': ['clamp(1.0625rem, 1.04rem + 0.12vw, 1.125rem)', { lineHeight: '1.35', fontWeight: '600' }],
         'body-lg': ['clamp(1.0625rem, 1.02rem + 0.2vw, 1.1875rem)', { lineHeight: '1.55' }],
         body: ['clamp(1rem, 0.98rem + 0.1vw, 1.0625rem)', { lineHeight: '1.55' }],
+        /* LEGACY alias — `body-base` was written in the pinned sections
+           before the scale was checked. Resolves to `body`. */
+        'body-base': ['clamp(1rem, 0.98rem + 0.1vw, 1.0625rem)', { lineHeight: '1.55' }],
         'body-sm': ['clamp(0.875rem, 0.86rem + 0.1vw, 0.9375rem)', { lineHeight: '1.5' }],
         /* Never below 12px, and it must pass AA — see §23.5. */
         legal: ['clamp(0.75rem, 0.74rem + 0.1vw, 0.8125rem)', { lineHeight: '1.5', letterSpacing: '0.01em' }],
@@ -230,9 +277,12 @@ export default {
       },
 
       boxShadow: {
+        xs: 'var(--shadow-xs)',
         sm: 'var(--shadow-sm)',
         md: 'var(--shadow-md)',
         lg: 'var(--shadow-lg)',
+        /* Reserved for the pinned stage's active card. Nothing else. */
+        '2xl': 'var(--shadow-2xl)',
       },
 
       /*
@@ -256,6 +306,7 @@ export default {
       },
 
       transitionDuration: {
+        micro: 'var(--dur-micro)',
         instant: 'var(--dur-instant)',
         fast: 'var(--dur-fast)',
         base: 'var(--dur-base)',

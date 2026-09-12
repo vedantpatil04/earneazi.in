@@ -144,9 +144,35 @@
 
   /* Shadows. Tinted with ink, never neutral black. Three steps only;
      `lg` is reserved for overlays and the mobile navigation sheet. */
+  --shadow-xs: 0 1px 1px 0 rgb(10 27 46 / 0.04);
   --shadow-sm: 0 1px 2px 0 rgb(10 27 46 / 0.06);
   --shadow-md: 0 4px 12px 0 rgb(10 27 46 / 0.08);
   --shadow-lg: 0 16px 40px -8px rgb(10 27 46 / 0.1);
+  /* The pinned stage's single elevation step. One shadow, not a stack of
+     glows — depth on paper is a cast shadow, and this is the only place on
+     the site allowed the largest one. */
+  --shadow-2xl: 0 32px 80px -24px rgb(10 27 46 / 0.18), 0 2px 8px -2px rgb(10 27 46 / 0.06);
+
+  /* ── AMBIENCE, VEIL AND SPINE ────────────────────────────────────────
+     Three devices the redesign adds, each defined once so a section cannot
+     invent its own version.
+
+     `ambient`  the one hue allowed behind a pinned stage, at the one
+                strength below. Not a glow on components — a field behind
+                them, so depth reads as light in a room rather than as
+                every card being lit from inside.
+     `veil`     the translucent panel base used by the header, the strip
+                and any surface that sits over photography. Paired with
+                backdrop-blur; the alpha is the token, not a per-component
+                guess.
+     `spine`    the hairline that threads the page and picks up brand
+                colour where the reader is. See §"The spine" in README. */
+  --color-ambient: var(--brand-600);
+  --ambient-strength: 0.07;
+  --color-veil: var(--neutral-000);
+  --veil-alpha: 0.82;
+  --color-spine: var(--neutral-300);
+  --color-spine-active: var(--color-brand);
 
   /* Display weight. The variable display face is set one step heavier on
      paper than on ink, because ink optically bolds type (Phase 0 §12). */
@@ -237,9 +263,23 @@
 
   /* Shadow barely reads on ink. `sm` becomes a hairline ring, and only the
      overlay step keeps a real ambient shadow. */
+  --shadow-xs: 0 0 0 1px rgb(255 255 255 / 0.04);
   --shadow-sm: 0 0 0 1px rgb(255 255 255 / 0.05);
   --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.45);
   --shadow-lg: 0 24px 60px -12px rgb(0 0 0 / 0.6);
+  /* On ink a cast shadow barely reads, so the largest step pairs a deep
+     ambient shadow with a light top edge — the same construction the rest
+     of the dark theme uses for elevation, at the stage's scale. */
+  --shadow-2xl: 0 40px 90px -30px rgb(0 0 0 / 0.75), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+
+  /* Ambience is the lighter brand instance on ink, and slightly stronger:
+     the same alpha over a dark ground reads as roughly half as much light. */
+  --color-ambient: var(--brand-500);
+  --ambient-strength: 0.11;
+  --color-veil: var(--ink-900);
+  --veil-alpha: 0.78;
+  --color-spine: var(--on-ink-divider);
+  --color-spine-active: var(--brand-400);
 
   --weight-display: 600;
   --weight-title: 550;
@@ -282,6 +322,10 @@
 
   /* Motion (Phase 0 §18.1). Mirrored in TypeScript by lib/motion/tokens.ts
      for Framer Motion — change both together. */
+  /* 90ms — the smallest step, for a mark that answers the cursor
+     immediately (an icon tinting, a chevron nudging). Below this a
+     transition reads as a jump rather than as a response. */
+  --dur-micro: 90ms;
   --dur-instant: 120ms; /* hover / focus feedback            */
   --dur-fast: 180ms; /* small transitions, theme surfaces */
   --dur-base: 240ms; /* panels, accordions, tabs          */
