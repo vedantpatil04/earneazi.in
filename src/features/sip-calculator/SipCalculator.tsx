@@ -146,7 +146,7 @@ export function SipCalculator() {
             header the same way every other pinned element on the site does.
           */}
           <div className="lg:sticky lg:top-[calc(var(--header-height)_+_1.5rem)]">
-            <div className="rounded-band border border-divider bg-surface p-5 shadow-sm sm:p-6 lg:p-7">
+            <div className="floating rounded-band border border-divider bg-surface p-5 sm:p-6 lg:p-7">
               <SipResults result={result} input={committed} isValid={isValid} />
             </div>
 
@@ -166,7 +166,7 @@ export function SipCalculator() {
           The gap between the two bands is the part that isn&rsquo;t your own money. It widens slowly and then quickly
           — that shape is the whole argument for starting early.
         </p>
-        <div className="mt-6 rounded-band border border-divider bg-surface p-4 sm:p-6">
+        <div className="raised mt-6 rounded-band border border-divider bg-surface p-4 sm:p-6">
           <SipChartPanel breakdown={breakdown} summary={chartSummary} />
         </div>
       </section>

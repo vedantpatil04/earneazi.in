@@ -6,31 +6,37 @@ import type { SipCalculatorInput } from '@/lib/finance';
 /**
  * The consultation form's contract.
  *
+ * Enhancement B keeps the form to what a first conversation needs: a name, a
+ * number to reach the person on, the service and the goal they have in mind
+ * (either can be "not sure"), and a line or two about what they are trying to
+ * do. Nothing sensitive — no income, no account details, no documents, and no
+ * email address, since the conversation continues on WhatsApp or by phone.
+ *
  * Options are derived from the service and goal data rather than listed
- * again here, so the form cannot offer something the firm does not do, and a
- * goal added in Phase 3 appears in this list without anyone remembering to
- * add it.
+ * again here, so the form cannot offer something the firm does not do.
  */
-export const consultationTopics = [
-  { value: 'not-sure', label: 'Not sure yet — let’s work it out', group: 'General' },
-  ...servicePillars.map((service) => ({ value: service.id, label: service.title, group: 'Services' })),
-  ...goalEntries.map((goal) => ({ value: goal.id, label: goal.title, group: 'Goals' })),
+export const NOT_SURE = 'not-sure';
+
+export const consultationServiceOptions = [
+  { value: NOT_SURE, label: 'Not sure yet' },
+  ...servicePillars.map((service) => ({ value: service.id, label: service.title })),
 ] as const;
 
-const topicValues = consultationTopics.map((topic) => topic.value) as [string, ...string[]];
+export const consultationGoalOptions = [
+  { value: NOT_SURE, label: 'Not sure yet' },
+  ...goalEntries.map((goal) => ({ value: goal.id, label: goal.title })),
+] as const;
 
-/** The option groups, in render order, so the `<select>` can use `<optgroup>`. */
-export const consultationTopicGroups = ['General', 'Services', 'Goals'] as const;
+const serviceValues = consultationServiceOptions.map((option) => option.value) as [string, ...string[]];
+const goalValues = consultationGoalOptions.map((option) => option.value) as [string, ...string[]];
 
 /**
  * Validation, written for the person filling the form in.
  *
  * Messages say what is wrong and what to do rather than restating the rule.
- * The one judgement call worth recording: phone is **required** here where
- * the old enquiry form made it optional. The flow this feeds is a WhatsApp
- * draft, and a WhatsApp conversation that cannot be continued by phone is a
- * conversation with a stranger's account. Email is optional instead, which
- * inverts the previous form — deliberately.
+ * Phone is required: the flow this feeds is a WhatsApp draft, and a
+ * conversation that cannot be continued by phone is a conversation with a
+ * stranger's account.
  */
 export const consultationSchema = z.object({
   name: z
@@ -47,14 +53,8 @@ export const consultationSchema = z.object({
        country code, with spaces, dashes and brackets. Rejecting a valid way
        of writing a real number is worse than accepting a slightly odd one. */
     .regex(/^[\d+][\d\s()-]{6,}$/, 'Please enter a phone number we can reach you on.'),
-  email: z
-    .string()
-    .trim()
-    .max(120, 'That email address is longer than we can accept.')
-    .email('That doesn’t look like an email address.')
-    .optional()
-    .or(z.literal('')),
-  topic: z.enum(topicValues, { errorMap: () => ({ message: 'Please choose what this is about.' }) }),
+  service: z.enum(serviceValues, { errorMap: () => ({ message: 'Please choose a service, or “Not sure yet”.' }) }),
+  goal: z.enum(goalValues, { errorMap: () => ({ message: 'Please choose a goal, or “Not sure yet”.' }) }),
   message: z
     .string()
     .trim()
@@ -67,14 +67,19 @@ export type ConsultationValues = z.infer<typeof consultationSchema>;
 export const consultationDefaults: ConsultationValues = {
   name: '',
   phone: '',
-  email: '',
-  topic: 'not-sure',
+  service: NOT_SURE,
+  goal: NOT_SURE,
   message: '',
 };
 
-/** True when the value names a service or a goal we actually publish. */
-export function isKnownTopic(value: string | null): value is string {
-  return value !== null && topicValues.includes(value);
+/** True when the value names a service we actually publish. */
+export function isKnownService(value: string | null): value is string {
+  return value !== null && value !== NOT_SURE && serviceValues.includes(value);
+}
+
+/** True when the value names a goal we actually publish. */
+export function isKnownGoal(value: string | null): value is string {
+  return value !== null && value !== NOT_SURE && goalValues.includes(value);
 }
 
 /**

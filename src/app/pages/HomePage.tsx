@@ -1,6 +1,5 @@
 import { PageShell } from '@/components/layout/PageShell';
 import { Hero } from '@/components/sections/home/Hero';
-import { ServicesStrip } from '@/components/sections/home/ServicesStrip';
 import { FinancialGoals } from '@/components/sections/home/FinancialGoals';
 import { ServicesShowcase } from '@/components/sections/home/ServicesShowcase';
 import { WhyEarneazi } from '@/components/sections/home/WhyEarneazi';
@@ -19,7 +18,6 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  *
  * The order is the argument the page is making:
  *   hero            what this firm is, in one cinematic line
- *   services strip  an index of what's here, bridging hero into the page
  *   goals           your situation, before our products — a planning brief,
  *                  not a menu
  *   services        what we actually do about it
@@ -30,12 +28,15 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  *   testimonials    what clients said (hidden until consented)
  *   SIP teaser      one concrete thing you can try right now
  *   consultation    the ask
+ *
+ * The index of what is here — the information ribbon — now sits directly
+ * under the navigation on every route (components/navigation/InfoRibbon.tsx,
+ * mounted in AppLayout), so it is not part of this page's own order.
  */
 export default function HomePage() {
   return (
     <PageShell title="Financial planning, made simple">
       <Hero />
-      <ServicesStrip />
       <FinancialGoals />
       <ServicesShowcase />
       <WhyEarneazi />

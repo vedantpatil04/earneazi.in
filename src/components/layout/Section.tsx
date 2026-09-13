@@ -69,6 +69,10 @@ export function Section({
   return (
     <Tag
       id={id}
+      /* Tells the dimensional type inside which construction to draw: a band
+         is ink in both themes, so a theme-keyed rule would draw the paper
+         extrusion on it in light mode (see DIMENSIONAL TYPE in globals.css). */
+      data-ground={background === 'band' ? 'ink' : undefined}
       className={cn(
         'relative',
         spacingStyles[spacing],

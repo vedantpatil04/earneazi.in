@@ -68,7 +68,7 @@ export function SipResults({ result, input, isValid }: SipResultsProps) {
 
       <div
         aria-hidden="true"
-        className="mt-6 flex h-2.5 w-full overflow-hidden rounded-pill border border-divider bg-surface-sunken"
+        className="inset-well mt-6 flex h-2.5 w-full overflow-hidden rounded-pill border border-divider bg-surface-sunken"
       >
         <span className="h-full bg-chart-1" style={{ width: `${investedShare}%` }} />
         {/* Hatched, so the segments are told apart by texture as well as by
@@ -144,7 +144,7 @@ function Figure({
   marker: 'square' | 'diamond';
 }) {
   return (
-    <div className="rounded-surface border border-divider bg-surface-sunken p-4">
+    <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-4">
       <dt className="flex items-center gap-2 text-body-sm text-ink-secondary">
         {/* Shape as well as colour, matching the chart legend and the split
             bar, so the three readings of the same two series agree. */}

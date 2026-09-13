@@ -1,109 +1,86 @@
-import { useId } from 'react';
+import { createElement, useRef } from 'react';
 import type { CSSProperties } from 'react';
-import { useTheme } from '@/hooks/useTheme';
+import { useInView } from 'framer-motion';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { cn } from '@/lib/utils/cn';
 
 /**
- * Dimensional type — the global infrastructure only (Phase 0 §9).
+ * Dimensional type — Phase 0 §9, built out in Enhancement A.
  *
- * The audit's answer to "explore 3D typography" is: use it exactly once, and
- * use it on the brand rather than on the content. This component is that
- * capability, built and constrained here so it exists in one place and
- * cannot spread. It is deliberately NOT applied anywhere yet — its intended
- * home is the oversized footer wordmark, which belongs to Phase 6.
+ * The brand's typographic depth, in exactly the places that carry the brand:
+ * the footer wordmark, the hero's closing phrase, the closing band's
+ * headline, and the founders' monograms. Never running text, numerals,
+ * legal copy, form labels, or anything a screen reader must read as data.
  *
  * How it is built
  * ───────────────
- * The text is one real, selectable, screen-reader-visible node. Depth comes
- * from `aria-hidden` duplicates stacked behind it along a fixed light
- * vector. There is no WebGL, no second font load, and no image.
+ * One real, selectable text node. The depth is a stepped extrusion drawn as
+ * `text-shadow` (the DIMENSIONAL TYPE block in globals.css) — no duplicate
+ * spans behind the text, so nothing is announced twice, the text wraps like
+ * any other text, and there is no second layout to keep in register. The
+ * previous version stacked `aria-hidden` copies, which could not wrap and
+ * doubled the DOM for every glyph.
  *
- * Two constructions, chosen by the GROUND rather than by the theme
- * ───────────────────────────────────────────────────────────────
- * On paper, depth is a stack of neutrals stepping down-right beneath the
- * face. On ink that construction disappears — a dark extrusion on a dark
- * ground is invisible — so §9 specifies a different build: a thin optical
- * edge-light on the top-left plus one cool shadow below, and no stack.
+ * Three faces
+ * ───────────
+ *   brand   the face in brand blue over deeper blues — the hero phrase.
+ *   ink     an ink face over a brand-blue echo — the wordmark, the band.
+ *   fill    a white face on a coloured fill — a monogram plate.
  *
- * Which applies depends on what the text is sitting on, not on which theme
- * is active: the footer band is ink in BOTH themes (§27), so keying this to
- * `[data-theme]` would render the wrong construction there in light mode.
- * `ground` defaults to the theme's own page background and is passed
- * explicitly wherever the element sits on a band.
+ * The construction follows the ground: in the dark theme, or inside a
+ * `data-ground="ink"` band (ink in both themes), the stack becomes brand
+ * blues with a light top-left edge, because a dark extrusion on a dark
+ * ground disappears. The face colour always comes from the caller, so the
+ * contrast pair is a token decision measured like every other.
  *
- * Other constraints this enforces rather than documents
- * ─────────────────────────────────────────────────────
- *   · Depth scales with viewport through `--depth-steps`: flat below 768px,
- *     3 layers at 768–1023px, 5 from 1024px up.
- *   · The face inherits its colour from the caller, so the contrast pair is
- *     a token decision like every other one on the site, and passes AA
- *     independently of the extrusion behind it.
- *   · Under reduced motion the full depth renders immediately, with no
- *     resolve animation.
- *
- * Never use this for running text, numerals, legal copy, form labels, or
- * anything a screen reader must read as data. It is for a wordmark.
+ * Motion
+ * ──────
+ * Flat until the text is on screen, then the depth resolves once over
+ * `dur-story`. If scripts never run it simply stays flat and legible. Under
+ * reduced motion it renders at full depth immediately, with no animation.
  */
 
-interface DimensionalTextProps {
-  children: string;
-  /** Rendered element. The text stays one node whatever this is. */
-  as?: 'span' | 'h1' | 'h2' | 'p' | 'div';
-  /**
-   * What the text sits on. Defaults to the current theme's page ground;
-   * pass `ink` explicitly on a band, which is ink in both themes.
-   */
-  ground?: 'paper' | 'ink';
-  className?: string;
-  /**
-   * Depth ceiling. The rendered depth is the lesser of this and what the
-   * viewport allows, so a caller can ask for less but never for more.
-   */
-  maxLayers?: 3 | 5;
-}
+type Face = 'brand' | 'ink' | 'fill';
 
-/** Maximum the layer stack can ever be, matching `--depth-steps` at ≥1024px. */
-const LAYER_CEILING = 5;
+interface DimensionalTextProps {
+  /** One string — the one real text node. */
+  children: string;
+  /** Rendered element. */
+  as?: 'span' | 'h1' | 'h2' | 'h3' | 'p' | 'div';
+  tone?: Face;
+  /** Grow the depth in when it first appears. Off renders full depth at once. */
+  resolve?: boolean;
+  /** Milliseconds before the depth starts to resolve — to land after an entrance. */
+  delay?: number;
+  className?: string;
+  id?: string;
+}
 
 export function DimensionalText({
   children,
-  as: Tag = 'span',
-  ground,
+  as = 'span',
+  tone = 'ink',
+  resolve = true,
+  delay = 0,
   className,
-  maxLayers = LAYER_CEILING,
+  id,
 }: DimensionalTextProps) {
-  const { mode } = useTheme();
+  const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const id = useId();
+  const inView = useInView(ref, { once: true, margin: '0px 0px -8% 0px' });
 
-  const resolvedGround = ground ?? (mode === 'dark' ? 'ink' : 'paper');
+  const state = !resolve || prefersReducedMotion ? 'static' : inView ? 'resolve' : 'pending';
 
-  // Layers render unconditionally and are revealed by CSS. Deciding the
-  // count in JavaScript would tie the visual to a resize listener and to
-  // hydration timing; `--depth-steps` already carries the breakpoint rule,
-  // so each layer hides itself when its index exceeds the current step.
-  const layers = Array.from({ length: Math.min(maxLayers, LAYER_CEILING) }, (_, index) => index + 1);
-
-  return (
-    <Tag
-      className={cn('relative isolate inline-block', className)}
-      data-ground={resolvedGround}
-      data-dimensional={prefersReducedMotion ? 'static' : 'resolve'}
-    >
-      {layers.map((layer) => (
-        <span
-          key={`${id}-${layer}`}
-          aria-hidden="true"
-          className="dimensional-layer pointer-events-none absolute inset-0 select-none"
-          style={{ '--layer': layer } as CSSProperties}
-        >
-          {children}
-        </span>
-      ))}
-
-      {/* The one real text node. Everything above is decoration behind it. */}
-      <span className="dimensional-face relative">{children}</span>
-    </Tag>
+  return createElement(
+    as,
+    {
+      ref,
+      id,
+      className: cn('text-extrude', className),
+      'data-extrude': tone,
+      'data-state': state,
+      style: state === 'resolve' && delay > 0 ? ({ '--extrude-delay': `${delay}ms` } as CSSProperties) : undefined,
+    },
+    children
   );
 }

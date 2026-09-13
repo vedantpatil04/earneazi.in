@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { RefObject } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { Calculator } from 'lucide-react';
+import { ArrowRight, Calculator, ChevronRight } from 'lucide-react';
 import type { NavItem } from '@/types/nav';
 import { headerCta } from '@/data/nav';
 import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
@@ -11,6 +11,7 @@ import { LogoMark } from '@/components/brand/Logo';
 import { ThemeControl } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { MenuTrigger } from './MenuTrigger';
+import { HeaderCredential } from './HeaderCredential';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useInert } from '@/hooks/useInert';
@@ -41,6 +42,16 @@ const HIGHLIGHT_PATH = '/sip-calculator';
  * Content order is the audit's, and it is an argument rather than a list:
  * where you can go, then the one tool worth trying, then how to reach a
  * person, then the controls.
+ *
+ * ── Enhancement A ────────────────────────────────────────────────────────
+ *
+ * The same depth language as the desktop bar. Each destination carries its
+ * glyph in a recessed well; the current route rises onto a raised surface
+ * with its glyph lit, so the state is a change of depth as well as of
+ * colour. The calculator row is a tinted card with a lit tile — distinct,
+ * but a step below the one lit button, which stays the consultation. The
+ * sheet has one soft brand light in its corner, the same device the ink
+ * band uses, so it reads as a room rather than a white page.
  *
  * The behaviour that has to be right for this to feel native rather than
  * like a div over the page:
@@ -133,7 +144,6 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose, triggerRef]);
 
-
   const destinations = items.filter((item) => item.path !== HIGHLIGHT_PATH);
   const highlight = items.find((item) => item.path === HIGHLIGHT_PATH);
 
@@ -162,21 +172,25 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
           transition={withMotionSafety(
             prefersReducedMotion,
             /* §16: 280ms, ease-out. Under reduced motion the sheet appears
-               with opacity only and no longer than 120ms — which is what
-               `withMotionSafety` collapsing to zero duration delivers. */
+               with no transition at all. */
             { duration: 0.28, ease: easing.out }
           )}
           className={cn(
-            'fixed inset-0 z-overlay flex flex-col overflow-y-auto overscroll-contain',
-            'bg-surface shadow-lg lg:hidden'
+            'fixed inset-0 z-overlay flex flex-col overflow-y-auto overflow-x-hidden overscroll-contain',
+            'bg-bg shadow-lg lg:hidden'
           )}
           style={{
             paddingTop: 'env(safe-area-inset-top)',
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
-          <div className="flex h-header shrink-0 items-center justify-between gap-4 px-gutter">
-            <LogoMark lockup="primary" className="text-ink" />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-pill bg-brand opacity-[0.12] blur-3xl"
+          />
+
+          <div className="relative flex h-header shrink-0 items-center justify-between gap-4 px-gutter">
+            <LogoMark lockup="primary" className="text-ink-display" />
             <MenuTrigger ref={closeButtonRef} open onClick={onClose} />
           </div>
 
@@ -193,51 +207,105 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
                 },
               },
             }}
-            className="flex flex-1 flex-col px-gutter pb-10 pt-2"
+            className="relative flex flex-1 flex-col px-gutter pb-10 pt-2"
           >
-            <ul className="flex flex-col">
-              {destinations.map((item) => (
-                <motion.li key={item.path} variants={navItemVariants}>
-                  <NavLink
-                    to={item.path}
-                    end={item.path === '/'}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex min-h-14 flex-col justify-center border-b border-divider py-2.5 pl-3 pr-2',
-                        'transition-colors motion-safe:duration-instant ease-out',
-                        isActive ? 'border-l-2 border-l-brand bg-selected/50 text-ink' : 'text-ink hover:bg-hovered'
-                      )
-                    }
-                  >
-                    <span className="font-display text-title-lg">{item.label}</span>
-                    {item.description && <span className="mt-0.5 text-body-sm text-ink-muted">{item.description}</span>}
-                  </NavLink>
-                </motion.li>
-              ))}
+            {/* Verified registrations only; renders nothing until evidenced. */}
+            <motion.div variants={navItemVariants} className="mb-3 empty:hidden">
+              <HeaderCredential className="inline-flex" />
+            </motion.div>
+
+            <ul className="flex flex-col gap-1">
+              {destinations.map((item) => {
+                const Glyph = item.icon;
+                return (
+                  <motion.li key={item.path} variants={navItemVariants}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === '/'}
+                      onClick={onClose}
+                      className={({ isActive }) =>
+                        cn(
+                          'group flex min-h-14 items-center gap-3.5 rounded-surface border px-3 py-2',
+                          'transition-[background-color,border-color] motion-safe:duration-instant ease-out',
+                          isActive ? 'raised border-divider bg-surface' : 'border-transparent hover:bg-hovered'
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {Glyph && (
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-surface border',
+                                isActive
+                                  ? 'lit border-brand-pressed/30 bg-brand text-on-brand'
+                                  : 'inset-well border-divider bg-surface-sunken text-ink-secondary'
+                              )}
+                            >
+                              <Glyph size={18} strokeWidth={isActive ? 2 : 1.75} />
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block font-display text-title-lg text-ink-display">{item.label}</span>
+                            {item.description && (
+                              <span className="mt-0.5 block truncate text-body-sm text-ink-muted">{item.description}</span>
+                            )}
+                          </span>
+                          <ChevronRight
+                            size={18}
+                            strokeWidth={1.75}
+                            aria-hidden="true"
+                            className={cn(
+                              'shrink-0 transition-transform motion-safe:duration-instant ease-out',
+                              isActive ? 'text-brand-ink' : 'text-ink-muted motion-safe:group-hover:translate-x-0.5'
+                            )}
+                          />
+                        </>
+                      )}
+                    </NavLink>
+                  </motion.li>
+                );
+              })}
             </ul>
 
             {/* The one tool a visitor can use before speaking to anyone, so
                 it is a distinct row rather than the fifth item in a list. */}
             {highlight && (
-              <motion.div variants={navItemVariants} className="mt-6">
+              <motion.div variants={navItemVariants} className="mt-5">
                 <NavLink
                   to={highlight.path}
                   onClick={onClose}
-                  className="flex min-h-14 items-center gap-3 rounded-surface border border-brand/25 bg-brand-subtle px-4 py-3 text-ink transition-colors motion-safe:duration-instant ease-out hover:border-brand/40"
+                  className={({ isActive }) =>
+                    cn(
+                      'edge-top group flex min-h-16 items-center gap-3.5 rounded-band border bg-brand-subtle px-3.5 py-3 text-ink',
+                      'transition-colors motion-safe:duration-instant ease-out hover:border-brand/45',
+                      isActive ? 'border-brand/50' : 'border-brand/20'
+                    )
+                  }
                 >
-                  <Calculator size={22} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-brand-ink" />
-                  <span className="min-w-0">
-                    <span className="block font-display text-title-sm">{highlight.label}</span>
+                  <span
+                    aria-hidden="true"
+                    className="lit inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-surface bg-brand text-on-brand"
+                  >
+                    <Calculator size={19} strokeWidth={1.75} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display text-title-sm text-ink-display">{highlight.label}</span>
                     {highlight.description && (
-                      <span className="block text-body-sm text-ink-muted">{highlight.description}</span>
+                      <span className="block text-body-sm text-ink-secondary">{highlight.description}</span>
                     )}
                   </span>
+                  <ArrowRight
+                    size={18}
+                    aria-hidden="true"
+                    className="shrink-0 text-brand-ink transition-transform motion-safe:duration-instant ease-out motion-safe:group-hover:translate-x-0.5"
+                  />
                 </NavLink>
               </motion.div>
             )}
 
-            <motion.div variants={navItemVariants} className="mt-6">
+            <motion.div variants={navItemVariants} className="mt-5">
               <Button to={headerCta.path} onClick={onClose} size="lg" className="w-full">
                 {headerCta.label}
               </Button>
@@ -247,7 +315,7 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
                 not routes. Appears only once the owner confirms a channel
                 in data/contact.ts (Phase 0 §25). */}
             {directChannels.length > 0 && (
-              <motion.ul variants={navItemVariants} className="mt-6 flex flex-col gap-2">
+              <motion.ul variants={navItemVariants} className="mt-5 flex flex-col gap-2">
                 {directChannels.map((channel) => {
                   const href = contactChannelHref(channel);
                   if (!href) return null;
@@ -258,7 +326,7 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
                         href={href}
                         {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         onClick={onClose}
-                        className="flex min-h-12 items-center justify-between gap-3 rounded-action border border-divider px-4 text-body text-ink transition-colors motion-safe:duration-instant ease-out hover:bg-hovered"
+                        className="raised flex min-h-12 items-center justify-between gap-3 rounded-surface border border-divider bg-surface px-4 text-body text-ink transition-colors motion-safe:duration-instant ease-out hover:border-border"
                       >
                         <span className="font-medium">{channel.label}</span>
                         <span className="text-ink-muted">{channel.value}</span>

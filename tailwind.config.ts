@@ -53,6 +53,8 @@ export default {
           DEFAULT: color('brand'),
           hover: color('brand-hover'),
           pressed: color('brand-pressed'),
+          /* Enhancement A — the hover step of a solid fill, AA-safe on ink. */
+          'fill-hover': color('brand-fill-hover'),
           subtle: color('brand-subtle'),
           ink: color('brand-on-surface'),
         },
@@ -179,19 +181,26 @@ export default {
         TYPE SCALE — Phase 0 §8.4, locked structure.
         Fluid via clamp() so there is no jump between breakpoints, and the
         scale is the only place a font size is decided.
+
+        Enhancement A: the display steps read their weight from
+        `--weight-display` instead of a fixed 650, so ink's optical bolding
+        is compensated per theme (700 on paper, 650 on ink), and tracking
+        tightens as size rises so a large heading holds together as a shape.
+        `display-lg` — the section opener — gains a step at the top so a
+        heading reads as the start of a chapter.
       */
       fontSize: {
         'display-xl': [
           'clamp(2.5rem, 1.62rem + 4.4vw, 4.75rem)',
-          { lineHeight: '1.05', letterSpacing: '-0.025em', fontWeight: '650' },
+          { lineHeight: '1.04', letterSpacing: '-0.03em', fontWeight: 'var(--weight-display)' },
         ],
         'display-lg': [
-          'clamp(2rem, 1.61rem + 1.95vw, 3.25rem)',
-          { lineHeight: '1.08', letterSpacing: '-0.02em', fontWeight: '650' },
+          'clamp(2.125rem, 1.6rem + 2.2vw, 3.5rem)',
+          { lineHeight: '1.06', letterSpacing: '-0.026em', fontWeight: 'var(--weight-display)' },
         ],
         'display-md': [
           'clamp(1.625rem, 1.43rem + 0.98vw, 2.25rem)',
-          { lineHeight: '1.12', letterSpacing: '-0.015em', fontWeight: '650' },
+          { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: 'var(--weight-display)' },
         ],
         /*
           `sm` and `xs` complete the display ramp. They were referenced by
@@ -203,11 +212,11 @@ export default {
         */
         'display-sm': [
           'clamp(1.4375rem, 1.31rem + 0.63vw, 1.875rem)',
-          { lineHeight: '1.15', letterSpacing: '-0.015em', fontWeight: '650' },
+          { lineHeight: '1.14', letterSpacing: '-0.018em', fontWeight: 'var(--weight-display)' },
         ],
         'display-xs': [
           'clamp(1.25rem, 1.17rem + 0.39vw, 1.5rem)',
-          { lineHeight: '1.2', letterSpacing: '-0.012em', fontWeight: '650' },
+          { lineHeight: '1.2', letterSpacing: '-0.014em', fontWeight: 'var(--weight-display)' },
         ],
         /*
           The hero headline, and the only step above `display-xl`. It is
@@ -241,8 +250,8 @@ export default {
         legal: ['clamp(0.75rem, 0.74rem + 0.1vw, 0.8125rem)', { lineHeight: '1.5', letterSpacing: '0.01em' }],
         /* Financial output. Always paired with the `tabular` utility. */
         'data-lg': [
-          'clamp(1.75rem, 1.4rem + 1.75vw, 2.75rem)',
-          { lineHeight: '1.05', letterSpacing: '-0.015em', fontWeight: '650' },
+          'clamp(1.875rem, 1.45rem + 1.9vw, 3rem)',
+          { lineHeight: '1.04', letterSpacing: '-0.025em', fontWeight: 'var(--weight-display)' },
         ],
         'data-md': ['clamp(1.25rem, 1.17rem + 0.39vw, 1.5rem)', { lineHeight: '1.2', fontWeight: '600' }],
 
@@ -314,6 +323,14 @@ export default {
         '2xl': 'var(--shadow-2xl)',
         /* Phase 6 — the social marks' edge, tuned per theme. */
         social: 'var(--shadow-social)',
+        /* Enhancement A — the depth language (tokens.css, DEPTH). Prefer the
+           `.raised` / `.floating` / `.inset-well` classes in globals.css,
+           which add the edge light; these exist where a plain shadow is the
+           whole job. */
+        raised: 'var(--shadow-raised)',
+        float: 'var(--shadow-float)',
+        'inset-well': 'var(--shadow-inset)',
+        header: 'var(--shadow-header)',
       },
 
       /*

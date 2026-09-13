@@ -2,12 +2,20 @@ import { motion } from 'framer-motion';
 import { teamMembers, hasVerifiedDetail, hasVerifiedPhoto } from '@/data/team';
 import type { TeamMember } from '@/types/content';
 import { RevealGroup } from '@/components/motion/Reveal';
+import { DimensionalText } from '@/components/brand/DimensionalText';
 import { settleVariants } from '@/lib/motion/variants';
 import { cn } from '@/lib/utils/cn';
 
 /**
- * The founders, as cards — shared by the homepage section and the About page
+ * The people, as cards — shared by the homepage section and the About page
  * so the two cannot drift into two different treatments of the same people.
+ *
+ * ── Founders and team — Enhancement B ───────────────────────────────────
+ *
+ * The founders come first, two to a row. The team (today, Aditya Math,
+ * Social Media Manager) follows under its own small label, in the same card
+ * at a smaller scale — the same system, one step down, so a team member is
+ * never presented as a founder and the founders keep their prominence.
  *
  * ── What it renders, and what it refuses to ─────────────────────────────
  *
@@ -20,16 +28,11 @@ import { cn } from '@/lib/utils/cn';
  *
  * ── The mark ────────────────────────────────────────────────────────────
  *
- * §24 opens on a defect: both founders rendered the monogram "AS", because
- * "Abhishek Sharma" and "Anil Souza" reduce to the same initials. The fix is
- * in the data — an authored monogram per person — and the design here makes
- * it a deliberate mark rather than an avatar fallback: a tall plate in the
- * founder's own accent from the Phase 3 tone channel, with the letters set
- * in the display face at the same radius and weight as every other surface
- * on the page. Two founders, two marks, two colours.
- *
- * When real photography arrives the plate becomes the photograph and
- * everything else stays exactly where it is.
+ * Without a photograph, each person has an authored monogram (data/team.ts)
+ * on a lit plate in their own accent from the Phase 3 tone channel, with the
+ * letters pressed into it by the dimensional type's `fill` face. When real
+ * photography arrives the plate becomes the photograph and everything else
+ * stays exactly where it is.
  *
  * ── Motion ──────────────────────────────────────────────────────────────
  *
@@ -39,37 +42,55 @@ import { cn } from '@/lib/utils/cn';
  * to the pointer, which is what makes it reachable from a keyboard.
  */
 export function FounderCards({ className }: { className?: string }) {
+  const founders = teamMembers.filter((member) => member.group === 'founder');
+  const team = teamMembers.filter((member) => member.group === 'team');
+
   return (
-    <RevealGroup
-      as="ul"
-      stagger={0.1}
-      className={cn('grid grid-cols-1 gap-5 sm:grid-cols-2', className)}
-    >
-      {teamMembers.map((member) => (
-        <motion.li key={member.id} variants={settleVariants}>
-          <FounderCard member={member} />
-        </motion.li>
-      ))}
-    </RevealGroup>
+    <div className={className}>
+      <RevealGroup as="ul" stagger={0.1} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        {founders.map((member) => (
+          <motion.li key={member.id} variants={settleVariants}>
+            <PersonCard member={member} />
+          </motion.li>
+        ))}
+      </RevealGroup>
+
+      {team.length > 0 && (
+        <div className="mt-8">
+          <p className="flex items-center gap-2 font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
+            <span aria-hidden="true" className="sphere h-2 w-2 rounded-pill" />
+            The team
+          </p>
+          <RevealGroup as="ul" stagger={0.1} className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {team.map((member) => (
+              <motion.li key={member.id} variants={settleVariants}>
+                <PersonCard member={member} compact />
+              </motion.li>
+            ))}
+          </RevealGroup>
+        </div>
+      )}
+    </div>
   );
 }
 
-function FounderCard({ member }: { member: TeamMember }) {
+function PersonCard({ member, compact = false }: { member: TeamMember; compact?: boolean }) {
   const showPhoto = hasVerifiedPhoto(member);
   const showDetail = hasVerifiedDetail(member);
+  const markSize = compact ? 'h-14 w-14 sm:h-16 sm:w-16' : 'h-20 w-20 sm:h-24 sm:w-24';
 
   return (
     <article
       data-tone={member.toneId}
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-band border border-divider bg-surface',
+        'raised group relative flex h-full flex-col overflow-hidden rounded-band border border-divider bg-surface',
         /* Border and surface only — no transform. The state answers focus as
            well as hover, so it exists for a keyboard too. */
         'transition-[border-color,background-color] duration-base ease-out',
         'hover:border-tone/40 focus-within:border-tone/60 focus-within:bg-tone-tint/40'
       )}
     >
-      <div className="flex items-start gap-5 p-5 sm:p-6">
+      <div className={cn('flex items-start', compact ? 'gap-4 p-4 sm:p-5' : 'gap-5 p-5 sm:p-6')}>
         {showPhoto ? (
           <img
             src={member.photoUrl ?? undefined}
@@ -78,23 +99,27 @@ function FounderCard({ member }: { member: TeamMember }) {
             height={96}
             loading="lazy"
             decoding="async"
-            className="h-20 w-20 shrink-0 rounded-surface object-cover sm:h-24 sm:w-24"
+            className={cn('shrink-0 rounded-surface object-cover', markSize)}
           />
         ) : (
           <span
             aria-hidden="true"
             className={cn(
-              'inline-flex h-20 w-20 shrink-0 items-center justify-center rounded-surface sm:h-24 sm:w-24',
-              'border border-tone/25 bg-tone-tint',
-              'font-display text-display-xs font-semibold tracking-[0.02em] text-tone'
+              'lit lit-tone relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-surface',
+              'bg-tone-fill font-display font-bold tracking-[0.02em] text-on-tone',
+              compact ? 'text-display-xs' : 'text-display-sm',
+              markSize
             )}
           >
-            {member.monogram}
+            <span className="texture-dots pointer-events-none absolute inset-0 opacity-60" />
+            <DimensionalText tone="fill" className="relative">
+              {member.monogram}
+            </DimensionalText>
           </span>
         )}
 
         <div className="min-w-0 pt-1">
-          <h3 className="text-display-xs text-ink-display">{member.name}</h3>
+          <h3 className={compact ? 'text-title-lg text-ink-display' : 'text-display-xs text-ink-display'}>{member.name}</h3>
           <p className="mt-1 text-body-sm font-semibold text-tone">{member.role}</p>
 
           {member.tenureVerified && member.tenure && (

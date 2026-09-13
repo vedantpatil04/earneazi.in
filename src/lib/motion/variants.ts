@@ -49,8 +49,10 @@ export const slideDownVariants: Variants = {
  */
 export const sheetVariants: Variants = {
   hidden: { opacity: 0, y: -16, clipPath: 'inset(0 0 100% 0)' },
-  visible: { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' },
-  exit: { opacity: 0, y: -12, clipPath: 'inset(0 0 100% 0)' },
+  visible: { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', pointerEvents: 'auto' },
+  /* Pointer events go the moment the sheet starts to leave, so a full-screen
+     layer that is fading out can never catch a tap meant for the page. */
+  exit: { opacity: 0, y: -12, clipPath: 'inset(0 0 100% 0)', pointerEvents: 'none' },
 };
 
 /** Tab panel swap — a short lateral drift so the change reads as different content. */

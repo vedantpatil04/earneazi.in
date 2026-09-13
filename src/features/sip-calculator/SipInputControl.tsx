@@ -98,7 +98,9 @@ export function SipInputControl({
         */}
         <div
           className={cn(
-            'inline-flex items-center rounded-action border bg-surface',
+            /* A recessed well (Enhancement A) that comes up to the surface
+               while it has focus — the exact figure is where you type. */
+            'inset-well inline-flex items-center rounded-action border bg-surface-sunken focus-within:bg-surface',
             'transition-[border-color,box-shadow] duration-instant ease-out',
             'focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus',
             errorMessage ? 'border-error' : 'border-border focus-within:border-brand'

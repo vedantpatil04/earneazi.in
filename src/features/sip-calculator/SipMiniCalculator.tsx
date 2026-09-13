@@ -60,8 +60,12 @@ export function SipMiniCalculator() {
   });
 
   return (
-    <div className="rounded-band border border-divider bg-surface p-5 shadow-md sm:p-6">
-      <p className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
+    /* Enhancement A: the panel floats above the section, the controls sit
+       in recessed wells, and the answer is its own tinted, lit well — so the
+       eye travels from what you set to what it adds up to. */
+    <div data-conversion-suppress="" className="floating rounded-band border border-divider bg-surface p-5 sm:p-6">
+      <p className="flex items-center gap-2 font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
+        <span aria-hidden="true" className="sphere h-2 w-2 rounded-pill" />
         Try it with your own numbers
       </p>
 
@@ -94,7 +98,7 @@ export function SipMiniCalculator() {
         />
       </div>
 
-      <div className="mt-6 border-t border-divider pt-5">
+      <div className="edge-top mt-6 rounded-surface border border-brand/15 bg-brand-subtle/60 p-4 sm:p-5">
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {`Projected value ${formatRupees(result.futureValue)} after ${formatYears(committed.durationYears)}: ` +
             `${formatRupees(result.totalInvested)} invested and ${formatRupees(result.estimatedGains)} estimated gains.`}

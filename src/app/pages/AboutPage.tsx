@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import { Icon } from '@/components/ui/Icon';
+import { IconTile } from '@/components/ui/IconTile';
 import { CtaBand } from '@/components/sections/shared/CtaBand';
 import { FounderCards } from '@/components/sections/shared/FounderCards';
 import { CredentialLedger } from '@/components/sections/shared/CredentialLedger';
@@ -53,11 +53,9 @@ export default function AboutPage() {
           >
             {aboutPrinciples.map((principle) => (
               <motion.div key={principle.id} variants={settleVariants} className="flex gap-5 border-b border-divider py-8">
-                <span className="mt-1 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-surface text-brass">
-                  <Icon icon={principle.icon} size={19} />
-                </span>
-                <div>
-                  <dt className="font-display text-h3 text-ink">{principle.title}</dt>
+                <IconTile icon={principle.icon} fill="brand" size="md" className="mt-0.5" />
+                <div className="min-w-0">
+                  <dt className="text-display-xs text-ink-display">{principle.title}</dt>
                   <dd className="mt-2.5 max-w-measure text-body text-ink-secondary">{principle.description}</dd>
                 </div>
               </motion.div>
@@ -85,11 +83,15 @@ export default function AboutPage() {
                 variants={settleVariants}
                 className="grid grid-cols-[3rem_1fr] gap-x-4 border-b border-divider py-7 sm:grid-cols-[4rem_1fr] sm:gap-x-6"
               >
-                <span className="font-mono text-body-lg font-medium font-numeric text-brass" aria-hidden="true">
+                <span
+                  className="inline-flex h-7 items-center gap-2 font-display text-body-lg font-semibold tabular text-brand-ink"
+                  aria-hidden="true"
+                >
+                  <span className="sphere h-2 w-2 rounded-pill" />
                   {String(index + 1).padStart(2, '0')}
                 </span>
                 <span>
-                  <h3 className="text-h3 text-ink">{step.title}</h3>
+                  <h3 className="text-display-xs text-ink-display">{step.title}</h3>
                   <p className="mt-2 max-w-measure text-body text-ink-secondary">{step.description}</p>
                 </span>
               </motion.li>

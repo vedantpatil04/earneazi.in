@@ -39,7 +39,20 @@ interface AnimatedRupeesProps {
  *
  * Both start on the correct final value at first paint, so the figure is
  * right before any animation runs and stays right if none ever does.
+ *
+ * ── The rupee sign — Enhancement A ─────────────────────────────────────
+ *
+ * On the visible copy the ₹ is set apart from the digits (`.currency-symbol`
+ * in globals.css): smaller, raised to the digits' cap height and a step
+ * quieter, the way a printed statement sets it, so the eye lands on the
+ * number. Only the digits tween. The screen-reader copy keeps the plain
+ * formatted string, so nothing about what is announced changes.
  */
+/** The rupee sign apart from the digits. Anything not led by ₹ (the "—" placeholder) stays whole. */
+function splitRupees(formatted: string): { symbol: string; digits: string } {
+  return formatted.startsWith('₹') ? { symbol: '₹', digits: formatted.slice(1) } : { symbol: '', digits: formatted };
+}
+
 export function AnimatedRupees({ value, className }: AnimatedRupeesProps) {
   const nodeRef = useRef<HTMLSpanElement>(null);
   /** The value currently painted, so a new tween starts from where the last one stopped. */
@@ -52,7 +65,7 @@ export function AnimatedRupees({ value, className }: AnimatedRupeesProps) {
 
     if (prefersReducedMotion || paintedRef.current === value) {
       paintedRef.current = value;
-      node.textContent = formatRupees(value);
+      node.textContent = splitRupees(formatRupees(value)).digits;
       return;
     }
 
@@ -61,7 +74,7 @@ export function AnimatedRupees({ value, className }: AnimatedRupeesProps) {
       ease: easing.out,
       onUpdate: (frame) => {
         paintedRef.current = frame;
-        node.textContent = formatRupees(frame);
+        node.textContent = splitRupees(formatRupees(frame)).digits;
       },
     });
 
@@ -73,10 +86,13 @@ export function AnimatedRupees({ value, className }: AnimatedRupeesProps) {
     return () => controls.stop();
   }, [value, prefersReducedMotion]);
 
+  const painted = splitRupees(formatRupees(value));
+
   return (
-    <span className={cn('tabular', className)}>
-      <span ref={nodeRef} aria-hidden="true">
-        {formatRupees(value)}
+    <span className={cn('tabular whitespace-nowrap', className)}>
+      <span aria-hidden="true">
+        {painted.symbol && <span className="currency-symbol">{painted.symbol}</span>}
+        <span ref={nodeRef}>{painted.digits}</span>
       </span>
       <span className="sr-only">{formatRupees(value)}</span>
     </span>

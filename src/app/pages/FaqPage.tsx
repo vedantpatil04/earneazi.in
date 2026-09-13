@@ -129,6 +129,7 @@ export default function FaqPage() {
   return (
     <PageShell title="Frequently asked questions">
       <PageHeader
+        size="content"
         title="Questions people ask us first."
         lead="Short, plain answers to the things that come up most often. If yours isn’t here, it’s worth a conversation."
       />
@@ -150,7 +151,7 @@ export default function FaqPage() {
                         /* A swipeable chip row on a phone — the site's one
                            designed horizontal scroller — and a ruled list on a
                            laptop. */
-                        'rail-x -mx-gutter gap-2 px-gutter pb-1',
+                        'rail-x max-lg:rail-fade -mx-gutter gap-2 px-gutter pb-1',
                         'lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-divider lg:px-0 lg:pb-0'
                       )}
                     >
@@ -166,8 +167,8 @@ export default function FaqPage() {
                                 'text-body-sm font-semibold transition-colors duration-fast ease-out',
                                 'lg:rounded-none lg:border-0 lg:border-b lg:border-divider lg:px-0 lg:py-2',
                                 active
-                                  ? 'border-transparent bg-brand text-on-brand lg:bg-transparent lg:text-brand-ink'
-                                  : 'border-divider bg-surface text-ink-secondary hover:text-ink lg:bg-transparent'
+                                  ? 'lit border-transparent bg-brand text-on-brand lg:bg-transparent lg:bg-none lg:text-brand-ink lg:shadow-none'
+                                  : 'edge-top border-divider bg-surface text-ink-secondary hover:text-ink lg:bg-transparent lg:shadow-none'
                               )}
                             >
                               <span>{group.category}</span>
@@ -177,16 +178,10 @@ export default function FaqPage() {
                         );
                       })}
                     </ul>
-                    {/* The chip row dissolves at its right edge on a phone, so a
-                        fourth topic reads as continuing rather than cut off. */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg to-transparent lg:hidden"
-                    />
                   </div>
                 </nav>
 
-                <div className="mt-8 hidden rounded-band border border-divider bg-surface p-5 lg:block">
+                <div className="raised mt-8 hidden rounded-band border border-divider bg-surface p-5 lg:block">
                   <p className="text-body-sm font-semibold text-ink">Question not here?</p>
                   <p className="mt-1.5 text-body-sm text-ink-secondary">
                     The useful ones rarely fit on a page like this.

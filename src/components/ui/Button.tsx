@@ -19,6 +19,24 @@ import { cn } from '@/lib/utils/cn';
  *     motion that encodes nothing.
  *   · One radius token (`radius-action`), shared with inputs and chips, so
  *     actions read as one family and surfaces read as another.
+ *
+ * ── Depth — Enhancement A ────────────────────────────────────────────────
+ *
+ * Buttons speak the site's depth language (globals.css) rather than being
+ * flat rectangles of colour:
+ *
+ *   primary     `.lit` — the brand fill lit from above, with a shadow in its
+ *               own blue, and one band of light (`.sheen`) that crosses it
+ *               when the pointer or focus arrives. Pressing puts the light
+ *               out and sinks the fill. The overlay keeps the label's band
+ *               at the fill's measured contrast (tokens.css, DEPTH), and the
+ *               hover step is `brand-fill-hover`, which stays ≥4.5:1 under
+ *               white in both themes.
+ *   secondary   `.raised` — a surface resting on the page, with an edge.
+ *   icon        the same raised surface, square.
+ *   on-band     `.lit-light` — a pale lit fill for dark and brand grounds.
+ *
+ * Still no travel: depth changes with state; position never does.
  */
 
 type ButtonVariant =
@@ -65,7 +83,7 @@ export type ButtonProps = ButtonAsButton | ButtonAsRouterLink | ButtonAsAnchor;
    on their own; `sm` is desktop-density only and is never the sole target
    on a touch surface. */
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'h-9 px-3.5 text-body-sm gap-1.5',
+  sm: 'h-9 px-4 text-body-sm gap-1.5',
   md: 'h-11 px-5 text-body gap-2',
   lg: 'h-13 px-7 text-body-lg gap-2.5',
 };
@@ -76,45 +94,50 @@ const iconSizeStyles: Record<ButtonSize, string> = {
   lg: 'h-13 w-13 p-0',
 };
 
-const variantStyles: Record<ButtonVariant, string> = {
-  /* Solid brand fill. White label clears 4.5:1 on the fill in both themes
-     (the fill stays brand-600 on dark — see tokens.css §12 note). */
-  primary: 'bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-pressed border border-transparent',
+const primaryStyles =
+  'lit sheen border border-brand-pressed/30 bg-brand text-on-brand hover:bg-brand-fill-hover active:bg-brand-pressed';
 
-  /* Outline in ink. Hover and press change the surface, not the position. */
-  secondary:
-    'border border-border bg-transparent text-ink hover:bg-hovered hover:border-border-strong active:bg-pressed',
+const secondaryStyles =
+  'raised border border-border/70 bg-surface text-ink hover:border-border-strong hover:text-ink-display active:bg-pressed active:shadow-none';
+
+const variantStyles: Record<ButtonVariant, string> = {
+  /* Solid brand fill, lit. White label clears 4.5:1 on the fill and on its
+     hover step in both themes (tokens.css). */
+  primary: primaryStyles,
+
+  /* A raised surface in ink. Hover and press change the edge and the
+     surface, not the position. */
+  secondary: secondaryStyles,
 
   /* Text-weight action. Gets an underline on hover so it is not identified
      by colour alone. */
   ghost: 'border border-transparent bg-transparent text-ink hover:bg-hovered active:bg-pressed',
 
   /* Square, icon-only. The caller must supply an accessible name. */
-  icon: 'border border-divider bg-transparent text-ink-secondary hover:border-border hover:bg-hovered hover:text-ink active:bg-pressed',
+  icon: 'raised border border-divider bg-surface text-ink-secondary hover:border-border hover:text-ink active:bg-pressed active:shadow-none',
 
   /* LEGACY → secondary. */
-  outline:
-    'border border-border bg-transparent text-ink hover:bg-hovered hover:border-border-strong active:bg-pressed',
+  outline: secondaryStyles,
 
   /* LEGACY → primary. The gold accent is retired (§6.3, §10.1). */
-  brass: 'bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-pressed border border-transparent',
+  brass: primaryStyles,
 
-  /* For use inside the ink band, where the brand fill sits too close to the
-     ground to read as a button. */
+  /* For the ink band and the brand-blue call-to-action surface, where the
+     brand fill sits too close to the ground to read as a button. */
   'on-band':
-    'bg-on-band text-band hover:bg-on-band/90 active:bg-on-band/80 border border-transparent focus-visible:shadow-[0_0_0_1px_rgb(var(--color-band))]',
+    'lit-light border border-transparent bg-on-band text-band hover:bg-on-band/95 active:bg-on-band/85 focus-visible:shadow-[0_0_0_1px_rgb(var(--color-band))]',
 };
 
 const baseStyles = [
   'inline-flex items-center justify-center rounded-action font-body font-semibold',
   'select-none whitespace-nowrap',
-  /* Colour and border only. No transform: §18.3 bans hover lift. */
-  'transition-[background-color,border-color,color] motion-safe:duration-instant ease-out',
+  /* Colour, border and depth only. No transform: §18.3 bans hover lift. */
+  'transition-[background-color,border-color,color,box-shadow] motion-safe:duration-instant ease-out',
   /* `aria-pressed` is how a toggle button expresses `selected`. */
   'aria-pressed:bg-selected aria-pressed:border-selected-border aria-pressed:text-brand-ink',
-  'disabled:bg-disabled disabled:text-ink-disabled disabled:border-disabled-border',
+  'disabled:bg-disabled disabled:bg-none disabled:text-ink-disabled disabled:border-disabled-border disabled:shadow-none',
   'disabled:cursor-not-allowed disabled:pointer-events-none',
-  'aria-disabled:bg-disabled aria-disabled:text-ink-disabled aria-disabled:pointer-events-none',
+  'aria-disabled:bg-disabled aria-disabled:bg-none aria-disabled:text-ink-disabled aria-disabled:shadow-none aria-disabled:pointer-events-none',
 ].join(' ');
 
 /* The trailing icon's 2px travel, applied from the button's hover/focus so

@@ -10,6 +10,7 @@ import { clipRevealVariants, riseVariants } from '@/lib/motion/variants';
 import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
 import { ConsultationForm } from '@/features/contact/ConsultationForm';
 import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
+import { buildConversationMessage, generalConversation, whatsAppHref } from '@/lib/contact/conversation';
 import type { ContactChannel } from '@/types/content';
 import { cn } from '@/lib/utils/cn';
 
@@ -72,6 +73,7 @@ export default function ContactPage() {
   return (
     <PageShell title="Get in touch">
       <PageHeader
+        size="content"
         title="Tell us what you’re working toward."
         lead="Where you are now, what you’d like to sort out. A sentence or two is enough to start with — the detail can come later."
       />
@@ -88,7 +90,9 @@ export default function ContactPage() {
                 send it yourself — so you can see exactly what leaves.
               </p>
 
-              <div className="mt-8">
+              {/* The form sits on its own raised surface (Enhancement A), so
+                  the page's one task reads as an object you work on. */}
+              <div className="raised mt-8 rounded-band border border-divider bg-surface p-5 sm:p-7">
                 <ConsultationForm />
               </div>
             </Reveal>
@@ -113,7 +117,7 @@ export default function ContactPage() {
               <Reveal variants={riseVariants} delay={0.1}>
                 <section
                   aria-labelledby="next-heading"
-                  className="rounded-band border border-divider bg-surface p-5 sm:p-6"
+                  className="raised rounded-band border border-divider bg-surface p-5 sm:p-6"
                 >
                   <h2 id="next-heading" className="text-display-xs text-ink-display">
                     What happens next
@@ -123,7 +127,7 @@ export default function ContactPage() {
                       <li key={step.title} className="flex gap-4">
                         <span
                           aria-hidden="true"
-                          className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand-subtle font-display text-legal font-semibold tabular text-brand-ink"
+                          className="lit mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand font-display text-legal font-semibold tabular text-on-brand"
                         >
                           {index + 1}
                         </span>
@@ -158,15 +162,20 @@ export default function ContactPage() {
  * what the working-hours row is.
  */
 function ChannelRow({ channel }: { channel: ContactChannel }) {
-  const href = contactChannelHref(channel);
   const isWhatsApp = channel.kind === 'whatsapp';
+  /* WhatsApp goes through the shared resolver (Enhancement C), so this row
+     opens with the same general draft as every other WhatsApp action on the
+     site rather than an empty chat. */
+  const href = isWhatsApp
+    ? whatsAppHref(buildConversationMessage(generalConversation))
+    : contactChannelHref(channel);
   /* WhatsApp and a maps URL both leave the site; `tel:` and `mailto:` hand
      off to another app on the same device and keep the current context. */
   const opensNewTab = isWhatsApp || channel.kind === 'office';
 
   const body = (
     <>
-      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-action bg-surface-sunken text-brand-ink">
+      <span className="inset-well inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-action bg-surface-sunken text-brand-ink">
         {isWhatsApp ? (
           <WhatsAppGlyph size={18} />
         ) : (

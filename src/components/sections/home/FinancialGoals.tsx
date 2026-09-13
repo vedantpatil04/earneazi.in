@@ -201,7 +201,7 @@ export function FinancialGoals() {
                 className={cn(
                   isDesktop
                     ? 'flex flex-col gap-1.5'
-                    : 'rail-x -mx-gutter gap-2 px-gutter pb-1'
+                    : 'rail-x rail-fade -mx-gutter gap-2 px-gutter pb-1'
                 )}
               >
                 {goalEntries.map((goal, index) => (
@@ -216,12 +216,6 @@ export function FinancialGoals() {
                 ))}
               </div>
 
-              {!isDesktop && (
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg to-transparent"
-                />
-              )}
             </div>
 
             {isDesktop && (
@@ -285,7 +279,7 @@ export function FinancialGoals() {
 
         {/* Retained from the previous build because it is still the most
             common answer people give: more than one of these applies. */}
-        <div className="mt-10 flex flex-col gap-4 rounded-band border border-divider bg-surface p-6 sm:flex-row sm:items-center sm:justify-between lg:mt-14 lg:p-7">
+        <div className="raised mt-10 flex flex-col gap-4 rounded-band border border-divider bg-surface p-6 sm:flex-row sm:items-center sm:justify-between lg:mt-14 lg:p-7">
           <div className="min-w-0">
             <h3 className="text-display-xs text-ink-display">Not sure which of these fits?</h3>
             <p className="mt-2 max-w-measure text-body-sm text-ink-secondary">
@@ -337,15 +331,15 @@ function GoalTab({ goal, index, isActive, isDesktop, onSelect }: GoalTabProps) {
           ? cn(
               'min-h-[3.5rem] rounded-surface border px-4 py-2',
               isActive
-                ? 'border-tone/35 bg-tone-tint text-ink-display'
+                ? 'raised border-tone/35 bg-tone-tint text-ink-display'
                 : 'border-transparent text-ink-secondary hover:bg-hovered hover:text-ink'
             )
           : cn(
               /* 44px minimum, and the chip is the whole target. */
               'min-h-11 shrink-0 rounded-pill border px-4',
               isActive
-                ? 'border-transparent bg-tone-fill text-on-tone'
-                : 'border-divider bg-surface text-ink-secondary'
+                ? 'lit lit-tone border-transparent bg-tone-fill text-on-tone'
+                : 'edge-top border-divider bg-surface text-ink-secondary'
             )
       )}
     >
@@ -370,7 +364,9 @@ function GoalTab({ goal, index, isActive, isDesktop, onSelect }: GoalTabProps) {
           isDesktop
             ? cn(
                 'h-9 w-9 rounded-action',
-                isActive ? 'bg-tone-fill text-on-tone' : 'bg-surface-sunken text-ink-muted group-hover:text-tone'
+                isActive
+                  ? 'lit lit-tone bg-tone-fill text-on-tone'
+                  : 'inset-well bg-surface-sunken text-ink-muted group-hover:text-tone'
               )
             : ''
         )}
@@ -423,7 +419,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
   const Glyph = goal.icon;
 
   return (
-    <article data-tone={goal.id} className="relative overflow-hidden rounded-band border border-tone/30 bg-surface">
+    <article data-tone={goal.id} className="raised relative overflow-hidden rounded-band border border-tone/30 bg-surface">
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-tone-fill" />
       <span
         aria-hidden="true"
@@ -433,7 +429,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
       <div className="relative p-6 sm:p-7 lg:p-8">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
+            <span className="lit lit-tone inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
               <Glyph size={22} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -448,13 +444,13 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
           {/* The two pieces of context, stated as labelled facts rather than
               as decorative badges — both are framing, neither is a figure. */}
           <dl className="flex shrink-0 flex-wrap gap-2">
-            <div className="rounded-pill border border-tone/25 bg-tone-tint px-3 py-1.5">
+            <div className="edge-top rounded-pill border border-tone/25 bg-tone-tint px-3 py-1.5">
               <dt className="font-display text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
                 Focus
               </dt>
               <dd className="text-legal font-semibold text-tone">{goal.focus}</dd>
             </div>
-            <div className="rounded-pill border border-divider bg-surface-sunken px-3 py-1.5">
+            <div className="inset-well rounded-pill border border-divider bg-surface-sunken px-3 py-1.5">
               <dt className="font-display text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
                 Horizon
               </dt>
@@ -467,7 +463,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
 
         <div className="mt-7 grid gap-7 md:grid-cols-12 md:gap-8">
           <div className="min-w-0 md:col-span-7">
-            <div className="rounded-surface border border-divider bg-surface-sunken p-4">
+            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-4">
               <h4 className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 Where this starts
               </h4>
@@ -486,7 +482,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
                 <li key={consideration} className="flex items-start gap-3">
                   <span
                     aria-hidden="true"
-                    className="mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-tone-tint font-display text-legal font-semibold tabular text-tone"
+                    className="lit lit-tone mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-tone-fill font-display text-legal font-semibold tabular text-on-tone"
                   >
                     {questionIndex + 1}
                   </span>
@@ -521,7 +517,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
                   key={serviceId}
                   to={service.href}
                   className={cn(
-                    'inline-flex min-h-11 items-center rounded-pill border border-divider bg-surface-sunken px-4',
+                    'raised inline-flex min-h-11 items-center rounded-pill border border-divider bg-surface px-4',
                     'text-legal font-semibold text-ink',
                     'transition-[background-color,border-color,color] duration-fast ease-out',
                     'hover:border-tone hover:bg-tone-tint hover:text-tone'

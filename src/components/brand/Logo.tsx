@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { brand } from '@/config/brand';
 import { cn } from '@/lib/utils/cn';
+import { DimensionalText } from './DimensionalText';
 
 /**
  * The Earneazi logo system — Phase 0 §7.
@@ -19,29 +20,44 @@ import { cn } from '@/lib/utils/cn';
  *              second navigation bar, and deliberately nowhere near a poster:
  *              the footer's content is the footer, not the wordmark.
  *   oversized  a display-scale lockup, reserved for a future brand band.
- *              Optically tracked, and the only lockup the dimensional
- *              treatment in §9 may be applied to.
  *
  * ── The typographic treatment ────────────────────────────────────────────
  *
  * Still provisional, and still one line from being replaced — but no longer
- * *arbitrary*. The lockup is now set the way the wordmark on Earneazi's own
- * live site is set: uppercase, heavy, and tracked open rather than tight.
- * That is a deliberate correction. Title case at a tight negative tracking
- * reads as a word someone typed into a heading; caps at a positive tracking
- * reads as a mark, which is what §7 is asking for and what the rest of the
- * page now has to sit underneath.
+ * *arbitrary*. The lockup is set the way the wordmark on Earneazi's own live
+ * site is set: uppercase, heavy, and tracked open rather than tight. Caps at
+ * a positive tracking read as a mark, which is what §7 asks for.
  *
  * Contrast: the wordmark is `currentColor`, so it inherits whatever text
  * colour its context sets and both themes are served by one asset with no
  * flash on switch. It is deliberately *not* a gradient — a gradient
  * wordmark cannot be given a contrast ratio, and the identity is the one
- * element on the page that must never be the thing that fails. The dot is
- * the single brand-coloured part.
+ * element on the page that must never be the thing that fails.
+ *
+ * ── Depth — Enhancement A ────────────────────────────────────────────────
+ *
+ * The dot is the brand's one recurring 3D object: a small lit sphere (the
+ * `.sphere` construction in globals.css), the same ball that reappears as
+ * the slider thumb, the journey's milestones and the ribbon's separators.
+ * Its silhouette is the brand blue, so it clears 3:1 as a graphic in both
+ * themes whatever the lighting does inside it.
+ *
+ * The wordmark's depth scales with its size, because §7 is right that an
+ * extrusion at small sizes is mush:
+ *
+ *   primary / compact / footer   a 1px letterpress edge — the smallest
+ *                                honest depth. The footer lockup stays in
+ *                                this group on purpose: Phase 6 settled the
+ *                                footer as a compact sign-off, not a brand
+ *                                poster, and data/footer.test.ts guards it.
+ *   oversized                    the ink face over a stepped brand-blue
+ *                                extrusion (DimensionalText), resolving once
+ *                                as it arrives — the display-scale lockup
+ *                                reserved for a future brand band.
  *
  * Interaction: the dot is the handle. On hover and focus it is the only
- * thing that moves — the wordmark itself never animates, because a moving
- * logotype reads as a widget rather than as an identity.
+ * thing that moves — the wordmark never animates, because a moving logotype
+ * reads as a widget rather than as an identity.
  *
  * PROVISIONAL: the approved vector has not been supplied. When
  * `brand.logo.vectorAsset` is set, that component renders instead and every
@@ -66,18 +82,19 @@ const lockupStyles: Record<LogoLockup, string> = {
   oversized: 'text-[clamp(2.75rem,8vw,6rem)] tracking-[0.045em] font-extrabold',
 };
 
+/* A sphere needs a little more diameter than a flat dot to read as round,
+   so each step is a touch larger than the flat dot it replaces. */
 const dotStyles: Record<LogoLockup, string> = {
-  primary: 'h-[0.3em] w-[0.3em]',
-  compact: 'h-[0.3em] w-[0.3em]',
+  primary: 'h-[0.32em] w-[0.32em]',
+  compact: 'h-[0.32em] w-[0.32em]',
   monogram: 'hidden',
-  footer: 'h-[0.26em] w-[0.26em]',
-  oversized: 'h-[0.17em] w-[0.17em]',
+  footer: 'h-[0.28em] w-[0.28em]',
+  oversized: 'h-[0.18em] w-[0.18em]',
 };
 
 /**
  * The wordmark itself. Split out so both the linked and unlinked versions
- * render exactly the same markup — they were previously two copies that had
- * already begun to drift.
+ * render exactly the same markup.
  *
  * The dot responds to hover and focus on the *nearest* `group/logo`, which
  * is the link when there is one and the mark itself when there isn't, so
@@ -88,7 +105,7 @@ function Wordmark({ lockup }: { lockup: LogoLockup }) {
     return (
       <span
         className={cn(
-          'inline-flex h-9 w-9 items-center justify-center rounded-action',
+          'lit inline-flex h-9 w-9 items-center justify-center rounded-action',
           'bg-brand text-on-brand font-display uppercase leading-none',
           'transition-transform duration-instant ease-out',
           'motion-safe:group-hover/logo:scale-[1.04] motion-safe:group-focus-visible/logo:scale-[1.04]',
@@ -100,18 +117,26 @@ function Wordmark({ lockup }: { lockup: LogoLockup }) {
     );
   }
 
+  const dimensional = lockup === 'oversized';
+
   return (
     <span className={cn('inline-flex items-baseline font-display uppercase leading-none', lockupStyles[lockup])}>
       {/* The trailing tracking on the last letter would otherwise push the
           dot away from the wordmark it belongs to. */}
-      <span className="-me-[0.1em]">{brand.logo.wordmark}</span>
+      {dimensional ? (
+        <DimensionalText tone="ink" className="-me-[0.1em]">
+          {brand.logo.wordmark}
+        </DimensionalText>
+      ) : (
+        <span className="logo-letterpress -me-[0.1em]">{brand.logo.wordmark}</span>
+      )}
       {brand.logo.hasDot && (
         <span
           aria-hidden="true"
           className={cn(
-            'ms-[0.22em] shrink-0 rounded-pill bg-brand',
+            'sphere ms-[0.22em] shrink-0 rounded-pill',
             'transition-transform duration-instant ease-out',
-            'motion-safe:group-hover/logo:scale-[1.35] motion-safe:group-focus-visible/logo:scale-[1.35]',
+            'motion-safe:group-hover/logo:scale-[1.3] motion-safe:group-focus-visible/logo:scale-[1.3]',
             dotStyles[lockup]
           )}
         />

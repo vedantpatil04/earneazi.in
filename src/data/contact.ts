@@ -4,8 +4,8 @@ import type { ContactChannel, SocialProfile } from '@/types/content';
  * ─────────────────────────────────────────────────────────────────────────
  * CONTACT DETAILS — CLIENT CONFIGURATION
  * ─────────────────────────────────────────────────────────────────────────
- * Every channel below ships unverified, because none of these details have
- * been confirmed. Nothing renders for a channel with `verified: false`, so
+ * A channel renders only once it has been confirmed. Nothing renders for a
+ * channel with `verified: false`, so
  * the site never shows a phone number or address that might not be real —
  * on a financial-services site that is a worse failure than showing nothing.
  *
@@ -17,17 +17,20 @@ import type { ContactChannel, SocialProfile } from '@/types/content';
  *
  * Formats expected:
  *   phone     display form, e.g. '+91 98765 43210'
- *   whatsapp  digits only including country code, e.g. '919876543210'
+ *   whatsapp  display form with the country code, e.g. '+91 98765 43210' —
+ *             every link built from it strips it to digits
  *   email     a plain address
  *   office    a short address; line breaks are fine, plus `mapsUrl`
  *   hours     e.g. 'Monday to Saturday, 10am – 7pm'
  *
- * The WhatsApp entry is the one §25 singles out: exactly one number must be
- * designated as the actively monitored line before it is used anywhere. The
- * old site used two different numbers in two different places, which is how
- * a monitored line stops being monitored. Until this one is confirmed, every
- * WhatsApp CTA on the site resolves to the contact route instead — see
- * lib/contact/conversation.ts, which is the only place that decision is made.
+ * The WhatsApp entry is the one §25 singles out: exactly one number is the
+ * actively monitored line. The Enhancement B brief confirmed it as
+ * +91 87921 51022, so every WhatsApp action on the site — the floating
+ * button, the contextual CTAs, the consultation form and the footer — opens
+ * WhatsApp with a pre-filled draft. lib/contact/conversation.ts is the only
+ * place that decision is made. The old site's second number is not used
+ * anywhere, and phone, email, office and hours stay unconfirmed and render
+ * nothing.
  */
 export const contactChannels: ContactChannel[] = [
   {
@@ -42,9 +45,10 @@ export const contactChannels: ContactChannel[] = [
     id: 'whatsapp',
     kind: 'whatsapp',
     label: 'WhatsApp',
-    value: null,
+    /* Confirmed in the Enhancement B brief as the monitored line. */
+    value: '+91 87921 51022',
     note: 'Send a question and pick the conversation up later.',
-    verified: false,
+    verified: true,
   },
   {
     id: 'email',
@@ -110,7 +114,7 @@ export const hasVerifiedContactChannel = verifiedContactChannels.length > 0;
  * (e.g. 'https://www.instagram.com/<handle>/') and `verified: true`.
  */
 export const socialProfiles: SocialProfile[] = [
-  { id: 'instagram', network: 'instagram', label: 'Instagram', handle: null, url: null, verified: false },
+  { id: 'instagram', network: 'instagram', label: 'Instagram', handle: 'earn_eazi', url: 'https://www.instagram.com/earn_eazi/', verified: true },
 ];
 
 /** Builds the `href` for a channel, or null where the channel isn't actionable (office, hours). */

@@ -41,6 +41,10 @@ interface ConversationCtaProps {
  * up-right arrow when the link leaves the site, a right arrow when it
  * navigates within it. That distinction is the one thing a person cannot
  * infer from the label, and it changes on its own when the number lands.
+ *
+ * Every instance carries `data-conversion-suppress` (Enhancement B), so the
+ * floating WhatsApp button steps aside while one of these passes beneath it
+ * — a floating control must never cover the action it duplicates.
  */
 export function ConversationCta({
   context,
@@ -64,6 +68,7 @@ export function ConversationCta({
   if (target.external) {
     return (
       <Button
+        data-conversion-suppress=""
         href={target.href}
         target="_blank"
         rel="noopener noreferrer"
@@ -82,6 +87,7 @@ export function ConversationCta({
 
   return (
     <Button
+      data-conversion-suppress=""
       to={target.href}
       aria-label={target.ariaLabel}
       variant={variant}

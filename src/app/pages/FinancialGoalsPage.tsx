@@ -1,11 +1,13 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
-import { Icon } from '@/components/ui/Icon';
+import { IconTile } from '@/components/ui/IconTile';
 import { CtaBand } from '@/components/sections/shared/CtaBand';
+import { ConversationCta } from '@/components/conversion/ConversationCta';
+import { goalConversation } from '@/lib/contact/conversation';
 import { Reveal } from '@/components/motion/Reveal';
 import { riseVariants } from '@/lib/motion/variants';
 import { goalEntries, getServiceById } from '@/data/services';
@@ -23,6 +25,16 @@ import type { GoalEntry } from '@/types/content';
  * it touches. Nothing here states an outcome — the considerations are
  * framing questions, which is honest content that needs no verified figures
  * behind it.
+ *
+ * ── Enhancement A ────────────────────────────────────────────────────────
+ *
+ * Each goal wears the accent it wears on the homepage — "Protect family"
+ * the teal of Insurance, "Buy a home" the violet of Loans — through the tone
+ * channel, so the colour of a goal means the same thing on both pages. The
+ * way in is a grid of raised tiles with each goal's lit glyph; each section
+ * carries the same lit tile, its questions set against the brand's sphere in
+ * the goal's accent, and the services it touches as raised chips. The
+ * content is unchanged.
  */
 export default function FinancialGoalsPage() {
   return (
@@ -34,15 +46,18 @@ export default function FinancialGoalsPage() {
         <nav aria-label="Goals on this page">
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {goalEntries.map((goal) => (
-              <li key={goal.id}>
+              <li key={goal.id} data-tone={goal.id}>
                 <a
                   href={`#${goal.id}`}
-                  className="group flex min-h-[4rem] items-center gap-3 rounded-md border border-divider px-4 py-3 transition-colors motion-safe:duration-200 hover:border-accent/45 hover:bg-accent/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="raised group flex min-h-[4rem] items-center gap-3.5 rounded-surface border border-divider bg-surface px-4 py-3 transition-colors duration-instant ease-out hover:border-tone/50"
                 >
-                  <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm bg-surface-2 text-ink-muted transition-colors motion-safe:duration-200 group-hover:bg-accent group-hover:text-on-accent">
-                    <Icon icon={goal.icon} size={18} />
-                  </span>
-                  <span className="font-display text-body-lg text-ink">{goal.title}</span>
+                  <IconTile icon={goal.icon} fill="tone-solid" size="sm" />
+                  <span className="min-w-0 flex-1 font-display text-title-sm text-ink-display">{goal.title}</span>
+                  <ArrowDown
+                    size={16}
+                    aria-hidden="true"
+                    className="shrink-0 text-tone transition-transform duration-instant ease-out motion-safe:group-hover:translate-y-0.5"
+                  />
                 </a>
               </li>
             ))}
@@ -78,35 +93,36 @@ function GoalSection({ goal }: { goal: GoalEntry }) {
     <Reveal variants={riseVariants}>
       <section
         id={goal.id}
+        data-tone={goal.id}
         aria-labelledby={headingId}
         className="scroll-mt-24 border-b border-divider py-12 md:scroll-mt-28 md:py-16"
       >
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <div className="flex items-center gap-4">
-              <span className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md border border-accent/30 bg-accent/[0.07] text-accent">
-                <Icon icon={goal.icon} size={22} />
-              </span>
-              <h2 id={headingId} className="text-h2 font-display-sharp">
+              <IconTile icon={goal.icon} fill="tone-solid" size="md" active />
+              <h2 id={headingId} className="text-display-md text-ink-display">
                 {goal.title}
               </h2>
             </div>
-            <p className="mt-5 max-w-measure text-lead text-ink-secondary">{goal.description}</p>
+            <p className="mt-5 max-w-measure text-body-lg text-ink-secondary">{goal.description}</p>
           </div>
 
           <div className="lg:col-span-7">
-            <p className="font-body text-label font-semibold text-ink">What we&rsquo;d work through</p>
-            <ul className="mt-3 flex flex-col gap-2.5">
+            <p className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-tone">
+              What we&rsquo;d work through
+            </p>
+            <ul className="mt-4 flex flex-col gap-3">
               {goal.considerations.map((consideration) => (
                 <li key={consideration} className="flex items-start gap-3 text-body text-ink-secondary">
-                  <span aria-hidden="true" className="mt-[0.6rem] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brass" />
+                  <span aria-hidden="true" className="sphere sphere-tone mt-[0.5em] h-2 w-2 shrink-0 rounded-pill" />
                   {consideration}
                 </li>
               ))}
             </ul>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="text-small text-ink-muted">Usually involves</span>
+              <span className="text-body-sm text-ink-muted">Usually involves</span>
               {goal.relatedServiceIds.map((serviceId) => {
                 const service = getServiceById(serviceId);
                 if (!service) return null;
@@ -115,7 +131,7 @@ function GoalSection({ goal }: { goal: GoalEntry }) {
                   <Link
                     key={serviceId}
                     to={service.href}
-                    className="inline-flex items-center rounded-full border border-divider px-3 py-1 text-small text-ink transition-colors motion-safe:duration-200 hover:border-brass hover:text-brass focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                    className="raised inline-flex min-h-11 items-center rounded-pill border border-divider bg-surface px-4 text-body-sm font-semibold text-ink transition-colors duration-instant ease-out hover:border-tone hover:text-tone"
                   >
                     {service.shortTitle}
                   </Link>
@@ -123,17 +139,14 @@ function GoalSection({ goal }: { goal: GoalEntry }) {
               })}
             </div>
 
-            <Link
-              to="/contact"
-              className="group mt-6 inline-flex items-center gap-2 text-body font-medium text-accent transition-colors motion-safe:duration-200 hover:text-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              Talk through this goal
-              <Icon
-                icon={ArrowRight}
-                size={18}
-                className="transition-transform motion-safe:duration-200 ease-signature group-hover:translate-x-1"
-              />
-            </Link>
+            {/* The same control, and the same goal-named WhatsApp draft, as
+                the goal brief on the homepage — this used to go to the contact
+                page without saying which goal it came from. */}
+            <div className="mt-7">
+              <ConversationCta context={goalConversation(goal.id)} variant="secondary" size="md" showChannelIcon>
+                Talk through this goal
+              </ConversationCta>
+            </div>
           </div>
         </div>
       </section>

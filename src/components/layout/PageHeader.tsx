@@ -12,6 +12,12 @@ interface PageHeaderProps {
   actions?: ReactNode;
   /** Extra content below the header inside the same padding block — used where a page's first interactive element belongs with its heading. */
   children?: ReactNode;
+  /**
+   * The container the header sits in. It must match the sections beneath it,
+   * so the title and the content start on the same edge (§13 rule 2): pages
+   * whose sections use the 1200px content column pass `content`.
+   */
+  size?: 'shell' | 'content';
   className?: string;
 }
 
@@ -27,7 +33,7 @@ interface PageHeaderProps {
  * eyebrow as a global device and §34 lists it among the templated tells
  * being retired.
  */
-export function PageHeader({ title, lead, actions, children, className }: PageHeaderProps) {
+export function PageHeader({ title, lead, actions, children, className, size = 'shell' }: PageHeaderProps) {
   return (
     <Section
       spacing={children ? 'lg' : 'md'}
@@ -36,7 +42,7 @@ export function PageHeader({ title, lead, actions, children, className }: PageHe
          Tailwind emits `pb-*` after `py-*`, so this reliably wins. */
       className={cn('pt-12 md:pt-16', !children && 'pb-2 md:pb-4', className)}
     >
-      <Container size="shell">
+      <Container size={size}>
         <Reveal variants={riseVariants} immediate>
           <h1 className="max-w-[20ch] text-display-lg text-ink-display">{title}</h1>
           {lead && <p className="mt-5 max-w-measure text-body-lg text-ink-secondary">{lead}</p>}

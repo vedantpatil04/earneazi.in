@@ -6,6 +6,7 @@ import { ScrollManager } from '@/components/navigation/ScrollManager';
 import { RouteAnnouncer } from '@/components/navigation/RouteAnnouncer';
 import { PageTransition } from '@/components/motion/PageTransition';
 import { FloatingContact } from '@/components/conversion/FloatingContact';
+import { InfoRibbon } from '@/components/navigation/InfoRibbon';
 
 /**
  * The application shell. Every route renders inside it, so the landmark
@@ -38,6 +39,11 @@ export default function AppLayout() {
       </a>
 
       <Header />
+
+      {/* The information ribbon (Enhancement A) — directly under the
+          navigation on every route, in the document flow so it scrolls away
+          with the page rather than riding along inside the sticky bar. */}
+      <InfoRibbon />
 
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         <Suspense fallback={<RouteFallback />}>

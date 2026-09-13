@@ -1,6 +1,6 @@
 import { formatPercent, formatRupees, formatYears } from '@/lib/finance';
 import type { SipCalculatorInput } from '@/lib/finance';
-import { getServiceById, goalEntries } from '@/data/services';
+import { getServiceById, getServiceProduct, goalEntries } from '@/data/services';
 import { contactWhatsApp } from '@/data/contact';
 
 /**
@@ -14,43 +14,35 @@ import { contactWhatsApp } from '@/data/contact';
  * WhatsApp message, builds a `wa.me` URL, or decides where a "talk to us"
  * action goes.
  *
- * Before this existed there were three separate implementations — the
- * header's icon button, the hero's secondary action, and the SIP
- * calculator's CTA — each assembling its own `wa.me` link, plus a fourth
- * hard-coded one with an unverified number sitting in dead code. That is the
- * "second WhatsApp implementation" the phase brief rules out, four times
- * over.
- *
  * ── The number ──────────────────────────────────────────────────────────
  *
- * There is still no WhatsApp number in this codebase. §25 requires exactly
- * one verified, actively monitored line to be designated before one is used,
- * and data/contact.ts ships every channel unverified. So:
+ * The number comes from data/contact.ts and nowhere else. It was confirmed
+ * in the Enhancement B brief as +91 87921 51022, so:
  *
- *   verified number present  → wa.me with the message pre-filled
+ *   verified number present  → wa.me with the message pre-filled as a draft
  *   not present              → the contact route, carrying the same context
- *                              in its query string so the consultation form
- *                              opens already knowing what this is about
+ *                              in its query string
  *
- * The fallback is not a degraded state. The same context reaches the same
- * form either way; only the transport changes. That is what lets the number
- * be switched on later without touching a single call site.
+ * WhatsApp always opens a draft. Nothing is sent until the person presses
+ * send in their own app, and nothing leaves the browser before that.
  *
  * ── What goes in a message ──────────────────────────────────────────────
  *
- * Enough to start the conversation, and nothing more. Names of services and
- * goals, the three SIP inputs (§23.3 approves those explicitly), and
- * whatever the person typed themselves. Never a computed projection: a
- * maturity figure this site produced from an assumption the user picked
- * would arrive in a chat log looking like something Earneazi had quoted.
+ * Enough to start the conversation, and nothing more. Names of services,
+ * products and goals, the three SIP inputs (§23.3 approves those
+ * explicitly), and whatever the person typed themselves. Never a computed
+ * projection: a maturity figure this site produced from an assumption the
+ * user picked would arrive in a chat log looking like something Earneazi had
+ * quoted.
  */
 
 export interface ConsultationDetails {
   name: string;
   phone: string;
-  email?: string;
-  /** A service id, a goal id, or 'not-sure'. */
-  topic: string;
+  /** A service id the person chose, if any. */
+  serviceId?: string;
+  /** A goal id the person chose, if any. */
+  goalId?: string;
   message: string;
   /** Carried through from a SIP entry point, when the person arrived from one. */
   sip?: SipCalculatorInput;
@@ -58,15 +50,15 @@ export interface ConsultationDetails {
 
 export type ConversationContext =
   | { kind: 'general' }
-  | { kind: 'service'; serviceId: string }
+  | { kind: 'service'; serviceId: string; productId?: string }
   | { kind: 'goal'; goalId: string }
   | { kind: 'sip-plan'; input: SipCalculatorInput }
   | { kind: 'consultation'; details: ConsultationDetails };
 
 export const generalConversation: ConversationContext = { kind: 'general' };
 
-export function serviceConversation(serviceId: string): ConversationContext {
-  return { kind: 'service', serviceId };
+export function serviceConversation(serviceId: string, productId?: string): ConversationContext {
+  return productId ? { kind: 'service', serviceId, productId } : { kind: 'service', serviceId };
 }
 
 export function goalConversation(goalId: string): ConversationContext {
@@ -99,12 +91,6 @@ function describeSip(input: SipCalculatorInput): string {
   );
 }
 
-/** What the person picked in the form's topic field, in words. */
-function topicName(topic: string): string | null {
-  if (topic === 'not-sure') return null;
-  return serviceName(topic) ?? goalName(topic);
-}
-
 /* ── The builder ────────────────────────────────────────────────────────── */
 
 const OPENING = 'Hi Earneazi';
@@ -120,9 +106,11 @@ export function buildConversationMessage(context: ConversationContext): string {
 
     case 'service': {
       const name = serviceName(context.serviceId);
-      return name
-        ? `${OPENING} — I was reading about ${name} on your website and I would like to understand whether it fits my situation. Could we talk it through?`
-        : buildConversationMessage(generalConversation);
+      if (!name) return buildConversationMessage(generalConversation);
+
+      const product = context.productId ? getServiceProduct(context.serviceId, context.productId) : undefined;
+      const subject = product ? `${product.name} (${name})` : name;
+      return `${OPENING} — I was reading about ${subject} on your website and I would like to understand whether it fits my situation. Could we talk it through?`;
     }
 
     case 'goal': {
@@ -140,8 +128,9 @@ export function buildConversationMessage(context: ConversationContext): string {
       );
 
     case 'consultation': {
-      const { name, phone, email, topic, message, sip } = context.details;
-      const subject = topicName(topic);
+      const { name, phone, serviceId, goalId, message, sip } = context.details;
+      const service = serviceId ? serviceName(serviceId) : null;
+      const goal = goalId ? goalName(goalId) : null;
 
       /*
         A labelled block rather than a paragraph. Whoever reads this is
@@ -153,8 +142,8 @@ export function buildConversationMessage(context: ConversationContext): string {
         '',
         `Name: ${name}`,
         `Phone: ${phone}`,
-        email ? `Email: ${email}` : null,
-        subject ? `About: ${subject}` : 'About: Not sure yet',
+        `Service: ${service ?? 'Not sure yet'}`,
+        `Financial goal: ${goal ?? 'Not sure yet'}`,
         sip ? `From the SIP calculator: ${describeSip(sip)}` : null,
         '',
         message,
@@ -185,12 +174,12 @@ export function buildConversationMessage(context: ConversationContext): string {
 export function contactRouteFor(context: ConversationContext): string {
   switch (context.kind) {
     case 'service':
-      return `/contact?topic=${encodeURIComponent(context.serviceId)}`;
+      return `/contact?service=${encodeURIComponent(context.serviceId)}`;
     case 'goal':
       return `/contact?goal=${encodeURIComponent(context.goalId)}`;
     case 'sip-plan': {
       const { monthlyInvestment, annualReturnPct, durationYears } = context.input;
-      return `/contact?topic=mutual-funds-pms&sip=${monthlyInvestment}-${annualReturnPct}-${durationYears}`;
+      return `/contact?service=mutual-funds-pms&sip=${monthlyInvestment}-${annualReturnPct}-${durationYears}`;
     }
     default:
       return '/contact';

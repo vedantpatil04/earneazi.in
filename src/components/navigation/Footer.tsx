@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import type { Variants } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, Clock, Instagram, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Clock, Mail, MapPin, Phone } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { brand } from '@/config/brand';
 import { Container } from '@/components/layout/Container';
@@ -12,6 +12,8 @@ import { ThemeControl } from '@/components/ui/ThemeToggle';
 import { DisclosureRow } from '@/components/ui/DisclosureRow';
 import { Reveal } from '@/components/motion/Reveal';
 import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
+import { HeaderCredential } from '@/components/navigation/HeaderCredential';
+import { InstagramGlyph } from '@/components/conversion/InstagramGlyph';
 import {
   buildConversationMessage,
   contactRouteFor,
@@ -95,6 +97,14 @@ import { cn } from '@/lib/utils/cn';
  * footer is reached — and hover feedback on links and marks. Nothing else
  * animates, and no link, contact item or legal line waits on an animation.
  *
+ * ── Enhancement A ────────────────────────────────────────────────────────
+ *
+ * The lockup stays the compact footer mark (with the brand's lit sphere for
+ * its dot), the social marks are lit squircles in their owners' published
+ * colours with Instagram's glyph drawn at its real proportions, and the call
+ * to action is the one lit brand surface in the footer, with a fine weave
+ * across its lower corner.
+ *
  * "Book a consultation" is the Phase 5 consultation route, and WhatsApp is
  * the Phase 5 resolver: this file never assembles a `wa.me` URL.
  */
@@ -155,8 +165,12 @@ export function Footer() {
             <div className="mt-3 md:mt-2.5 xl:mt-4">
               <p className="max-w-[36ch] text-body-sm text-ink-secondary">{statement}</p>
 
-              {/* Verified registrations only. With none, nothing renders —
-                  a pending credential still reads as a credential. */}
+              {/* The compact credential line, the same one the header
+                  carries, until the evidenced ledger rows below replace it. */}
+              {verifiedCredentials.length === 0 && <HeaderCredential className="mt-4 inline-flex" />}
+
+              {/* Verified registrations with their identifiers. With none,
+                  nothing renders — a pending credential still reads as one. */}
               {verifiedCredentials.length > 0 && (
                 <dl className="mt-4 flex flex-col gap-2">
                   {verifiedCredentials.map((credential) => (
@@ -237,8 +251,12 @@ export function Footer() {
             <section
               aria-labelledby="footer-cta-heading"
               style={onBrandFocus}
-              className="rounded-surface bg-brand p-4 text-on-brand shadow-md sm:p-5"
+              className="lit relative isolate overflow-hidden rounded-surface bg-brand p-4 text-on-brand sm:p-5"
             >
+              <span
+                aria-hidden="true"
+                className="texture-dots pointer-events-none absolute inset-0 -z-10 opacity-40 [mask-image:linear-gradient(135deg,transparent_35%,rgb(0_0_0))]"
+              />
               <h2 id="footer-cta-heading" className="font-display text-title-sm text-on-brand">
                 Start with a conversation
               </h2>
@@ -412,10 +430,12 @@ function ChannelItem({ channel }: { channel: ContactChannel }) {
 }
 
 /**
- * One brand-coloured mark in the social row: 44px, circular, white glyph on
- * the network's or the site's own colour. Hover brightens the mark and draws
- * a brand ring outside it; focus uses the site-wide ring. The per-theme
- * `shadow-social` edge keeps the shape legible on the dark ground.
+ * One brand-coloured mark in the social row: a 44px lit squircle — the shape
+ * both networks' own icons take — with a white glyph on the network's or the
+ * site's own colour (`.social-tile` in globals.css). Hover brightens the mark
+ * and draws a ring outside it, as an outline so the lit shadow stays; focus
+ * uses the site-wide ring. The per-theme `shadow-social` edge keeps the shape
+ * legible on the dark ground.
  *
  * `mode` decides the element, from data/footer.ts: a new-tab link, an
  * app hand-off, an in-site route, or — for a mark with no honest destination
@@ -423,11 +443,11 @@ function ChannelItem({ channel }: { channel: ContactChannel }) {
  */
 function SocialMark({ entry }: { entry: SocialEntry }) {
   const { tint, glyph } = SOCIAL_MARKS[entry.kind];
-  const base = cn('inline-flex h-11 w-11 items-center justify-center rounded-pill text-on-brand shadow-social', tint);
+  const base = cn('social-tile inline-flex h-11 w-11 items-center justify-center rounded-surface text-on-brand', tint);
   const interactive = cn(
     base,
-    'transition-[filter,box-shadow] duration-instant ease-out',
-    'hover:brightness-110 hover:ring-2 hover:ring-brand/40 hover:ring-offset-2 hover:ring-offset-footer'
+    'transition-[filter] duration-instant ease-out',
+    'hover:brightness-110 hover:outline hover:outline-2 hover:outline-offset-2 hover:outline-brand/40'
   );
 
   switch (entry.mode) {
@@ -459,26 +479,27 @@ function SocialMark({ entry }: { entry: SocialEntry }) {
 }
 
 /**
- * The colour and glyph for each mark. Instagram carries its own gradient and
- * WhatsApp its own green (both from tokens.css, tuned per theme so the white
+ * The colour and glyph for each mark. Instagram carries its published radial
+ * and WhatsApp its two published greens (tokens.css, measured so the white
  * glyph stays legible); Email and Phone take Earneazi's blue and the violet
  * from the Phase 3 accent arc, so the row reads as colourful but in-system.
+ * No other company's mark appears anywhere on the site.
  */
 const SOCIAL_MARKS: Record<SocialEntry['kind'], { tint: string; glyph: ReactNode }> = {
   instagram: {
     tint: 'social-tile-instagram',
-    glyph: <Instagram size={20} strokeWidth={2} aria-hidden="true" />,
+    glyph: <InstagramGlyph size={22} />,
   },
   whatsapp: {
-    tint: 'bg-social-whatsapp',
-    glyph: <WhatsAppGlyph size={21} />,
+    tint: 'social-tile-whatsapp',
+    glyph: <WhatsAppGlyph size={22} />,
   },
   email: {
-    tint: 'bg-social-email',
+    tint: 'social-tile-email',
     glyph: <Mail size={19} strokeWidth={2} aria-hidden="true" />,
   },
   phone: {
-    tint: 'bg-social-phone',
+    tint: 'social-tile-phone',
     glyph: <Phone size={18} strokeWidth={2} aria-hidden="true" />,
   },
 };

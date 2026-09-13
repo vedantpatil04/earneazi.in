@@ -27,8 +27,13 @@ import { WhatsAppGlyph } from './WhatsAppGlyph';
  * ── Colour ──────────────────────────────────────────────────────────────
  *
  * §25: the container belongs to Earneazi's system, and WhatsApp's green stays
- * confined to the glyph. So the pill is the brand blue with a white mark on
- * it. Green is not introduced into the palette and nothing else picks it up.
+ * confined to the glyph. So the pill is the brand blue — lit and floating,
+ * in the depth language every other primary action uses — and once a
+ * verified number exists the WhatsApp mark sits in a white disc in its own
+ * published green, which is what makes it recognisable at a glance. Until
+ * then the control goes to the consultation form and shows a plain chat
+ * glyph, because a WhatsApp mark on a link that does not open WhatsApp
+ * would be a promise the link does not keep.
  *
  * ── Suppression ─────────────────────────────────────────────────────────
  *
@@ -146,8 +151,8 @@ export function FloatingContact() {
   const controlClass = cn(
     'group pointer-events-auto flex items-center overflow-hidden rounded-pill',
     /* 56×56 at rest — comfortably over the 44px minimum on touch. */
-    'h-14 min-w-14 border border-brand-hover/40 bg-brand text-on-brand shadow-lg',
-    'transition-[background-color,padding] duration-base ease-out hover:bg-brand-hover',
+    'lit lit-float sheen h-14 min-w-14 border border-on-brand/15 bg-brand text-on-brand',
+    'transition-[background-color,padding] duration-base ease-out hover:bg-brand-fill-hover',
     /* Desktop expands to a labelled pill on hover and on focus. Below `lg` it
        stays an icon: there is no hover on a thumb, and a pill wide enough to
        read would cover the content beside it. */
@@ -157,7 +162,13 @@ export function FloatingContact() {
   const controlBody = (
     <>
       <span className="flex h-14 w-14 shrink-0 items-center justify-center">
-        {isWhatsApp ? <WhatsAppGlyph size={26} /> : <MessageCircle size={24} strokeWidth={1.75} aria-hidden="true" />}
+        {isWhatsApp ? (
+          <span className="flex h-9 w-9 items-center justify-center rounded-pill bg-on-brand text-social-whatsapp shadow-xs">
+            <WhatsAppGlyph size={21} />
+          </span>
+        ) : (
+          <MessageCircle size={24} strokeWidth={1.75} aria-hidden="true" />
+        )}
       </span>
 
       {/*

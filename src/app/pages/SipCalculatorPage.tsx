@@ -31,6 +31,7 @@ export default function SipCalculatorPage() {
   return (
     <PageShell title="SIP calculator">
       <PageHeader
+        size="content"
         title="See what investing a fixed amount every month could add up to."
         lead="Set the amount, the return you want to assume and how long you’d stay invested. The projection updates as you go."
       />

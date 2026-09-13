@@ -2,12 +2,18 @@ import type { TeamMember } from '@/types/content';
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- * THE FOUNDERS — CLIENT CONFIGURATION
+ * THE TEAM — CLIENT CONFIGURATION
  * ─────────────────────────────────────────────────────────────────────────
  *
  * Names and roles are as published on the current live site; the open
  * verification item there is the photography and the biography, not the
  * names (Phase 0 §24 / Blueprint D.5).
+ *
+ * Aditya Math is added as Social Media Manager (Enhancement B brief) — a
+ * team member, not a founder. `group` keeps that distinction: the footer's
+ * attribution names founders only, and the team card sits beside the
+ * founders rather than among them. The name and the role are the only facts
+ * supplied, so they are the only facts shown.
  *
  * Everything else below ships empty on purpose. Photography, tenure,
  * responsibility and bio are all [VERIFY], and the UI renders each one only
@@ -45,7 +51,8 @@ export const teamMembers: TeamMember[] = [
     id: 'founder-ceo',
     name: 'Abhishek Sharma',
     role: 'Founder & CEO',
-    monogram: 'AB',
+    group: 'founder',
+    monogram: 'AS',
     /* Reuses the Phase 3 subject-accent channel, so the two founders are
        told apart by colour as well as by mark, inside the existing palette. */
     toneId: 'mutual-funds-pms',
@@ -63,8 +70,26 @@ export const teamMembers: TeamMember[] = [
     id: 'co-founder-coo',
     name: 'Anil Souza',
     role: 'Co-Founder & COO',
-    monogram: 'AN',
+    group: 'founder',
+    monogram: 'AS',
     toneId: 'insurance',
+    photoUrl: null,
+    photoVerified: false,
+    bio: '',
+    bioVerified: false,
+    tenure: null,
+    tenureVerified: false,
+    responsibility: null,
+    focus: [],
+    credentialId: null,
+  },
+  {
+    id: 'social-media-manager',
+    name: 'Aditya Math',
+    role: 'Social Media Manager',
+    group: 'team',
+    monogram: 'AM',
+    toneId: 'loans',
     photoUrl: null,
     photoVerified: false,
     bio: '',

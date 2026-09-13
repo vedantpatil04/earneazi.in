@@ -11,8 +11,9 @@
   GLOBAL BASE LAYER
   ═════════════════════════════════════════════════════════════════════════
   Values live in tokens.css. This file only applies them: document defaults,
-  the typographic system, the focus system, and the reduced-motion safety
-  net. Nothing here introduces a literal colour, size or duration.
+  the typographic system, the focus system, the depth language, and the
+  reduced-motion safety net. Nothing here introduces a literal colour, size
+  or duration that is not already a token.
 */
 
 @layer base {
@@ -199,98 +200,374 @@
   }
 
   /*
-    INSTAGRAM MARK — Phase 6.
+    ═══════════════════════════════════════════════════════════════════════
+    THE DEPTH LANGUAGE — Enhancement A
+    ═══════════════════════════════════════════════════════════════════════
 
-    The one gradient fill outside a chart, and a deliberate exception to
-    §10.3: it is Instagram's own brand treatment on a 44px mark, not a
-    surface, and recognition is the whole job of that mark. The angle and
-    stops put the white glyph over the pink-to-purple range, where it
-    measures 4.48:1 and above. Colours live in tokens.css.
+    Five constructions, used everywhere, so the site has one idea of what
+    "dimensional" means rather than one per section:
+
+      .raised      a surface resting on the page — edge light plus the
+                   raised shadow. Panels, the active nav pill, cards.
+      .floating    held above the page — the same edge, the float shadow.
+      .inset-well  a recessed well — the nav track, fields, switch tracks.
+      .lit         a solid fill lit from above: highlight at the top edge,
+                   a shade along the base, and a shadow in the fill's own
+                   colour. Buttons, active tiles, chips, the FAB.
+      .sphere      a small lit ball — the logo's dot, milestone beads, the
+                   slider thumb. The brand's one recurring 3D object.
+
+    All five read tokens.css → DEPTH, which is tuned per theme, so none of
+    them needs a dark variant here. They set `box-shadow` (and `.lit` sets
+    `background-image`), so a Tailwind `shadow-*` utility on the same
+    element will replace them — by design, since utilities are the escape
+    hatch for a state such as `disabled:shadow-none`.
   */
-  .social-tile-instagram {
-    background-image: linear-gradient(
-      45deg,
-      rgb(var(--social-instagram-a)) 0%,
-      rgb(var(--social-instagram-b)) 38%,
-      rgb(var(--social-instagram-c)) 72%,
-      rgb(var(--social-instagram-d)) 100%
-    );
+  .edge-top {
+    box-shadow: inset 0 1px 0 0 rgb(var(--edge-light) / var(--edge-light-alpha));
+  }
+
+  .raised {
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--edge-light) / var(--edge-light-alpha)),
+      var(--shadow-raised);
+  }
+
+  .floating {
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--edge-light) / var(--edge-light-alpha)),
+      var(--shadow-float);
+  }
+
+  .inset-well {
+    box-shadow: var(--shadow-inset);
+  }
+
+  .lit {
+    --lit-color: var(--color-brand);
+    background-image: var(--lit-overlay);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.14),
+      0 1px 2px 0 rgb(var(--lit-color) / calc(var(--lit-glow) * 0.6)),
+      0 8px 20px -10px rgb(var(--lit-color) / var(--lit-glow));
+  }
+
+  /* A lit fill in the subject accent. Must follow `.lit` in source order. */
+  .lit-tone {
+    --lit-color: var(--tone-fill);
+  }
+
+  /* A lit fill that also floats — the persistent contact control. */
+  .lit.lit-float {
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.14),
+      0 10px 24px -8px rgb(var(--lit-color) / var(--lit-glow)),
+      var(--shadow-float);
+  }
+
+  /* Pressed: the light goes out and the fill sinks. Feedback, not travel.
+     Scoped to links and buttons because browsers match :active on every
+     ancestor of the pressed element — a lit card would otherwise go dark
+     whenever a button inside it was pressed. */
+  :is(a, button).lit:active {
+    background-image: none;
+    box-shadow: inset 0 2px 5px 0 rgb(0 0 0 / 0.28);
+  }
+
+  /* A pale fill lit from above, for light controls on a dark or brand
+     ground — the band's button, the footer's call to action. */
+  .lit-light {
+    background-image: linear-gradient(180deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 55%);
+    box-shadow:
+      inset 0 -1px 0 0 rgb(10 27 46 / 0.12),
+      0 1px 2px 0 rgb(0 0 0 / 0.2),
+      0 10px 24px -12px rgb(0 0 0 / 0.55);
+  }
+
+  .sphere {
+    background:
+      radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.9) 0, rgb(255 255 255 / 0.9) 6%, rgb(255 255 255 / 0.32) 18%, rgb(255 255 255 / 0) 44%),
+      radial-gradient(circle at 62% 74%, rgb(0 0 0 / 0) 36%, rgb(0 0 0 / 0.3) 100%),
+      rgb(var(--sphere-color));
+    box-shadow: 0 1px 2px 0 rgb(var(--sphere-color) / 0.45);
+  }
+
+  .sphere-tone {
+    --sphere-color: var(--tone-fill);
+  }
+
+  /* Over photography only: the veil, a blur, the edge and the float shadow. */
+  .glass {
+    background-color: rgb(var(--color-veil) / var(--veil-alpha));
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--edge-light) / var(--edge-light-alpha)),
+      var(--shadow-float);
+  }
+
+  /*
+    THE SHEEN — one band of light that crosses a primary action once when
+    the pointer or focus arrives. It sits under the label (z-index -1 inside
+    an isolated control), so it lights the fill rather than washing out the
+    words, and it snaps back invisibly when the pointer leaves. Touch
+    devices never see it: a sticky :hover would leave it half-way across.
+  */
+  .sheen {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(100deg, rgb(255 255 255 / 0) 30%, rgb(255 255 255 / 0.26) 50%, rgb(255 255 255 / 0) 70%);
+    transform: translateX(-110%);
+  }
+
+  .sheen:hover::after,
+  .sheen:focus-visible::after {
+    transform: translateX(110%);
+    transition: transform 720ms var(--ease-out);
+  }
+
+  @media (hover: none) {
+    .sheen::after {
+      display: none;
+    }
+  }
+
+  /* A fine dot weave for large coloured grounds — texture, not pattern. */
+  .texture-dots {
+    background-image: radial-gradient(circle, rgb(var(--dots-color, 255 255 255) / var(--dots-alpha, 0.14)) 1px, transparent 1.5px);
+    background-size: 16px 16px;
+  }
+
+  /* The one light allowed inside an ink band: a soft wash of brand from
+     the top edge, so the band reads as a lit room rather than a flat slab. */
+  .band-light {
+    background-image: radial-gradient(60% 100% at 50% 0%, rgb(var(--brand-600) / 0.32), rgb(var(--brand-600) / 0) 72%);
   }
 
   @media (forced-colors: active) {
-    .social-tile-instagram {
+    .lit,
+    .lit-light,
+    .glass {
       background-image: none;
+      box-shadow: none;
+      border: 1px solid CanvasText;
+    }
+
+    .sphere {
+      background: CanvasText;
+      box-shadow: none;
+    }
+  }
+
+  /*
+    SOCIAL MARKS — Phase 6, redrawn in Enhancement A.
+
+    Each mark is a lit squircle in its owner's colours: Instagram's
+    published radial and WhatsApp's two published greens, with Email and
+    Phone in Earneazi's blue and the Phase 3 violet. A squircle rather than
+    a circle because that is the shape both networks' own icons take, which
+    is most of what makes them recognisable at 44px. Colours and measured
+    contrast live in tokens.css. `--shadow-social` keeps the per-theme edge
+    the marks need on the dark footer.
+  */
+  .social-tile {
+    --lit-color: var(--color-brand);
+    background-image: var(--lit-overlay);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.16),
+      var(--shadow-social),
+      0 8px 18px -10px rgb(var(--lit-color) / var(--lit-glow));
+  }
+
+  .social-tile-instagram {
+    --lit-color: var(--social-instagram-magenta);
+    background-image:
+      var(--lit-overlay),
+      radial-gradient(
+        circle at 30% 107%,
+        rgb(var(--social-instagram-yellow)) 0%,
+        rgb(var(--social-instagram-yellow)) 5%,
+        rgb(var(--social-instagram-orange)) 35%,
+        rgb(var(--social-instagram-magenta)) 52%,
+        rgb(var(--social-instagram-blue)) 90%
+      );
+  }
+
+  .social-tile-whatsapp {
+    --lit-color: var(--social-whatsapp);
+    background-image: var(--lit-overlay), linear-gradient(180deg, rgb(var(--social-whatsapp-hi)) 0%, rgb(var(--social-whatsapp)) 100%);
+  }
+
+  .social-tile-email {
+    --lit-color: var(--social-email);
+    background-color: rgb(var(--social-email));
+  }
+
+  .social-tile-phone {
+    --lit-color: var(--social-phone);
+    background-color: rgb(var(--social-phone));
+  }
+
+  @media (forced-colors: active) {
+    .social-tile {
+      background-image: none;
+      box-shadow: none;
       border: 1px solid CanvasText;
     }
   }
 
   /*
-    DIMENSIONAL TYPE — Phase 0 §9, infrastructure only.
-    Paired with components/brand/DimensionalText.tsx. Not applied anywhere
-    yet; its intended home is the oversized footer wordmark (Phase 6).
+    DIMENSIONAL TYPE — Phase 0 §9, built out in Enhancement A.
+    Paired with components/brand/DimensionalText.tsx.
 
-    The construction is selected by `data-ground`, not by the theme — the
-    footer band is ink in both themes, so a theme-keyed rule would render
-    the paper build on it in light mode. See the component's header.
+    One real text node with a stepped extrusion drawn as text-shadow — no
+    duplicate spans, no second font load, and it wraps like any other text.
+    Offsets are in `em`, so one rule serves a 30px wordmark and a 72px
+    headline, and `--extrude-scale` halves the depth below 768px, where the
+    same depth reads as blur.
 
-    Each layer hides itself when its index exceeds --depth-steps, which the
-    token layer steps by breakpoint: flat below 768px, 3 layers at
-    768–1023px, 5 from 1024px.
+    Three faces, and the construction follows the GROUND rather than the
+    theme alone:
+
+      brand   the face in brand blue, stepping down through deeper blues.
+      ink     an ink face (or light face on ink) over a brand-blue echo —
+              the wordmark and the band's headline.
+      fill    a white face on a coloured fill — the founders' monograms.
+
+    On paper the extrusion steps down-right into darker values. On ink —
+    the dark theme, or a band that is ink in both themes — a dark stack
+    vanishes, so the steps are brand blues with a lighter top-left edge,
+    exactly as §9 specifies. The face colour is always the caller's token,
+    so its contrast is measured like every other pair and never depends on
+    the depth behind it.
+
+    `data-state="pending"` renders flat until the element is in view;
+    `resolve` grows the depth in once. Under reduced motion the component
+    renders `static`, which is full depth with no animation.
   */
-  .dimensional-face {
-    /* Inherits, so the face colour is the caller's token decision and its
-       contrast pair is checked like every other pair on the site. */
-    color: inherit;
+  .text-extrude {
+    --extrude-scale: 0.55;
   }
 
-  /* On paper: neutrals stepping down-right beneath the face, each layer one
-     step further out and one step fainter than the last. */
-  [data-ground='paper'] .dimensional-layer {
-    color: rgb(var(--neutral-300));
-    opacity: calc(1 - (var(--layer) - 1) * 0.16);
-    transform: translate(calc(var(--layer) * var(--depth-unit)), calc(var(--layer) * var(--depth-unit)));
-    z-index: calc(0 - var(--layer));
-  }
-
-  @media (max-width: 767px) {
-    .dimensional-layer {
-      display: none;
+  @media (min-width: 768px) {
+    .text-extrude {
+      --extrude-scale: 1;
     }
   }
 
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .dimensional-layer:nth-child(n + 4) {
-      display: none;
+  .text-extrude[data-extrude='brand']:not([data-state='pending']) {
+    text-shadow:
+      calc(0.012em * var(--extrude-scale)) calc(0.012em * var(--extrude-scale)) 0 rgb(var(--brand-700)),
+      calc(0.024em * var(--extrude-scale)) calc(0.024em * var(--extrude-scale)) 0 rgb(var(--brand-800) / 0.9),
+      calc(0.036em * var(--extrude-scale)) calc(0.036em * var(--extrude-scale)) 0 rgb(var(--brand-800) / 0.55),
+      calc(0.04em * var(--extrude-scale)) calc(0.1em * var(--extrude-scale)) 0.2em rgb(var(--ink-900) / 0.2);
+  }
+
+  .text-extrude[data-extrude='ink']:not([data-state='pending']) {
+    text-shadow:
+      calc(0.018em * var(--extrude-scale)) calc(0.018em * var(--extrude-scale)) 0 rgb(var(--brand-600) / 0.5),
+      calc(0.036em * var(--extrude-scale)) calc(0.036em * var(--extrude-scale)) 0 rgb(var(--brand-600) / 0.26),
+      calc(0.054em * var(--extrude-scale)) calc(0.054em * var(--extrude-scale)) 0 rgb(var(--brand-600) / 0.1),
+      calc(0.03em * var(--extrude-scale)) calc(0.1em * var(--extrude-scale)) 0.2em rgb(var(--ink-900) / 0.14);
+  }
+
+  .text-extrude[data-extrude='fill']:not([data-state='pending']) {
+    text-shadow:
+      calc(0.02em * var(--extrude-scale)) calc(0.02em * var(--extrude-scale)) 0 rgb(0 0 0 / 0.2),
+      calc(0.04em * var(--extrude-scale)) calc(0.04em * var(--extrude-scale)) 0 rgb(0 0 0 / 0.13),
+      calc(0.06em * var(--extrude-scale)) calc(0.06em * var(--extrude-scale)) 0 rgb(0 0 0 / 0.07),
+      0 calc(0.1em * var(--extrude-scale)) 0.2em rgb(0 0 0 / 0.18);
+  }
+
+  :root[data-theme='dark'] .text-extrude[data-extrude='brand']:not([data-state='pending']),
+  [data-ground='ink'] .text-extrude[data-extrude='brand']:not([data-state='pending']) {
+    text-shadow:
+      calc(-0.008em * var(--extrude-scale)) calc(-0.008em * var(--extrude-scale)) 0 rgb(255 255 255 / 0.2),
+      calc(0.014em * var(--extrude-scale)) calc(0.014em * var(--extrude-scale)) 0 rgb(var(--brand-600)),
+      calc(0.028em * var(--extrude-scale)) calc(0.028em * var(--extrude-scale)) 0 rgb(var(--brand-700) / 0.85),
+      calc(0.05em * var(--extrude-scale)) calc(0.12em * var(--extrude-scale)) 0.24em rgb(0 0 0 / 0.55);
+  }
+
+  :root[data-theme='dark'] .text-extrude[data-extrude='ink']:not([data-state='pending']),
+  [data-ground='ink'] .text-extrude[data-extrude='ink']:not([data-state='pending']) {
+    text-shadow:
+      calc(0.018em * var(--extrude-scale)) calc(0.018em * var(--extrude-scale)) 0 rgb(var(--brand-600) / 0.85),
+      calc(0.036em * var(--extrude-scale)) calc(0.036em * var(--extrude-scale)) 0 rgb(var(--brand-700) / 0.6),
+      calc(0.054em * var(--extrude-scale)) calc(0.054em * var(--extrude-scale)) 0 rgb(var(--brand-800) / 0.4),
+      calc(0.04em * var(--extrude-scale)) calc(0.12em * var(--extrude-scale)) 0.26em rgb(0 0 0 / 0.5);
+  }
+
+  .text-extrude[data-state='resolve'] {
+    animation: extrude-resolve var(--dur-story) var(--ease-out) both;
+    animation-delay: var(--extrude-delay, 0ms);
+  }
+
+  @keyframes extrude-resolve {
+    from {
+      text-shadow:
+        0 0 0 transparent,
+        0 0 0 transparent,
+        0 0 0 transparent,
+        0 0 0 transparent;
     }
+  }
+
+  /* The navigation wordmark is too small to carry an extrusion (§7), so it
+     gets a 1px letterpress edge instead — the smallest honest depth. */
+  .logo-letterpress {
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.65);
+  }
+
+  :root[data-theme='dark'] .logo-letterpress {
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.5);
   }
 
   /*
-    On ink: a downward dark extrusion vanishes, so there is no stack at all.
-    One cool shadow carries the depth and a 1px optical edge-light on the
-    top-left gives the face its edge.
+    POINTER TILT — Enhancement A, paired with hooks/usePointerTilt.ts.
+
+    The drawn marks in the services and goals panels lean a few degrees
+    toward a fine pointer, with a soft glare that follows it. The hook only
+    stamps `data-tilt` where there is a hover-capable fine pointer and no
+    reduced-motion preference, so on touch and for anyone who has opted out
+    this rule never matches and the plate is a flat, untransformed surface.
   */
-  [data-ground='ink'] .dimensional-layer {
-    display: none;
+  .tilt[data-tilt] {
+    transform: perspective(60rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition:
+      transform var(--dur-slow) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
   }
 
-  [data-ground='ink'] .dimensional-face {
-    text-shadow:
-      -1px -1px 0 rgb(255 255 255 / 0.22),
-      0 calc(var(--depth-unit) * 3) calc(var(--depth-unit) * 6) rgb(var(--ink-950) / 0.85);
+  .tilt[data-tilting] {
+    transition-duration: var(--dur-instant);
   }
 
-  /* The depth resolves from flat to full on entry. Under reduced motion the
-     component renders at full depth immediately and this never runs. */
-  [data-dimensional='resolve'][data-ground='paper'] .dimensional-layer {
-    animation: dimensional-resolve var(--dur-story) var(--ease-out) both;
-    animation-delay: calc(var(--layer) * 40ms);
+  .tilt-glare::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(22rem circle at var(--glare-x, 50%) var(--glare-y, 0%), rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 62%);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
   }
 
-  @keyframes dimensional-resolve {
-    from {
-      transform: translate(0, 0);
-      opacity: 0;
-    }
+  .tilt-glare[data-tilting]::after {
+    opacity: 1;
   }
 }
 
@@ -331,6 +608,20 @@
 
   .rail-x > * {
     scroll-snap-align: start;
+  }
+
+  /*
+    The scroller's trailing edge — Enhancement C. The rail dissolves over its
+    last 2.5rem so a further item reads as continuing rather than cut off.
+
+    A mask rather than a painted gradient: the painted version had to name
+    the ground it faded into, so it showed as a pale box over white chips and
+    as a grey strip wherever a rail sat on a different section ground. A mask
+    only fades what is there, on any ground, in either theme.
+  */
+  .rail-fade {
+    -webkit-mask-image: linear-gradient(90deg, rgb(0 0 0) calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(90deg, rgb(0 0 0) calc(100% - 2.5rem), transparent);
   }
 
   /*
@@ -388,6 +679,23 @@
   }
 
   /*
+    The rupee sign on a displayed figure — Enhancement A. Set smaller,
+    raised to the digits' cap height and a step quieter, the way a printed
+    statement sets a currency sign, so the eye lands on the number first.
+    Only ever on the visible (aria-hidden) copy of a figure; the
+    screen-reader copy keeps the plain formatted string.
+  */
+  .currency-symbol {
+    display: inline-block;
+    margin-inline-end: 0.06em;
+    font-size: 0.6em;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: 0.52em;
+    opacity: 0.72;
+  }
+
+  /*
     Display treatment. The display face is the body face at a heavier
     weight and tighter tracking — the contrast is optical, not a second
     family. Applied by the text-display-* scale, and available directly for
@@ -434,7 +742,7 @@
   }
 
   /*
-    THE SLIDER — Phase 4.
+    THE SLIDER — Phase 4, with an Enhancement A thumb.
 
     `appearance: none` on the input removes the platform control entirely, so
     the track and the thumb both have to be redrawn, and they have to be
@@ -442,21 +750,20 @@
     list or given an inline style.
 
     ── The 44px target ──────────────────────────────────────────────────
-    This used to be an 8px-tall input with a 24px thumb painted on it, which
-    left a drag target well under the 44px minimum — the known gap recorded
-    against §17, deferred to the phase that owns the calculator's layout.
-
-    The hit area and the paint are now separate things. The input is 44px
-    tall and transparent (see components/ui/Slider.tsx); the visible 8px
-    track is this pseudo-element, optically centred inside those 44px by the
-    thumb's negative top margin. Every pixel of the 44 drags, and the control
-    looks no larger than it did.
+    The input is 44px tall and transparent (see components/ui/Slider.tsx);
+    the visible 8px track is this pseudo-element, optically centred inside
+    those 44px by the thumb's negative top margin. Every pixel of the 44
+    drags, and the control looks no larger than it did.
 
     ── The fill ─────────────────────────────────────────────────────────
     The travelled portion is a hard-stop gradient built from `--slider-fill`,
-    a percentage the component publishes on the input. Two stops, no overlaid
-    element: one paint, and nothing sitting above the input intercepting
-    pointer events.
+    a percentage the component publishes on the input, under a soft light
+    from above. The unfilled part is a recessed well.
+
+    ── The thumb ────────────────────────────────────────────────────────
+    The brand sphere — the same lit ball as the logo's dot — in a surface
+    ring, so the one thing a person grabs on the calculator is the one 3D
+    object the brand repeats.
 
     Transform only on hover and press — animating width or height would
     relayout the track on every frame of a drag.
@@ -464,25 +771,33 @@
   .slider-control::-webkit-slider-runnable-track {
     height: 8px;
     border-radius: var(--radius-pill);
-    background-image: linear-gradient(
-      to right,
-      rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
-      rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
-    );
+    background-image:
+      linear-gradient(180deg, rgb(255 255 255 / 0.22) 0%, rgb(255 255 255 / 0) 60%),
+      linear-gradient(
+        to right,
+        rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
+        rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
+      );
     /* The unfilled half is a surface a control sits on, so it needs the
        3:1 boundary SC 1.4.11 asks for rather than a divider hairline. */
-    box-shadow: inset 0 0 0 1px rgb(var(--color-border) / 0.45);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--color-border) / 0.45),
+      var(--shadow-inset);
   }
 
   .slider-control::-moz-range-track {
     height: 8px;
     border-radius: var(--radius-pill);
-    background-image: linear-gradient(
-      to right,
-      rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
-      rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
-    );
-    box-shadow: inset 0 0 0 1px rgb(var(--color-border) / 0.45);
+    background-image:
+      linear-gradient(180deg, rgb(255 255 255 / 0.22) 0%, rgb(255 255 255 / 0) 60%),
+      linear-gradient(
+        to right,
+        rgb(var(--color-brand)) 0 var(--slider-fill, 0%),
+        rgb(var(--color-surface-sunken)) var(--slider-fill, 0%) 100%
+      );
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--color-border) / 0.45),
+      var(--shadow-inset);
   }
 
   .slider-control::-webkit-slider-thumb {
@@ -493,9 +808,14 @@
     /* Centres the 24px thumb on the 8px track: (24 − 8) ÷ 2. */
     margin-top: -8px;
     border-radius: var(--radius-pill);
-    background: rgb(var(--color-brand));
+    background:
+      radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.9) 0, rgb(255 255 255 / 0.9) 7%, rgb(255 255 255 / 0.3) 20%, rgb(255 255 255 / 0) 46%),
+      radial-gradient(circle at 62% 74%, rgb(0 0 0 / 0) 36%, rgb(0 0 0 / 0.28) 100%),
+      rgb(var(--color-brand));
     border: 3px solid rgb(var(--color-surface));
-    box-shadow: var(--shadow-sm);
+    box-shadow:
+      0 1px 2px 0 rgb(10 27 46 / 0.25),
+      0 6px 14px -4px rgb(var(--color-brand) / 0.5);
     cursor: pointer;
     transition: transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-instant) var(--ease-out);
   }
@@ -504,16 +824,20 @@
     width: 24px;
     height: 24px;
     border-radius: var(--radius-pill);
-    background: rgb(var(--color-brand));
+    background:
+      radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.9) 0, rgb(255 255 255 / 0.9) 7%, rgb(255 255 255 / 0.3) 20%, rgb(255 255 255 / 0) 46%),
+      radial-gradient(circle at 62% 74%, rgb(0 0 0 / 0) 36%, rgb(0 0 0 / 0.28) 100%),
+      rgb(var(--color-brand));
     border: 3px solid rgb(var(--color-surface));
-    box-shadow: var(--shadow-sm);
+    box-shadow:
+      0 1px 2px 0 rgb(10 27 46 / 0.25),
+      0 6px 14px -4px rgb(var(--color-brand) / 0.5);
     cursor: pointer;
     transition: transform var(--dur-instant) var(--ease-out);
   }
 
   .slider-control:hover::-webkit-slider-thumb {
     transform: scale(1.1);
-    box-shadow: var(--shadow-md);
   }
 
   .slider-control:active::-webkit-slider-thumb {
@@ -550,41 +874,48 @@
   }
 
   /*
-    THE SERVICE RAIL'S MARQUEE.
+    THE INFORMATION RIBBON — Enhancement A, paired with
+    components/navigation/InfoRibbon.tsx.
 
-    Two identical lists sit side by side and each translates left by its own
-    full width, so at the moment the first has fully exited the second is
-    exactly where the first began and the loop has no seam. (The previous
-    version moved a single container by -50%, which only works while both
-    copies live inside one element — and that construction is what forced
-    the duplicate links into the accessibility tree.)
+    The track holds four copies of the list and moves left by half its own
+    width, so the moment the first two copies have left, the second two
+    stand exactly where the first began and the loop has no seam — and a
+    half is always wider than the widest screen, so no gap ever opens at the
+    right edge. Only the first copy is in the accessibility tree.
 
-    It pauses on hover *and* on focus-within: a keyboard user tabbing into
-    the rail would otherwise have the link slide out from under the focus
-    ring while they read it.
+    It pauses on hover, on focus-within, while a finger is down (`:active`),
+    when its own pause control is pressed, and while it is off screen
+    (`data-paused`, set by the component). Reduced motion never reaches this
+    rule: the component renders a static, swipeable rail instead, because
+    collapsing the duration of an infinite animation does not stop it — it
+    makes it flicker.
 
-    Reduced motion is handled in the component, which stops rendering the
-    duplicate and drops this class entirely. It is not handled by the global
-    safety net below — collapsing the duration of an *infinite* animation
-    does not stop it, it makes it flicker.
+    The edges dissolve through a mask rather than painted gradients, so the
+    fade is correct over any surface in either theme.
   */
-  @keyframes marquee {
+  @keyframes ribbon-scroll {
     from {
-      transform: translateX(0);
+      transform: translate3d(0, 0, 0);
     }
     to {
-      transform: translateX(-100%);
+      transform: translate3d(-50%, 0, 0);
     }
   }
 
-  .animate-marquee {
-    animation: marquee 40s linear infinite;
-    will-change: transform;
+  .ribbon-track {
+    animation: ribbon-scroll var(--dur-ribbon) linear infinite;
   }
 
-  [data-marquee-root]:hover .animate-marquee,
-  [data-marquee-root]:focus-within .animate-marquee {
+  [data-ribbon]:hover .ribbon-track,
+  [data-ribbon]:focus-within .ribbon-track,
+  [data-ribbon]:active .ribbon-track,
+  [data-ribbon][data-paused] .ribbon-track {
     animation-play-state: paused;
+  }
+
+  .ribbon-fade {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, rgb(0 0 0) 2.5rem, rgb(0 0 0) calc(100% - 4.5rem), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, rgb(0 0 0) 2.5rem, rgb(0 0 0) calc(100% - 4.5rem), transparent 100%);
   }
 }
 

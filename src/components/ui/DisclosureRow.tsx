@@ -99,9 +99,10 @@ export function DisclosureRow({
         'relative border-b',
         'transition-colors motion-safe:duration-base ease-out',
         onFooter ? 'border-footer-line' : 'border-divider',
-        // The open row lifts onto its own surface. Depth by surface change
-        // rather than by shadow, so it reads the same in both themes.
-        open && 'bg-surface',
+        // The open row lifts onto its own surface, raised over the rows
+        // beneath it (Enhancement A). On the footer's tinted ground the lift
+        // is a surface change alone — a shadow there would crowd the links.
+        open && (onFooter ? 'bg-surface/70' : 'raised z-[1] bg-surface'),
         className
       )}
     >
@@ -154,8 +155,12 @@ export function DisclosureRow({
             className={cn(
               'relative inline-flex shrink-0 items-center justify-center rounded-pill border',
               compact ? 'h-8 w-8' : 'h-9 w-9',
-              'transition-colors motion-safe:duration-fast ease-out',
-              open ? 'border-brand/50 text-brand-ink' : 'border-divider text-ink-muted group-hover:border-border'
+              'transition-[background-color,border-color,color,box-shadow] motion-safe:duration-fast ease-out',
+              /* Open, the sign lights; closed, it rests on the row. The
+                 surface changes as well as the colour. */
+              open
+                ? 'lit border-transparent bg-brand text-on-brand'
+                : 'edge-top border-divider bg-surface text-ink-muted group-hover:border-border group-hover:text-ink'
             )}
           >
             {/* Two rules that rotate into a plus and back, rather than two

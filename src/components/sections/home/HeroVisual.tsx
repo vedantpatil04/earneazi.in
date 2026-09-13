@@ -65,12 +65,14 @@ export function HeroVisual({ depth }: HeroVisualProps) {
       </motion.div>
 
       {/*
-        Reading scrim: Subtle gradient wash that ensures crisp headline
-        contrast on the left while keeping the family, sunset, and landscape
-        vividly visible underneath across the center and right.
+        Reading scrim: a gradient wash that keeps the headline and supporting
+        copy crisp on the left while the family, sunset and landscape stay
+        visible across the centre and right. Enhancement C holds it stronger
+        through the middle of the frame: at 1024px the supporting copy reaches
+        almost half the width, where the group's silhouettes sit.
       */}
       <div
-        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.80)_0%,rgb(var(--color-bg)/0.65)_36%,rgb(var(--color-bg)/0.35)_75%,transparent_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.84)_0%,rgb(var(--color-bg)/0.70)_22%,rgb(var(--color-bg)/0.32)_42%,rgb(var(--color-bg)/0.06)_58%,transparent_74%)]"
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.80)_0%,rgb(var(--color-bg)/0.65)_36%,rgb(var(--color-bg)/0.35)_75%,transparent_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.9)_0%,rgb(var(--color-bg)/0.8)_28%,rgb(var(--color-bg)/0.52)_46%,rgb(var(--color-bg)/0.14)_62%,transparent_76%)]"
       />
 
       {/* Gentle bottom transition to the next section */}

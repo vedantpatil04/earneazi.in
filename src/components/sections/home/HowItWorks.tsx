@@ -44,14 +44,14 @@ export function HowItWorks() {
             variants={lineDrawVariants}
             speed="story"
             delay={0.15}
-            className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px origin-left bg-spine lg:block"
+            className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px origin-left bg-gradient-to-r from-transparent via-brand/45 to-transparent lg:block"
           />
           {/* Narrow screens: the same idea, turned on its side. */}
           <Reveal
             variants={lineDrawVerticalVariants}
             speed="story"
             delay={0.15}
-            className="pointer-events-none absolute bottom-10 left-7 top-7 w-px origin-top bg-spine lg:hidden"
+            className="pointer-events-none absolute bottom-10 left-7 top-7 w-px origin-top bg-gradient-to-b from-brand/10 via-brand/45 to-transparent lg:hidden"
           />
 
           <RevealGroup
@@ -65,12 +65,13 @@ export function HowItWorks() {
                 <motion.li key={step.id} variants={staggerItemVariants} className="flex gap-5 lg:flex-col lg:gap-6">
                   {/* Sits on the rule, so it needs the page's own ground
                       rather than a transparent background. */}
-                  <span className="relative z-10 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-pill border border-divider bg-bg text-brand-ink shadow-xs">
+                  <span className="raised relative z-10 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-pill border border-divider bg-surface text-brand-ink">
                     <Glyph size={22} strokeWidth={1.5} aria-hidden="true" />
                   </span>
 
                   <div className="min-w-0 pt-1 lg:pt-0">
-                    <span className="font-display text-body-sm font-semibold tabular text-brand-ink">
+                    <span className="inline-flex items-center gap-2 font-display text-body-sm font-semibold tabular text-brand-ink">
+                      <span aria-hidden="true" className="sphere h-2 w-2 rounded-pill" />
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <h3 className="mt-2 text-display-xs text-ink-display">{step.title}</h3>

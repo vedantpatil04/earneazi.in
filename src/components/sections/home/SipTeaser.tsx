@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -58,7 +59,7 @@ export function SipTeaser() {
                 <Link
                   to="/sip-calculator"
                   variant="standalone"
-                  trailingIcon={<span aria-hidden="true">→</span>}
+                  trailingIcon={<ArrowRight size={15} aria-hidden="true" />}
                 >
                   Open the full calculator, with the chart and the year-by-year table
                 </Link>

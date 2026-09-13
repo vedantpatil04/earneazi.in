@@ -8,15 +8,14 @@ import { cn } from '@/lib/utils/cn';
  * padding, different border alpha, a `dark:` branch each, and a pulsing dot
  * on some but not others). This is the one version.
  *
- * The dot is not decorative: on the pinned sections it is the spine
- * surfacing — the same brand hairline that threads the page, caught at the
- * point where this section attaches to it. It does not pulse. A dot that
- * pulses forever is movement carrying no information, which §31 of the
- * brief rules out; it reads as a live-status indicator the page cannot
- * honour.
+ * The dot is not decorative: it is the brand's sphere — the same lit ball
+ * as the logo's dot — caught at the point where a section attaches to the
+ * page. It does not pulse. A dot that pulses forever is movement carrying no
+ * information; it reads as a live-status indicator the page cannot honour.
  *
  * `tone`:
- *   default   on paper or ink, inside the normal flow.
+ *   default   on paper or ink, inside the normal flow. A tinted chip with
+ *             the edge light, so it sits on the page as an object.
  *   band      inside the inverted band, which is dark in both themes.
  *   onImage   over photography — gains a veil and a blur so it holds its
  *             contrast against whatever is behind it.
@@ -26,7 +25,7 @@ type EyebrowTone = 'default' | 'band' | 'onImage';
 
 interface EyebrowProps {
   children: ReactNode;
-  /** Show the leading spine dot. On by default; off where the eyebrow sits inside a card. */
+  /** Show the leading sphere. On by default; off where the eyebrow sits inside a card. */
   dot?: boolean;
   tone?: EyebrowTone;
   className?: string;
@@ -34,15 +33,15 @@ interface EyebrowProps {
 }
 
 const toneStyles: Record<EyebrowTone, string> = {
-  default: 'border-brand/20 bg-brand-subtle text-brand-ink',
+  default: 'edge-top border-brand/20 bg-brand-subtle text-brand-ink',
   band: 'border-on-band/20 bg-on-band/10 text-band-brand',
-  onImage: 'border-brand/30 bg-veil/[var(--veil-alpha)] text-brand-ink backdrop-blur-md shadow-xs',
+  onImage: 'edge-top border-brand/25 bg-veil/[var(--veil-alpha)] text-brand-ink backdrop-blur-md',
 };
 
 const dotStyles: Record<EyebrowTone, string> = {
-  default: 'bg-brand',
+  default: 'sphere',
   band: 'bg-band-brand',
-  onImage: 'bg-brand',
+  onImage: 'sphere',
 };
 
 export function Eyebrow({ children, dot = true, tone = 'default', className, id }: EyebrowProps) {
@@ -58,7 +57,7 @@ export function Eyebrow({ children, dot = true, tone = 'default', className, id 
         className
       )}
     >
-      {dot && <span aria-hidden="true" className={cn('h-1.5 w-1.5 shrink-0 rounded-pill', dotStyles[tone])} />}
+      {dot && <span aria-hidden="true" className={cn('h-2 w-2 shrink-0 rounded-pill', dotStyles[tone])} />}
       {children}
     </span>
   );

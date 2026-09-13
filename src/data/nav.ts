@@ -1,17 +1,29 @@
-import type { NavItem } from '@/types/nav';
+import { Calculator, CircleHelp, Home, Layers, MessageCircle, Target, Users } from 'lucide-react';
+import type { NavItem, RibbonItem } from '@/types/nav';
+import { servicePillars } from '@/data/services';
 
 /**
  * The confirmed sitemap. This stays the canonical list — the footer renders
  * it in full, and it's what any future sitemap/routing work should read.
  */
 export const primaryNav: NavItem[] = [
-  { label: 'Home', path: '/' },
-  { label: 'Services', path: '/services', description: 'Mutual funds & PMS, insurance, loans' },
-  { label: 'Financial Goals', path: '/financial-goals', description: 'Start from what you’re working toward' },
-  { label: 'SIP Calculator', path: '/sip-calculator', description: 'See what regular investing looks like' },
-  { label: 'About', path: '/about', description: 'Who we are' },
-  { label: 'Contact', path: '/contact', description: 'Start a conversation' },
-  { label: 'FAQ', path: '/faq', description: 'Common questions' },
+  { label: 'Home', path: '/', icon: Home },
+  { label: 'Services', path: '/services', description: 'Mutual funds & PMS, insurance, loans', icon: Layers },
+  {
+    label: 'Financial Goals',
+    path: '/financial-goals',
+    description: 'Start from what you’re working toward',
+    icon: Target,
+  },
+  {
+    label: 'SIP Calculator',
+    path: '/sip-calculator',
+    description: 'See what regular investing looks like',
+    icon: Calculator,
+  },
+  { label: 'About', path: '/about', description: 'Who we are', icon: Users },
+  { label: 'Contact', path: '/contact', description: 'Start a conversation', icon: MessageCircle },
+  { label: 'FAQ', path: '/faq', description: 'Common questions', icon: CircleHelp },
 ];
 
 /**
@@ -26,3 +38,56 @@ export const headerNav: NavItem[] = primaryNav.filter(
 
 /** The header's single call to action — kept here so it can't drift from the sitemap. */
 export const headerCta = { label: 'Book a consultation', path: '/contact' } as const;
+
+/**
+ * The information ribbon under the navigation bar — Enhancement A.
+ *
+ * An index of what the site can do, in the order a visitor tends to need it:
+ * the three services, the goals that organise them, the one tool, and a
+ * person. The service entries are read from `servicePillars` rather than
+ * restated, so renaming a service or changing its glyph cannot leave the
+ * ribbon saying the old thing, and each wears its own subject accent. The
+ * calculator wears the mutual-funds accent because that is what it
+ * calculates; the goals index and the advisor stay in the brand blue,
+ * because neither belongs to one subject.
+ *
+ * Descriptions are a few words of orientation, never a claim.
+ */
+const SERVICE_RIBBON_LINES: Record<string, string> = {
+  'mutual-funds-pms': 'Wealth & active portfolios',
+  insurance: 'Life & health cover',
+  loans: 'Home & personal',
+};
+
+export const ribbonItems: RibbonItem[] = [
+  ...servicePillars.map((service) => ({
+    id: service.id,
+    title: service.title,
+    description: SERVICE_RIBBON_LINES[service.id] ?? service.shortTitle,
+    href: service.href,
+    icon: service.icon,
+    toneId: service.id,
+  })),
+  {
+    id: 'financial-goals',
+    title: 'Financial Goals',
+    description: 'Milestone roadmaps',
+    href: '/financial-goals',
+    icon: Target,
+  },
+  {
+    id: 'sip-calculator',
+    title: 'SIP Calculator',
+    description: 'Run the numbers',
+    href: '/sip-calculator',
+    icon: Calculator,
+    toneId: 'mutual-funds-pms',
+  },
+  {
+    id: 'talk-to-advisor',
+    title: 'Talk to an advisor',
+    description: 'One-to-one guidance',
+    href: '/contact',
+    icon: MessageCircle,
+  },
+];

@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
+import { DimensionalText } from '@/components/brand/DimensionalText';
 import { ConversationCta } from '@/components/conversion/ConversationCta';
 import { generalConversation } from '@/lib/contact/conversation';
 import {
@@ -41,13 +42,24 @@ const trustIcons: Record<string, LucideIcon> = { target: Target, shield: ShieldC
  *             photograph, the same claim, the same three milestones, drawn
  *             along the axis the viewport actually has.
  *
+ * ── Depth — Enhancement A ───────────────────────────────────────────────
+ *
+ * The hero carries the page's one dimensional headline: the closing phrase,
+ * "decision that matters.", set in the brand blue over a stepped brand
+ * extrusion (DimensionalText). It resolves after the headline has risen, so
+ * the depth arrives as the last beat of the entrance rather than competing
+ * with it, and the rest of the headline stays flat ink so the phrase is the
+ * only thing that stands forward. Everything else over the photograph is
+ * glass or lit — the floating note, the proof row's marks — in the same
+ * depth language as the rest of the site.
+ *
  * ── Motion ──────────────────────────────────────────────────────────────
  *
- * One entrance, staged: eyebrow, then the headline's two halves, then the
- * supporting copy, then the actions, then the proof row — each starting
- * before the last has finished, so it reads as one movement settling rather
- * than as five elements taking turns. The journey draws itself against the
- * same clock.
+ * One entrance, staged: eyebrow, then the headline, then the supporting
+ * copy, then the actions, then the proof row — each starting before the
+ * last has finished, so it reads as one movement settling rather than as
+ * five elements taking turns. The journey draws itself against the same
+ * clock.
  *
  * Scroll-linked, the photograph drifts up a little and the journey drifts up
  * more. That difference is the whole parallax effect; it is deliberately
@@ -76,7 +88,10 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[36rem] w-full items-center overflow-hidden py-14 md:min-h-[41rem] md:py-16 lg:min-h-[44rem] lg:py-20"
+      /* The ribbon now sits between the header and the hero, so the hero's
+         top padding is a step lighter on a phone to keep the primary action
+         above the fold on a 640px-tall screen. */
+      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-10 md:min-h-[41rem] md:py-16 lg:min-h-[44rem] lg:py-20"
     >
       <HeroVisual depth={parallax ? { imageY, imageScale } : undefined} />
 
@@ -86,7 +101,7 @@ export function Hero() {
         <HeroJourney variant="path" depth={parallax ? { y: journeyY } : undefined} className="inset-y-12 left-0 right-0" />
       )}
 
-      {/* ── Floating Hero Card ── */}
+      {/* ── Floating note ── */}
       {isDesktop && (
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
@@ -96,12 +111,11 @@ export function Hero() {
         >
           <div
             className={cn(
-              'flex items-center gap-3 rounded-surface px-4 py-2.5 shadow-md border backdrop-blur-md transition-all duration-instant',
-              'bg-veil/[var(--veil-alpha)] border-divider text-ink-display',
-              'hover:border-brand/40'
+              'glass flex items-center gap-3 rounded-surface border border-divider/70 px-4 py-2.5 text-ink-display',
+              'transition-[border-color] duration-instant ease-out hover:border-brand/40'
             )}
           >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-pill bg-brand-subtle text-brand-ink">
+            <div className="lit flex h-8 w-8 shrink-0 items-center justify-center rounded-pill bg-brand text-on-brand">
               <Sparkles size={15} strokeWidth={2} aria-hidden="true" />
             </div>
             <div className="text-left">
@@ -133,20 +147,24 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.14)}
-            className="mt-4 text-[2.15rem] min-[390px]:text-[2.35rem] sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem] font-bold tracking-tight leading-[1.08] text-ink-display"
+            className="mt-4 text-[2.15rem] font-bold leading-[1.08] tracking-[-0.03em] text-ink-display min-[390px]:text-[2.35rem] sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem]"
           >
             <span className="block">One advisor</span>
             <span className="block">for every money</span>
-            <span className="text-brand-ink inline lg:inline-block max-w-full lg:whitespace-nowrap">
+            <DimensionalText
+              tone="brand"
+              delay={560}
+              className="inline max-w-full text-brand-ink lg:inline-block lg:whitespace-nowrap"
+            >
               {heroHeadlineAccent}
-            </span>
+            </DimensionalText>
           </motion.h1>
 
           <motion.p
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.34)}
-            className="mt-5 max-w-[28rem] lg:max-w-[31rem] xl:max-w-[33rem] text-body-lg text-ink-secondary leading-relaxed"
+            className="mt-5 max-w-[28rem] text-body-lg leading-relaxed text-ink-secondary lg:max-w-[31rem] xl:max-w-[33rem]"
           >
             {heroSubheadline}
           </motion.p>
@@ -155,6 +173,8 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.44)}
+            /* The floating WhatsApp button steps aside while this row is under it. */
+            data-conversion-suppress=""
             className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center"
           >
             <Button
@@ -170,10 +190,9 @@ export function Hero() {
             </Button>
 
             {/*
-              The hero's conversation entry point. It used to branch on the
-              WhatsApp number itself and label itself differently in each
-              case; the shared control now makes that decision once, for
-              every entry point on the site, and keeps one label either way.
+              The hero's conversation entry point, through the shared control
+              that decides the destination once for every entry point on the
+              site and keeps one label either way.
             */}
             <ConversationCta
               context={generalConversation}
@@ -190,19 +209,21 @@ export function Hero() {
             initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={enter(0.58)}
-            className="mt-8 flex w-full flex-col gap-y-2.5 border-t border-divider pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3.5 lg:flex-nowrap lg:gap-x-3.5 xl:gap-x-4"
+            /* Wraps until 1280px. Held to one line at 1024px it ran past the
+               narrative column into the journey's "Today" marker. */
+            className="mt-8 flex w-full flex-col gap-y-2.5 border-t border-divider pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3.5 xl:flex-nowrap xl:gap-x-4"
           >
             {heroTrustIndicators.map((indicator, idx) => {
               const Glyph = trustIcons[indicator.iconKey] ?? Target;
               return (
-                <li key={indicator.label} className="flex items-center gap-2 lg:shrink-0">
+                <li key={indicator.label} className="flex items-center gap-2 xl:shrink-0">
                   {idx > 0 && (
-                    <span className="hidden sm:inline-block h-3 w-px bg-divider mr-1.5" aria-hidden="true" />
+                    <span className="mr-1.5 hidden h-3 w-px bg-divider sm:inline-block" aria-hidden="true" />
                   )}
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-pill bg-brand-subtle text-brand-ink">
-                    <Glyph size={12} strokeWidth={2} aria-hidden="true" />
+                  <span className="lit flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand text-on-brand">
+                    <Glyph size={13} strokeWidth={2} aria-hidden="true" />
                   </span>
-                  <span className="text-body-sm font-medium text-ink whitespace-nowrap">{indicator.label}</span>
+                  <span className="whitespace-nowrap text-body-sm font-medium text-ink">{indicator.label}</span>
                 </li>
               );
             })}
@@ -214,7 +235,7 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.66)}
-            className={cn('mt-10 w-full max-w-[34rem]')}
+            className="mt-10 w-full max-w-[34rem]"
           >
             <HeroJourney variant="spine" />
           </motion.div>

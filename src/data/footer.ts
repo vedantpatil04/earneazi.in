@@ -75,8 +75,8 @@ function navLabel(path: string, fallback: string): string {
  * never advertise a product the services section does not.
  */
 const SERVICE_DETAIL_CATEGORIES: Record<string, string[]> = {
-  'mutual-funds-pms': ['SIP and STP', 'Tax-saving funds (ELSS)'],
-  insurance: ['Health insurance', 'Term life cover'],
+  'mutual-funds-pms': ['SIP planning', 'ELSS tax saving'],
+  insurance: ['Health insurance', 'Term life insurance'],
   loans: ['Home loan', 'Personal loan'],
 };
 
@@ -155,13 +155,15 @@ export function brandStatement({ credentials = shippedCredentials }: { credentia
 }
 
 /**
- * The baseline's attribution line (§27), built from the founder records.
- * Names and roles are confirmed (data/team.ts); nothing else about either
- * person is stated here.
+ * The baseline's attribution line (§27), built from the founder records —
+ * founders only, so a team member is never presented as leading the firm.
+ * Names and roles are confirmed (data/team.ts); nothing else about anyone is
+ * stated here.
  */
 export function founderAttribution({ team = teamMembers }: { team?: TeamMember[] } = {}): string | null {
-  if (team.length === 0) return null;
-  const people = team.map((member) => `${member.name} (${member.role})`);
+  const founders = team.filter((member) => member.group === 'founder');
+  if (founders.length === 0) return null;
+  const people = founders.map((member) => `${member.name} (${member.role})`);
   const list = people.length === 1 ? people[0] : `${people.slice(0, -1).join(', ')} and ${people[people.length - 1]}`;
   return `Led by ${list}.`;
 }

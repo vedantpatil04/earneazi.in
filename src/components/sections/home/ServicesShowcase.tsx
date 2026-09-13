@@ -204,7 +204,7 @@ function PinnedServices() {
               animate={{ opacity: 1, y: 0 }}
               transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.base, ease: easing.out }}
             >
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-surface border border-tone/25 bg-tone-tint text-tone">
+                <span className="lit lit-tone inline-flex h-11 w-11 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
                   <ActiveIcon size={20} strokeWidth={1.75} aria-hidden="true" />
                 </span>
                 <p className="mt-4 text-display-xs text-ink-display">{active.title}</p>
@@ -397,7 +397,7 @@ function ServiceDeck() {
           aria-label="Our services"
           aria-orientation="horizontal"
           onKeyDown={onKeyDown}
-          className="rail-x -mx-gutter gap-2 px-gutter pb-1"
+          className="rail-x rail-fade -mx-gutter gap-2 px-gutter pb-1"
         >
           {servicePillars.map((service, index) => {
             const isActive = index === activeIndex;
@@ -421,8 +421,8 @@ function ServiceDeck() {
                   'font-display text-body-sm font-semibold',
                   'transition-[background-color,border-color,color] duration-fast ease-out',
                   isActive
-                    ? 'border-transparent bg-tone-fill text-on-tone'
-                    : 'border-divider bg-surface text-ink-secondary'
+                    ? 'lit lit-tone border-transparent bg-tone-fill text-on-tone'
+                    : 'edge-top border-divider bg-surface text-ink-secondary hover:border-border hover:text-ink'
                 )}
               >
                 <TabIcon size={16} strokeWidth={isActive ? 1.75 : 1.5} aria-hidden="true" />
@@ -431,12 +431,6 @@ function ServiceDeck() {
             );
           })}
         </div>
-        {/* The strip dissolves at the right edge when it scrolls, so a
-            third label reads as continuing rather than as cut off. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface-sunken to-transparent"
-        />
       </div>
 
       <div
@@ -506,7 +500,10 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
       className={cn(
         'relative overflow-hidden rounded-band border bg-surface',
         'transition-[border-color,box-shadow] duration-base ease-out',
-        active ? 'border-tone/35 shadow-md' : 'border-divider'
+        /* Enhancement A: the panel being read is raised; the others rest
+           flat on the page, so the active one reads as nearer, not just
+           brighter. */
+        active ? 'raised border-tone/35' : 'border-divider'
       )}
     >
       {/* The leading edge. The panel's accent, stated once at its top — the
@@ -538,8 +535,8 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
               'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface',
               'transition-[background-color,border-color,color] duration-base ease-out',
               active
-                ? 'border border-transparent bg-tone-fill text-on-tone'
-                : 'border border-tone/25 bg-tone-tint text-tone'
+                ? 'lit lit-tone border border-transparent bg-tone-fill text-on-tone'
+                : 'edge-top border border-tone/25 bg-tone-tint text-tone'
             )}
           >
             <Icon size={22} strokeWidth={active ? 1.75 : 1.5} aria-hidden="true" />
@@ -585,7 +582,7 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
               </div>
             )}
 
-            <div className="rounded-surface border border-divider bg-surface-sunken p-4">
+            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-4">
               <h4 className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 Who it&rsquo;s for
               </h4>
@@ -621,7 +618,7 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
                       'inline-flex items-center rounded-pill border px-2.5 py-1 text-legal font-medium',
                       'transition-[background-color,border-color,color] duration-base ease-out',
                       active
-                        ? 'border-tone/25 bg-tone-tint text-ink'
+                        ? 'edge-top border-tone/25 bg-tone-tint text-ink'
                         : 'border-divider bg-surface-sunken text-ink-secondary'
                     )}
                   >

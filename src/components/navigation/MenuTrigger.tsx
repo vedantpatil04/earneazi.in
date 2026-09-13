@@ -19,6 +19,9 @@ interface MenuTriggerProps {
  * continuous transform on two elements — crossfading two SVGs produces a
  * visible double image at the halfway point.
  *
+ * A raised round surface (Enhancement A), matching the switch and the
+ * navigation pill it sits beside.
+ *
  * The label changes with the state, so the accessible name is always the
  * action rather than the object.
  */
@@ -32,9 +35,9 @@ export const MenuTrigger = forwardRef<HTMLButtonElement, MenuTriggerProps>(({ op
     aria-expanded={open}
     aria-controls="mobile-nav-panel"
     className={cn(
-      'relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-action border border-divider',
+      'raised relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-pill border border-divider bg-surface',
       'text-ink transition-[background-color,border-color] motion-safe:duration-instant ease-out',
-      'hover:border-border hover:bg-hovered',
+      'hover:border-border active:bg-pressed',
       className
     )}
   >
@@ -48,9 +51,9 @@ export const MenuTrigger = forwardRef<HTMLButtonElement, MenuTriggerProps>(({ op
       />
       <span
         className={cn(
-          'absolute left-0 block h-0.5 w-5 rounded-pill bg-current',
-          'transition-transform motion-safe:duration-fast ease-move',
-          open ? 'top-1/2 -translate-y-1/2 -rotate-45' : 'bottom-0.5'
+          'absolute left-0 block h-0.5 rounded-pill bg-current',
+          'transition-[transform,width] motion-safe:duration-fast ease-move',
+          open ? 'top-1/2 w-5 -translate-y-1/2 -rotate-45' : 'bottom-0.5 w-3.5'
         )}
       />
     </span>

@@ -11,17 +11,23 @@
  *     when the field takes focus and does not zoom back out. `text-base`
  *     is 16px, and `md:text-body` steps up with the fluid scale after that.
  *
+ * Depth (Enhancement A): a field is a recessed well — the inset shadow from
+ * the depth tokens — so an editable place reads as one you write *into*,
+ * against the raised buttons that act on it. Focus brings the edge to the
+ * brand colour alongside the global ring.
+ *
  * States: default, hover, focus-visible (inherits the global ring), invalid,
  * disabled and read-only, in both themes.
  */
 export const controlBase = [
-  'w-full rounded-action border bg-surface text-ink',
+  'w-full rounded-action border bg-surface text-ink shadow-inset-well',
   'text-base md:text-body',
   'placeholder:text-ink-muted',
   'transition-[border-color,background-color] motion-safe:duration-instant ease-out',
   'hover:border-border-strong',
+  'focus-visible:border-brand',
   'read-only:bg-surface-sunken read-only:hover:border-border',
-  'disabled:cursor-not-allowed disabled:bg-disabled disabled:text-ink-disabled disabled:border-disabled-border',
+  'disabled:cursor-not-allowed disabled:bg-disabled disabled:text-ink-disabled disabled:border-disabled-border disabled:shadow-none',
   /* Invalid: a thicker, recoloured border rather than colour alone — the
      Field component pairs this with a text message and `aria-invalid`. */
   'aria-[invalid=true]:border-error aria-[invalid=true]:border-2',

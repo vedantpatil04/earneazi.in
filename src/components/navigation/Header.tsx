@@ -15,35 +15,41 @@ import { springUi } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils/cn';
 import { MobileNav } from './MobileNav';
 import { MenuTrigger } from './MenuTrigger';
+import { HeaderCredential } from './HeaderCredential';
 
 /**
  * The site header.
  *
- * Rewritten onto the token layer. It previously carried its own palette —
- * `bg-white/95`, `text-slate-900`, `dark:bg-[#061424]`, `border-slate-200`
- * — which meant the one element present on every screen was the one element
- * not participating in the theme system. Every colour here is now a role
- * token, so a change in tokens.css reaches the header like everything else.
+ * Every colour here is a role token, so a change in tokens.css reaches the
+ * header like everything else.
  *
  * Three states, and no more:
  *
  *   rest       over the top of the page. A veil and a blur, no border, no
  *              shadow — the header reads as part of the hero rather than as
  *              a bar sitting on top of it.
- *   engaged    once the page has moved. The veil thickens, a hairline and
- *              the smallest shadow arrive. This is the only thing that
- *              changes; the bar does not shrink, because a header that
- *              resizes under the reader makes every fixed anchor on the
- *              page a moving target.
+ *   engaged    once the page has moved. A hairline and the header shadow
+ *              arrive. This is the only thing that changes; the bar does not
+ *              shrink, because a header that resizes under the reader makes
+ *              every fixed anchor on the page a moving target.
  *   progress   a brand hairline along the bottom edge tracking how far
  *              through the document the reader is.
  *
- * The progress line is the page's spine surfacing in the chrome. It is not
- * decoration: on a page whose two longest sections are pinned — where the
- * scrollbar is the only cue that anything is advancing, and the composition
- * is deliberately holding still — it is the one honest indicator of
- * position. It is hidden under reduced motion, where a permanently
- * animating element is exactly what has been opted out of.
+ * ── Enhancement A ────────────────────────────────────────────────────────
+ *
+ * The primary navigation sits in a recessed track, and the current route is
+ * a raised pill that slides between items as one object (a shared
+ * `layoutId` on the `spring-ui` token). The state is carried by the pill,
+ * the weight and `aria-current` together, so it never rests on colour.
+ * The theme control is a switch in the same recessed/raised construction,
+ * and the call to action is the lit primary button — so the bar is three
+ * depths: the veil, what sits in it, and the one thing that is lit.
+ *
+ * The credential line ("✓ AMFI Registered · DSA Licensed") renders only
+ * from verified registrations with their identifiers (data/credentials.ts),
+ * only from 1360px where it fits beside the navigation without crowding
+ * it, and links to the ledger that evidences it. With the register as
+ * shipped, it renders nothing.
  */
 export function Header() {
   /* Resolved once per render: where a "talk to us" action goes, decided in
@@ -64,37 +70,37 @@ export function Header() {
     <header
       className={cn(
         'sticky top-0 z-header border-b',
-        'bg-veil/[var(--veil-alpha)] backdrop-blur-xl',
+        'bg-veil/[var(--veil-alpha)] backdrop-blur-xl backdrop-saturate-150',
         'transition-[background-color,border-color,box-shadow] duration-base ease-out',
-        engaged ? 'border-divider shadow-sm' : 'border-transparent'
+        engaged ? 'border-divider shadow-header' : 'border-transparent'
       )}
     >
       <Container size="shell">
-        <div className="flex h-header items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_1fr_auto]">
+        <div className="flex h-header items-center justify-between gap-3 lg:grid lg:grid-cols-[auto_1fr_auto] lg:gap-5">
           <div className="flex items-center justify-start">
             <Logo lockup="primary" />
           </div>
 
           <nav aria-label="Primary" className="hidden items-center justify-center lg:flex">
-            <ul className="flex items-center gap-0.5 xl:gap-1.5">
+            <ul className="inset-well flex items-center gap-0.5 rounded-pill border border-divider/80 bg-surface-sunken/70 p-1">
               {headerNav.map((item) => (
                 <li key={item.path}>
-                  <HeaderLink to={item.path} label={item.label} />
+                  <HeaderLink to={item.path} label={item.label} reducedMotion={prefersReducedMotion} />
                 </li>
               ))}
             </ul>
           </nav>
 
           <div className="flex items-center justify-end gap-2 sm:gap-2.5">
+            <HeaderCredential className="hidden min-[1360px]:inline-flex" />
+
             <ThemeToggle />
 
             {/*
-              The navbar's conversation entry point (§25). It used to build
-              its own wa.me URL and write its own accessible name, which is
-              one of the three separate WhatsApp implementations Phase 5
-              consolidates. It now asks the shared resolver where this goes
-              and renders only when that destination is WhatsApp — a second
-              icon pointing at /contact would duplicate the button beside it.
+              The navbar's conversation entry point (§25). It asks the shared
+              resolver where this goes and renders only when that destination
+              is WhatsApp — a second icon pointing at /contact would duplicate
+              the button beside it.
             */}
             {navConversation.channel === 'whatsapp' && (
               <Button
@@ -103,7 +109,7 @@ export function Header() {
                 rel="noopener noreferrer"
                 variant="icon"
                 aria-label={navConversation.ariaLabel}
-                className="hidden xl:inline-flex"
+                className="hidden rounded-pill text-social-whatsapp xl:inline-flex"
               >
                 <WhatsAppGlyph size={18} />
               </Button>
@@ -114,7 +120,7 @@ export function Header() {
               variant="primary"
               size="sm"
               trailingIcon={<ArrowRight size={15} strokeWidth={2} aria-hidden="true" />}
-              className="hidden sm:inline-flex"
+              className="hidden rounded-pill sm:inline-flex"
             >
               {headerCta.label}
             </Button>
@@ -150,38 +156,34 @@ export function Header() {
 /**
  * A primary navigation link.
  *
- * The active state is carried by two things at once — weight and a brand
- * rule — so it does not depend on colour alone. The rule is a shared
- * `layoutId`, so moving between routes slides one marker rather than
- * cross-fading two, which is what makes the bar read as a single control.
+ * The active state is carried by three things at once — the raised pill,
+ * the weight, and `aria-current` — so it does not depend on colour alone.
+ * The pill is a shared `layoutId`, so moving between routes slides one
+ * object rather than cross-fading two, which is what makes the bar read as
+ * a single control. Under reduced motion it simply appears on the new item.
  */
-function HeaderLink({ to, label }: { to: string; label: string }) {
+function HeaderLink({ to, label, reducedMotion }: { to: string; label: string; reducedMotion: boolean }) {
   const location = useLocation();
-  const prefersReducedMotion = usePrefersReducedMotion();
   const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
+  const pillClass = 'raised absolute inset-0 rounded-pill bg-surface';
 
   return (
     <NavLink
       to={to}
       end={to === '/'}
       className={cn(
-        'relative inline-flex h-10 items-center rounded-action px-3.5 text-body-sm',
+        'relative inline-flex h-9 items-center rounded-pill px-3.5 text-body-sm',
         'transition-colors duration-instant ease-out',
-        isActive ? 'font-semibold text-ink-display' : 'font-medium text-ink-secondary hover:bg-hovered hover:text-ink'
+        isActive ? 'font-semibold text-ink-display' : 'font-medium text-ink-secondary hover:bg-surface/60 hover:text-ink'
       )}
     >
-      {label}
       {isActive &&
-        (prefersReducedMotion ? (
-          <span aria-hidden="true" className="absolute inset-x-3.5 bottom-1 h-0.5 rounded-pill bg-brand" />
+        (reducedMotion ? (
+          <span aria-hidden="true" className={pillClass} />
         ) : (
-          <motion.span
-            aria-hidden="true"
-            layoutId="header-nav-indicator"
-            className="absolute inset-x-3.5 bottom-1 h-0.5 rounded-pill bg-brand"
-            transition={springUi}
-          />
+          <motion.span aria-hidden="true" layoutId="header-nav-indicator" className={pillClass} transition={springUi} />
         ))}
+      <span className="relative">{label}</span>
     </NavLink>
   );
 }

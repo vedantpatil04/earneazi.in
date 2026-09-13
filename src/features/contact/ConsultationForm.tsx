@@ -21,11 +21,13 @@ import type { ConsultationDetails } from '@/lib/contact/conversation';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { duration, easing } from '@/lib/motion/tokens';
 import {
+  NOT_SURE,
   consultationDefaults,
+  consultationGoalOptions,
   consultationSchema,
-  consultationTopicGroups,
-  consultationTopics,
-  isKnownTopic,
+  consultationServiceOptions,
+  isKnownGoal,
+  isKnownService,
   parseSipParam,
 } from './consultationSchema';
 import type { ConsultationValues } from './consultationSchema';
@@ -33,8 +35,9 @@ import type { ConsultationValues } from './consultationSchema';
 /**
  * The consultation flow — the compose-and-send option from §25.
  *
- *   details → client-side validation → structured message → the person's own
- *   WhatsApp, pre-filled → they read it → they press send
+ *   Book a consultation → details → client-side validation → structured
+ *   message → WhatsApp opens with the draft pre-filled → the person reads it
+ *   → they press send
  *
  * ── What it never does ──────────────────────────────────────────────────
  *
@@ -45,27 +48,31 @@ import type { ConsultationValues } from './consultationSchema';
  * nothing is stored, and nothing leaves the browser until the person sends
  * it themselves from an app they control.
  *
- * ── The three destinations, in order ────────────────────────────────────
+ * ── The fields — Enhancement B ──────────────────────────────────────────
  *
- *   WhatsApp confirmed  → opens wa.me with the draft. The primary path.
- *   email confirmed     → opens their mail client with the same text.
- *   neither yet         → shows the composed draft with a copy button.
+ * Name, phone, the service and the goal in mind (each can be "not sure"),
+ * and a message. The service and goal are separate choices because a first
+ * conversation is usually about one of each — "a home loan, for buying a
+ * home". Everything entered appears in the draft, through the one shared
+ * builder in lib/contact/conversation.ts.
  *
- * All three produce the identical message, because all three go through
- * `buildConversationMessage` in lib/contact/conversation.ts. The typed
- * details reach the draft in every case — that is the requirement, and it is
- * why the draft is also shown on screen rather than only handed to another
- * app: a deep link that fails to open on some Android browsers would
- * otherwise lose what the person wrote.
+ * ── Destinations, in order ──────────────────────────────────────────────
+ *
+ *   WhatsApp confirmed  → opens wa.me with the draft. The primary path, and
+ *                         the live one: +91 87921 51022.
+ *   email confirmed     → offered as a second way to send the same text.
+ *   neither             → shows the composed draft with a copy button.
+ *
+ * The draft is always shown on screen too, with its own "Open in WhatsApp"
+ * button, so a browser that blocks the new tab — or a phone without WhatsApp
+ * — never costs the person what they typed.
  *
  * ── Arriving with context ───────────────────────────────────────────────
  *
- * `?topic=insurance`, `?goal=buy-a-home` and `?sip=5000-12-10` pre-select the
- * subject, which is how every contextual CTA on the site reaches this form
- * while the WhatsApp number is still unconfirmed. The SIP parameter is
- * revalidated through the calculator's own engine before it is trusted — a
- * query string is user-editable, and figures in a message must be ones the
- * person actually chose.
+ * `?service=insurance` (or the older `?topic=`), `?goal=buy-a-home` and
+ * `?sip=5000-12-10` pre-select the form. The SIP parameter is revalidated
+ * through the calculator's own engine before it is trusted — a query string
+ * is user-editable, and figures in a message must be ones the person chose.
  */
 export function ConsultationForm() {
   const [searchParams] = useSearchParams();
@@ -73,12 +80,13 @@ export function ConsultationForm() {
   const [draft, setDraft] = useState<{ text: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  /* Read once per URL change. `goal` and `topic` are the same field to this
-     form — both name a subject — so either populates it. */
+  /* Read once per URL change. */
   const incoming = useMemo(() => {
-    const requested = searchParams.get('topic') ?? searchParams.get('goal');
+    const requestedService = searchParams.get('service') ?? searchParams.get('topic');
+    const requestedGoal = searchParams.get('goal');
     return {
-      topic: isKnownTopic(requested) ? requested : consultationDefaults.topic,
+      service: isKnownService(requestedService) ? requestedService : NOT_SURE,
+      goal: isKnownGoal(requestedGoal) ? requestedGoal : NOT_SURE,
       sip: parseSipParam(searchParams.get('sip')),
     };
   }, [searchParams]);
@@ -95,21 +103,22 @@ export function ConsultationForm() {
        before there was a chance to type it, and a correction is acknowledged
        straight away. */
     mode: 'onTouched',
-    defaultValues: { ...consultationDefaults, topic: incoming.topic },
+    defaultValues: { ...consultationDefaults, service: incoming.service, goal: incoming.goal },
   });
 
   /* A CTA elsewhere on the site can change the query string while this form
-     is already mounted, so the selection follows it. */
+     is already mounted, so the selections follow it. */
   useEffect(() => {
-    setValue('topic', incoming.topic);
-  }, [incoming.topic, setValue]);
+    setValue('service', incoming.service);
+    setValue('goal', incoming.goal);
+  }, [incoming.service, incoming.goal, setValue]);
 
   const onSubmit = (values: ConsultationValues) => {
     const details: ConsultationDetails = {
       name: values.name,
       phone: values.phone,
-      email: values.email || undefined,
-      topic: values.topic,
+      serviceId: values.service === NOT_SURE ? undefined : values.service,
+      goalId: values.goal === NOT_SURE ? undefined : values.goal,
       message: values.message,
       sip: incoming.sip ?? undefined,
     };
@@ -142,7 +151,7 @@ export function ConsultationForm() {
   const startAgain = () => {
     setDraft(null);
     setCopied(false);
-    reset({ ...consultationDefaults, topic: incoming.topic });
+    reset({ ...consultationDefaults, service: incoming.service, goal: incoming.goal });
   };
 
   if (draft) {
@@ -156,25 +165,23 @@ export function ConsultationForm() {
         initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.base, ease: easing.out }}
-        className="rounded-band border border-divider bg-surface p-5 sm:p-6"
+        className="relative"
       >
         {/* Announced on appearance: the form it replaces is gone, so without
             this a screen reader user gets silence after submitting. */}
         <div role="status" aria-live="polite">
-          <h3 className="text-display-xs text-ink-display">
-            Ready to send, {draft.name.split(' ')[0]}.
-          </h3>
+          <h3 className="text-display-xs text-ink-display">Ready to send, {draft.name.split(' ')[0]}.</h3>
 
           <p className="mt-3 max-w-prose text-body text-ink-secondary">
             {href
-              ? 'WhatsApp should have opened with this message already written. Read it over, change anything you like, and press send — nothing reaches us until you do.'
+              ? 'WhatsApp should have opened with this message already written. Read it over, change anything you like, and press send — nothing reaches us until you do. If it didn’t open, use the button below.'
               : 'Here’s your message, written out. Nothing has been sent: copy it across to us and we’ll pick it up from there.'}
           </p>
         </div>
 
         {/* The draft itself, so what was typed is never trapped inside a deep
             link that may not have opened. */}
-        <pre className="mt-5 max-w-full overflow-x-auto whitespace-pre-wrap rounded-surface border border-divider bg-surface-sunken p-4 font-body text-body-sm text-ink">
+        <pre className="inset-well mt-5 max-w-full overflow-x-auto whitespace-pre-wrap rounded-surface border border-divider bg-surface-sunken p-4 font-body text-body-sm text-ink">
           {draft.text}
         </pre>
 
@@ -247,25 +254,25 @@ export function ConsultationForm() {
           {(field) => <Input {...field} {...register('phone')} type="tel" inputMode="tel" autoComplete="tel" />}
         </Field>
 
-        <Field label="Email" error={errors.email?.message} id="consultation-email" helper="Optional.">
+        <Field label="Service" error={errors.service?.message} id="consultation-service">
           {(field) => (
-            <Input {...field} {...register('email')} type="email" inputMode="email" autoComplete="email" />
+            <Select {...field} {...register('service')}>
+              {consultationServiceOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
           )}
         </Field>
 
-        <Field label="What’s this about?" required error={errors.topic?.message} id="consultation-topic">
+        <Field label="Financial goal" error={errors.goal?.message} id="consultation-goal">
           {(field) => (
-            <Select {...field} {...register('topic')}>
-              {consultationTopicGroups.map((group) => (
-                <optgroup key={group} label={group}>
-                  {consultationTopics
-                    .filter((topic) => topic.group === group)
-                    .map((topic) => (
-                      <option key={topic.value} value={topic.value}>
-                        {topic.label}
-                      </option>
-                    ))}
-                </optgroup>
+            <Select {...field} {...register('goal')}>
+              {consultationGoalOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </Select>
           )}
@@ -279,14 +286,14 @@ export function ConsultationForm() {
         id="consultation-message"
         helper="A sentence or two is plenty — where you are now, and what you'd like to sort out."
       >
-        {(field) => <Textarea {...field} {...register('message')} rows={5} />}
+        {(field) => <Textarea {...field} {...register('message')} rows={4} />}
       </Field>
 
       {/* Carried from a SIP entry point. Stated plainly rather than hidden,
           because it will appear in the message and the person should know
           that before they send it. */}
       {incoming.sip && (
-        <p className="rounded-surface border border-divider bg-surface-sunken px-4 py-3 text-body-sm text-ink-secondary">
+        <p className="inset-well rounded-surface border border-divider bg-surface-sunken px-4 py-3 text-body-sm text-ink-secondary">
           We&rsquo;ll include the plan you were looking at in the calculator — the monthly amount, the period and the
           rate you assumed. No projected figure is included.
         </p>
@@ -297,6 +304,7 @@ export function ConsultationForm() {
           type="submit"
           size="lg"
           disabled={isSubmitting}
+          className="w-full sm:w-auto"
           leadingIcon={whatsAppAvailable ? <WhatsAppGlyph size={18} /> : undefined}
         >
           {whatsAppAvailable ? 'Review in WhatsApp' : 'Write my message'}

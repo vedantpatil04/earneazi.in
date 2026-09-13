@@ -43,6 +43,12 @@ export interface ServicePillar {
    * services section falls back to `categories` when it is absent.
    */
   categoryGroups?: ServiceCategories[];
+  /**
+   * The products within the service (Enhancement B), each explained in three
+   * sentences. `categories` and `categoryGroups` are derived from these
+   * names in data/services.ts, so the lists cannot disagree.
+   */
+  products: ServiceProduct[];
   badge?: string;
   categoryLabel?: string;
 }
@@ -60,6 +66,24 @@ export interface ServiceCategories {
    * removing an item is an edit to this array and nothing else.
    */
   items: string[];
+}
+
+/**
+ * One product within a service (Enhancement B) — "Health insurance",
+ * "Gold loan". Three plain sentences and nothing more: no rate, premium,
+ * amount, tenure, return, provider name or promised outcome, and no field
+ * one could be dropped into.
+ */
+export interface ServiceProduct {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  /** What it is. */
+  summary: string;
+  /** Who it tends to suit — a situation, never a recommendation. */
+  whoFor: string;
+  /** What Earneazi does in a conversation about it. */
+  howWeHelp: string;
 }
 
 export interface GoalEntry {
@@ -175,6 +199,11 @@ export interface AboutPrinciple {
  */
 export interface TeamMember {
   id: string;
+  /**
+   * Founders lead the business and are named in the footer's attribution;
+   * the team appears beside them in the same card system (Enhancement B).
+   */
+  group: 'founder' | 'team';
   name: string;
   role: string;
   /**
@@ -215,6 +244,12 @@ export interface Credential {
   id: string;
   /** The claim, e.g. "AMFI-registered mutual fund distributor". */
   label: string;
+  /**
+   * The same claim in two or three words, for the header's credential line
+   * (Enhancement A), e.g. "AMFI Registered". A display form of `label`,
+   * never a separate claim — and it renders under exactly the same gate.
+   */
+  shortLabel?: string;
   /** What the identifier is called, e.g. "ARN". */
   identifierLabel: string;
   /** The evidence. Null until the client supplies it — the row stays hidden. */
@@ -241,12 +276,40 @@ export interface Testimonial {
   consentVerified: boolean;
 }
 
+/** The six SEBI riskometer levels, as printed on a scheme document. */
+export type FundRiskLevel = 'Low' | 'Low to moderate' | 'Moderate' | 'Moderately high' | 'High' | 'Very high';
+
+/**
+ * One scheme in the fund shortlist (Enhancement B). Everything past the name
+ * and category is null until confirmed, and the UI omits a null field rather
+ * than showing a placeholder. There is deliberately no NAV and no live data.
+ */
 export interface FundListing {
   id: string;
   name: string;
   category: string;
+  /** From the current scheme document — never inferred from the category. */
+  riskLevel: FundRiskLevel | null;
+  /** Minimum SIP instalment in rupees, from the scheme document. */
+  minSipAmount: number | null;
   oneYearReturnPct: number | null;
+  /** Annualised. */
   threeYearReturnPct: number | null;
+  /** Performance is shown only when this is true AND `performanceAsOf` is set. */
+  performanceVerified: boolean;
+  /** The as-of date printed beside any performance figure, e.g. '31 Aug 2026'. */
+  performanceAsOf: string | null;
+}
+
+/**
+ * A lending or insurance partner (Enhancement B). Shown only when the
+ * arrangement is verified, with the institution's own approved logo file or,
+ * without one, its name as text — never a redrawn or recoloured mark.
+ */
+export interface LendingPartner {
+  id: string;
+  name: string;
+  logo: { src: string; width: number; height: number } | null;
   verified: boolean;
 }
 

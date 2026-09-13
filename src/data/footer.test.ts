@@ -130,9 +130,12 @@ describe('brand statement and attribution', () => {
     expect(brandStatement({ credentials: since(true) })).toContain('since 2023');
   });
 
-  it('names each founder with their confirmed role and nothing else', () => {
+  it('names each founder with their confirmed role, and no one who is not a founder', () => {
     const line = founderAttribution();
-    teamMembers.forEach((member) => expect(line).toContain(`${member.name} (${member.role})`));
+    teamMembers.forEach((member) => {
+      if (member.group === 'founder') expect(line).toContain(`${member.name} (${member.role})`);
+      else expect(line).not.toContain(member.name);
+    });
   });
 });
 
@@ -151,16 +154,24 @@ describe('social row', () => {
     });
   });
 
-  it('gives every shipped icon a correct destination or none — never a guessed one', () => {
-    const entries = resolveSocialEntries({
-      ...base,
-      instagram: socialProfiles.find((profile) => profile.network === 'instagram'),
-    });
+  it('gives every shipped icon its verified destination — never a guessed one', () => {
+    const profile = socialProfiles.find((item) => item.network === 'instagram');
+    const [instagram, whatsapp, email, phone] = resolveSocialEntries({ ...base, instagram: profile });
 
-    const [instagram, whatsapp, email, phone] = entries;
-    expect(instagram.mode).toBe('none');
+    /* Instagram: the configured, verified profile — or nothing. */
+    if (profile?.verified && profile.url) {
+      expect(instagram).toMatchObject({ mode: 'external', href: profile.url });
+    } else {
+      expect(instagram.mode).toBe('none');
+    }
 
-    [whatsapp, email, phone].forEach((entry) => {
+    /* WhatsApp: the verified Earneazi line, +91 87921 51022, with a draft. */
+    expect(whatsapp.mode).toBe('external');
+    if (whatsapp.mode !== 'none') expect(whatsapp.href).toMatch(/^https:\/\/wa\.me\/918792151022\?text=/);
+    expect(whatsapp.ariaLabel).toMatch(/opens WhatsApp/);
+
+    /* Email and phone are still unconfirmed, so they go to the contact page. */
+    [email, phone].forEach((entry) => {
       expect(entry.mode).toBe('route');
       if (entry.mode === 'route') expectResolves(entry.href);
       expect(entry.ariaLabel).toMatch(/opens the contact page/);

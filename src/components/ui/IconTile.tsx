@@ -21,11 +21,23 @@ import { cn } from '@/lib/utils/cn';
  *     surface in its own right).
  *   · Fixed boxes — tiles line up down a column with no per-icon nudging.
  *
+ * ── Depth — Enhancement A ────────────────────────────────────────────────
+ *
+ * Each fill takes its place in the depth language, so a tile's state is a
+ * physical one as well as a colour: a resting tile is recessed into the
+ * page (`neutral`), a tinted tile carries the edge light (`brand`, `tone`),
+ * and a selected or leading tile is a lit solid (`solid`, `tone-solid`).
+ * Opening a disclosure row therefore reads as the icon coming up out of the
+ * surface and lighting, not just turning blue.
+ *
+ * `tone` and `tone-solid` read the subject tone channel, so a tile inside a
+ * `data-tone` ancestor wears that subject's accent in both themes.
+ *
  * `md` and `lg` clear the 44px touch target on their own. `xs` and `sm` are
  * decorative density only: never make one of them the sole hit area.
  */
 
-type IconTileFill = 'neutral' | 'brand' | 'solid' | 'band' | 'ghost';
+type IconTileFill = 'neutral' | 'brand' | 'solid' | 'tone' | 'tone-solid' | 'band' | 'ghost';
 type IconTileSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface IconTileProps {
@@ -48,11 +60,14 @@ interface IconTileProps {
 }
 
 const fillStyles: Record<IconTileFill, string> = {
-  neutral: 'bg-surface-sunken text-ink-secondary border border-divider',
-  brand: 'bg-brand-subtle text-brand-ink border border-brand/25',
+  /* Recessed: the tile sits into the page until something selects it. */
+  neutral: 'inset-well bg-surface-sunken text-ink-secondary border border-divider',
+  brand: 'edge-top bg-brand-subtle text-brand-ink border border-brand/20',
   /* The selected state. Surface change and border change together, never
-     border alone (Phase 0 §11). */
-  solid: 'bg-brand text-on-brand border border-transparent shadow-xs',
+     border alone (Phase 0 §11) — and now lit, so it reads as raised. */
+  solid: 'lit bg-brand text-on-brand border border-brand-pressed/30',
+  tone: 'edge-top bg-tone-tint text-tone border border-tone/20',
+  'tone-solid': 'lit lit-tone bg-tone-fill text-on-tone border border-transparent',
   band: 'bg-band-surface text-on-band border border-on-band/15',
   /* No box at all — the glyph alone, for dense rows where a container per
      item would out-weigh the text beside it. */
@@ -80,7 +95,7 @@ export function IconTile({
     <span
       className={cn(
         'inline-flex shrink-0 items-center justify-center',
-        'transition-[background-color,border-color,color] motion-safe:duration-fast ease-out',
+        'transition-[background-color,border-color,color,box-shadow] motion-safe:duration-fast ease-out',
         sizeStyles[size],
         fillStyles[fill],
         /* `ghost` carries its active state in the glyph's colour, because it
