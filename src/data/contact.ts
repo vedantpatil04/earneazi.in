@@ -1,4 +1,4 @@
-import type { ContactChannel } from '@/types/content';
+import type { ContactChannel, SocialProfile } from '@/types/content';
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
@@ -96,6 +96,22 @@ export const contactMapsUrl: string | null =
 
 /** True once the business can be reached by any confirmed channel at all. */
 export const hasVerifiedContactChannel = verifiedContactChannels.length > 0;
+
+/**
+ * Social profiles — Phase 6.
+ *
+ * The footer's social row must include Instagram, and must not guess where
+ * it points. So the profile is recorded here with no handle and no URL, and
+ * the footer renders it as visibly unavailable until both are supplied and
+ * `verified` is set. The URL must be the business's real instagram.com
+ * profile — data/footer.ts rejects anything else, verified or not.
+ *
+ * TO GO LIVE: set `handle` (without the @), `url`
+ * (e.g. 'https://www.instagram.com/<handle>/') and `verified: true`.
+ */
+export const socialProfiles: SocialProfile[] = [
+  { id: 'instagram', network: 'instagram', label: 'Instagram', handle: null, url: null, verified: false },
+];
 
 /** Builds the `href` for a channel, or null where the channel isn't actionable (office, hours). */
 export function contactChannelHref(channel: ContactChannel): string | null {

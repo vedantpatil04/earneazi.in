@@ -112,6 +112,19 @@ export default {
           surface: color('band-surface'),
           brand: color('band-brand'),
         },
+
+        /* ── Footer (Phase 6) — a themed surface and its hairline ────── */
+        footer: {
+          DEFAULT: color('footer'),
+          line: color('footer-line'),
+        },
+
+        /* ── Social marks (Phase 6) — the footer's social row only ───── */
+        social: {
+          whatsapp: 'rgb(var(--social-whatsapp) / <alpha-value>)',
+          email: 'rgb(var(--social-email) / <alpha-value>)',
+          phone: 'rgb(var(--social-phone) / <alpha-value>)',
+        },
         'on-band': {
           DEFAULT: color('on-band'),
           muted: color('on-band-muted'),
@@ -299,6 +312,8 @@ export default {
         lg: 'var(--shadow-lg)',
         /* Reserved for the pinned stage's active card. Nothing else. */
         '2xl': 'var(--shadow-2xl)',
+        /* Phase 6 — the social marks' edge, tuned per theme. */
+        social: 'var(--shadow-social)',
       },
 
       /*

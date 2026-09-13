@@ -64,7 +64,6 @@ import { WhatsAppGlyph } from './WhatsAppGlyph';
 const SUPPRESSING_SELECTOR = 'footer, [data-conversion-surface], [data-conversion-suppress]';
 
 export function FloatingContact() {
-  /* Phase 5. */
   const { pathname } = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [obstructed, setObstructed] = useState(false);

@@ -268,3 +268,50 @@ export interface BankingPartner {
   name: string;
   tagline: string;
 }
+
+/**
+ * A social profile (Phase 6).
+ *
+ * Distinct from `ContactChannel`: a profile is somewhere the business can
+ * be followed, not a line someone answers. Like every business fact on the
+ * site it is gated on `verified`, and `url` is never derived from the
+ * business name — a guessed handle can belong to someone else entirely.
+ */
+export interface SocialProfile {
+  id: string;
+  network: 'instagram';
+  label: string;
+  /** The handle without the @, for the accessible name. Null until supplied. */
+  handle: string | null;
+  /** The profile URL. Null until supplied — never guessed. */
+  url: string | null;
+  verified: boolean;
+}
+
+/**
+ * One notice in the footer's legal block (Phase 6, §27).
+ *
+ * `basis` records why the wording may appear at all. A notice with no
+ * approved or standard wording has `text: null` and renders nothing —
+ * regulatory copy is not written speculatively.
+ */
+export interface LegalNotice {
+  id: string;
+  /** What the notice covers, for whoever supplies the wording. Never rendered. */
+  subject: string;
+  text: string | null;
+  basis: 'industry-standard' | 'describes-this-site' | 'client-approved' | null;
+}
+
+/**
+ * A legal page the footer links to (Phase 6, §27). §27 requires these to be
+ * real routes rather than `#` placeholders, so a document links only once
+ * its route exists and its copy is approved.
+ */
+export interface LegalDocument {
+  id: string;
+  label: string;
+  /** A route that exists in App.tsx. Null until the page and its approved copy exist. */
+  route: string | null;
+  approved: boolean;
+}

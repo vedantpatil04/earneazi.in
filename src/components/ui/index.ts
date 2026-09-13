@@ -25,8 +25,9 @@ export type { SliderProps } from './Slider';
 export { Card } from './Card';
 export { Badge } from './Badge';
 export { Divider } from './Divider';
-export { Accordion } from './Accordion';
-export type { AccordionItem } from './Accordion';
+/* The one disclosure system (§26). `Accordion` — which unmounted closed
+   panels — was retired in Phase 6 when the FAQ moved onto this row. */
+export { DisclosureRow } from './DisclosureRow';
 export { EditorialImage } from './EditorialImage';
 
 /* LEGACY — adapter over SectionHeader, kept for pre-Phase-1 sections. */

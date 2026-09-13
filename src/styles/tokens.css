@@ -128,6 +128,29 @@
   --color-on-band-muted: var(--on-ink-300); /*  8.44:1 on band */
   --color-band-brand: var(--brand-500); /*  4.90:1 on band */
 
+  /* ── FOOTER — Phase 6 ────────────────────────────────────────────────
+     A themed surface rather than an ink band, so the close reads as part
+     of each theme: a cool blue-grey on paper that separates from the page
+     without going washed-out, and a lifted ink on dark (see the dark
+     block). Text on it uses the ordinary ink tokens. The deepest ground
+     that still keeps brand-blue text at AA was chosen.                  */
+  --color-footer: 234 240 247; /* #EAF0F7 — ink 15.14:1 · secondary 6.61:1 · muted 5.01:1 · brand 4.52:1 · border 3.17:1 */
+  --color-footer-line: 201 211 224; /* #C9D3E0 — decorative hairline */
+
+  /* ── SOCIAL MARKS — Phase 6 ──────────────────────────────────────────
+     The only third-party colours on the site, confined to the 44px marks
+     in the footer's social row. Instagram keeps its gradient and WhatsApp
+     its green because recognition is the point of those two marks; Email
+     and Phone take Earneazi's blue and the Phase 3 violet. Values were
+     chosen so a white glyph stays legible on each tile.                 */
+  --social-whatsapp: 18 140 126; /* #128C7E — white glyph 4.14:1 · tile vs footer 3.48:1 */
+  --social-instagram-a: 245 133 41; /* #F58529 */
+  --social-instagram-b: 221 42 123; /* #DD2A7B — white glyph 4.48:1 */
+  --social-instagram-c: 129 52 175; /* #8134AF — white glyph 6.90:1 */
+  --social-instagram-d: 81 91 212; /* #515BD4 — white glyph 5.53:1 */
+  --social-email: var(--color-brand); /* white glyph 5.19:1 */
+  --social-phone: var(--accent-borrow-fill); /* white glyph 6.87:1 light · 5.39:1 dark */
+
   /* Validation. */
   --color-success: var(--signal-positive); /* 5.55:1 on bg */
   --color-warning: var(--signal-caution); /* 5.90:1 on bg */
@@ -152,6 +175,8 @@
      glows — depth on paper is a cast shadow, and this is the only place on
      the site allowed the largest one. */
   --shadow-2xl: 0 32px 80px -24px rgb(10 27 46 / 0.18), 0 2px 8px -2px rgb(10 27 46 / 0.06);
+  /* Phase 6 — the social marks sit on paper with a soft contact shadow. */
+  --shadow-social: 0 1px 2px 0 rgb(10 27 46 / 0.16);
 
   /* ── SUBJECT ACCENTS ─────────────────────────────────────────────────
      Phase 3. Six accents, one per subject the site advises on, so a service
@@ -343,6 +368,14 @@
      ambient shadow with a light top edge — the same construction the rest
      of the dark theme uses for elevation, at the stage's scale. */
   --shadow-2xl: 0 40px 90px -30px rgb(0 0 0 / 0.75), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  /* Phase 6 — on the dark footer the blue and violet marks fall just under
+     3:1 against the ground, so every mark gets a 1px light edge instead of
+     a shadow that would not read. */
+  --shadow-social: 0 0 0 1px rgb(255 255 255 / 0.18);
+  /* Phase 6 — the footer lifts off the page rather than sinking to black. */
+  --color-footer: 15 38 64; /* #0F2640 — text 12.91:1 · secondary 8.95:1 · muted 6.19:1 · brand-400 6.07:1 · border 3.89:1 */
+  --color-footer-line: 42 74 106; /* #2A4A6A */
+  --social-whatsapp: 26 158 75; /* #1A9E4B — white glyph 3.48:1 · tile vs footer 4.40:1 */
 
 
   /* ── SUBJECT ACCENTS — DARK ──────────────────────────────────────────

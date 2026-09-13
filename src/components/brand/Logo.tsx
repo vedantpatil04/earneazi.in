@@ -9,13 +9,18 @@ import { cn } from '@/lib/utils/cn';
  * picks a lockup; the lockup decides size, weight, tracking and dot
  * proportion. There is no per-page recreation and no ad-hoc scaling.
  *
- *   primary    nav and footer. Wordmark plus dot.
+ *   primary    nav. Wordmark plus dot.
  *   compact    narrow bars and constrained surfaces, where the primary
  *              lockup would fall below its 112px minimum width.
  *   monogram   the square mark, for surfaces too tight for any wordmark —
  *              the mobile sheet header, a future avatar or app icon.
- *   oversized  the footer brand band. Optically tracked, and the only
- *              lockup the dimensional treatment in §9 may be applied to.
+ *   footer     the footer's brand anchor. One step up from the nav lockup,
+ *              so the mark reads as the page's sign-off rather than as a
+ *              second navigation bar, and deliberately nowhere near a poster:
+ *              the footer's content is the footer, not the wordmark.
+ *   oversized  a display-scale lockup, reserved for a future brand band.
+ *              Optically tracked, and the only lockup the dimensional
+ *              treatment in §9 may be applied to.
  *
  * ── The typographic treatment ────────────────────────────────────────────
  *
@@ -43,12 +48,18 @@ import { cn } from '@/lib/utils/cn';
  * call site picks it up untouched.
  */
 
-type LogoLockup = 'primary' | 'compact' | 'monogram' | 'oversized';
+type LogoLockup = 'primary' | 'compact' | 'monogram' | 'footer' | 'oversized';
 
 const lockupStyles: Record<LogoLockup, string> = {
   primary: 'text-[1.0625rem] md:text-[1.1875rem] tracking-[0.1em] font-extrabold',
   compact: 'text-[0.9375rem] tracking-[0.09em] font-extrabold',
   monogram: 'text-[0.9375rem] tracking-[0.02em] font-extrabold',
+  /* 26px on a phone, 30px from a tablet up — a clear step above the nav's
+     19px, and fixed rather than viewport-scaled so the mark keeps the same
+     weight against the footer grid at every width. Tracking eases slightly
+     from the nav lockup's 0.1em, which starts to read as spaced-out above
+     24px. */
+  footer: 'text-[1.625rem] md:text-[1.875rem] tracking-[0.085em] font-extrabold',
   /* Minimum 96px cap height at desktop, per §7. Tracked tighter than the
      small lockups, because tracking that reads as open at 17px reads as
      falling apart at 120px. */
@@ -59,6 +70,7 @@ const dotStyles: Record<LogoLockup, string> = {
   primary: 'h-[0.3em] w-[0.3em]',
   compact: 'h-[0.3em] w-[0.3em]',
   monogram: 'hidden',
+  footer: 'h-[0.26em] w-[0.26em]',
   oversized: 'h-[0.17em] w-[0.17em]',
 };
 
@@ -115,7 +127,7 @@ interface LogoMarkProps {
 
 /**
  * The mark with no link or landmark behaviour, for the places it is
- * decorative — inside the mobile sheet header, or the footer brand band.
+ * decorative — inside the mobile sheet header, or a brand band.
  */
 export function LogoMark({ lockup = 'primary', className }: LogoMarkProps) {
   const Vector = brand.logo.vectorAsset;

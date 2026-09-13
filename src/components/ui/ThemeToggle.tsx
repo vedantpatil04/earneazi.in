@@ -136,7 +136,9 @@ export function ThemeControl({ className, tone = 'default', label = 'Theme' }: T
                 setPreference(target.value);
               }}
               className={cn(
-                'inline-flex min-h-[2.5rem] items-center gap-2 rounded-[calc(var(--radius-action)-2px)] px-3 text-body-sm font-medium',
+                /* 44px: the touch-target floor. These were 40px, which fell short on
+                   the phone footer where this control is the last thing on the page. */
+                'inline-flex min-h-11 items-center gap-2 rounded-[calc(var(--radius-action)-2px)] px-3 text-body-sm font-medium',
                 'transition-[background-color,color] motion-safe:duration-instant ease-out',
                 selected
                   ? onBand

@@ -1,4 +1,4 @@
-import type { FaqItem } from '@/types/content';
+import type { FaqCategory, FaqItem } from '@/types/content';
 
 /**
  * FAQ content.
@@ -9,8 +9,19 @@ import type { FaqItem } from '@/types/content';
  * regulatory position — those are all unverified, and an FAQ is exactly
  * where such a claim would slip in unnoticed.
  *
+ * §26 flags the old site's FAQ for rewrite — "completely free", "within 1
+ * working day", "20+ banks" — and none of that wording is here. Every answer
+ * still needs the client's sign-off before launch ([VERIFY]); the rule for
+ * adding one is that it must be true without a figure behind it.
+ *
  * Kept deliberately short. A page of forty questions is a place people go
- * to give up; these are the ones that actually come up first.
+ * to give up; these are the ones that actually come up first. At eleven
+ * questions the page stays below §26's threshold for search or filtering —
+ * below about twelve, a search box is chrome.
+ *
+ * Each `id` is a stable public address: `/faq#<id>` opens that question.
+ * Renaming one breaks every link anyone has shared, so treat ids as
+ * permanent once published.
  */
 export const faqItems: FaqItem[] = [
   {
@@ -92,5 +103,43 @@ export const faqItems: FaqItem[] = [
   },
 ];
 
-/** Section order on the FAQ page. Declared once so the page and any future search stay in step. */
+/** Section order on the FAQ page. Declared once so the page, the JSON-LD and any future search stay in step. */
 export const faqCategoryOrder = ['Getting started', 'Investing', 'Insurance', 'Loans'] as const;
+
+export interface FaqGroup {
+  category: FaqCategory;
+  /** Stable id for the category heading — the target of `/faq#faq-investing`. */
+  headingId: string;
+  items: FaqItem[];
+}
+
+/** `Getting started` → `faq-getting-started`. Stable, URL-safe, and unchanged from the previous build. */
+export function faqHeadingId(category: string): string {
+  return `faq-${category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`;
+}
+
+/**
+ * The questions as the FAQ page renders them: grouped by category, in
+ * `faqCategoryOrder`, with empty categories dropped.
+ *
+ * This is the single source for what is on the page. The FAQ route renders
+ * from it and the FAQPage structured data is built from it, so the JSON-LD
+ * can never describe a question the page does not show.
+ */
+export function groupFaqItems(items: FaqItem[] = faqItems): FaqGroup[] {
+  return faqCategoryOrder
+    .map((category) => ({
+      category,
+      headingId: faqHeadingId(category),
+      items: items.filter((item) => item.category === category),
+    }))
+    .filter((group) => group.items.length > 0);
+}
+
+/** Every question the page renders, in render order. */
+export function visibleFaqItems(items: FaqItem[] = faqItems): FaqItem[] {
+  return groupFaqItems(items).flatMap((group) => group.items);
+}

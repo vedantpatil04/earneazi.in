@@ -199,6 +199,32 @@
   }
 
   /*
+    INSTAGRAM MARK — Phase 6.
+
+    The one gradient fill outside a chart, and a deliberate exception to
+    §10.3: it is Instagram's own brand treatment on a 44px mark, not a
+    surface, and recognition is the whole job of that mark. The angle and
+    stops put the white glyph over the pink-to-purple range, where it
+    measures 4.48:1 and above. Colours live in tokens.css.
+  */
+  .social-tile-instagram {
+    background-image: linear-gradient(
+      45deg,
+      rgb(var(--social-instagram-a)) 0%,
+      rgb(var(--social-instagram-b)) 38%,
+      rgb(var(--social-instagram-c)) 72%,
+      rgb(var(--social-instagram-d)) 100%
+    );
+  }
+
+  @media (forced-colors: active) {
+    .social-tile-instagram {
+      background-image: none;
+      border: 1px solid CanvasText;
+    }
+  }
+
+  /*
     DIMENSIONAL TYPE — Phase 0 §9, infrastructure only.
     Paired with components/brand/DimensionalText.tsx. Not applied anywhere
     yet; its intended home is the oversized footer wordmark (Phase 6).
@@ -305,6 +331,42 @@
 
   .rail-x > * {
     scroll-snap-align: start;
+  }
+
+  /*
+    THE DRAWN UNDERLINE — Phase 6, §27.
+
+    "Link hover/focus: underline draws from left over dur-instant; no
+    colour-only change." Applied to the label span inside a link, so the
+    link itself can be a padded 44px target while the line stays under
+    the words. It is a background sized from 0% to 100% rather than an
+    animated text-decoration, which cannot be drawn directionally.
+
+    The gradient here is a 1px rule in currentColor, not a surface fill.
+    Under reduced motion the global safety net makes it appear at once.
+  */
+  .link-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    padding-bottom: 1px;
+    transition: background-size var(--dur-instant) var(--ease-out);
+  }
+
+  a:hover .link-draw,
+  a:focus-visible .link-draw,
+  .link-draw:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Forced colours strip background images, which would remove the
+     underline entirely. A real text-decoration restores it. */
+  @media (forced-colors: active) {
+    a:hover .link-draw,
+    a:focus-visible .link-draw {
+      text-decoration: underline;
+    }
   }
 
   /*
