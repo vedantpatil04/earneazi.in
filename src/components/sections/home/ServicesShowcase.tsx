@@ -1,6 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
@@ -9,14 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Reveal } from '@/components/motion/Reveal';
 import { clipRevealVariants } from '@/lib/motion/variants';
-import { duration, easing, travel } from '@/lib/motion/tokens';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import { useScrollSpy } from '@/hooks/useScrollSpy';
+import { useScrollStory, useStoryFrame } from '@/hooks/useScrollStory';
+import type { ScrollStory } from '@/hooks/useScrollStory';
 import { servicePillars } from '@/data/services';
 import type { ServiceCategories, ServicePillar } from '@/types/content';
 import { cn } from '@/lib/utils/cn';
 import { serviceMarks } from './ServiceVisuals';
+import { StoryHeadings, StoryTrack } from './StoryStage';
+import type { StoryItem } from './StoryStage';
 import { ConversationCta } from '@/components/conversion/ConversationCta';
 import { serviceConversation } from '@/lib/contact/conversation';
 
@@ -24,80 +24,66 @@ import { serviceConversation } from '@/lib/contact/conversation';
  * "Three things we do, coordinated by one person." — Phase 3.
  *
  * ═════════════════════════════════════════════════════════════════════════
- * TWO EXPERIENCES, ONE STORY
+ * ONE STORY, READ BY SCROLLING
  * ═════════════════════════════════════════════════════════════════════════
  *
- * The section is deliberately built twice, because a pointer with a long
- * scroll and a thumb on a 360px screen are not the same instrument and the
- * phase brief is explicit that the small version must not be the large one
- * shrunk. Both tell the same three services in the same order with the same
- * content — `ServicePanel` is shared, so there is one copy of the words —
- * and they differ only in how you move between them.
+ * One service card occupies one place, and scrolling moves the story from
+ * 01 to 02 to 03: the reader reads a card, it holds with its end on screen,
+ * and further scrolling draws the next card up into the same place while the
+ * current one recedes — continuously, a little scroll for a little change
+ * (hooks/useScrollStory.ts). After 03 the section releases into the page.
  *
- *   ≥1024px   PINNED PREMISE (Phase 0 §19.2, the device measured off the
- *             motion reference). The left column holds position while the
- *             three panels travel past it. The pinned column is not a static
- *             caption: it names the service you are currently on, in display
- *             type, and re-states it as the panels advance — so the premise
- *             and the detail are visibly one system rather than a heading
- *             followed by three unrelated cards.
+ *   ≥1024px   The approved two columns. The left column — progress, the
+ *             service being read, the numbered rail — is pinned beside the
+ *             card (Phase 0 §19.2); the meter, the title and the rail's
+ *             marker all follow the scroll continuously.
  *
- *   <1024px   TAB DECK. A real ARIA tablist above a single panel. Tapping is
- *             the whole interaction, the strip scrolls horizontally if the
- *             labels need it, targets are 44px, and the panel slides in from
- *             the side you moved toward so the change has a direction. No
- *             pinning, no scroll-linked anything, nothing waiting on a
- *             scroll position — a thumb should not have to scroll three
- *             viewports to see the third service.
+ *   <1024px   The numbered headings stacked vertically above the card,
+ *             pinned while the story plays (StoryStage.tsx), with the card
+ *             beneath them.
  *
- * ── How "active" is decided, and why it is honest ───────────────────────
- *
- * On desktop the pinning is `position: sticky` and nothing else: no scroll
- * listener moves a pixel, so the composition tracks the finger exactly and
- * survives a dragged scrollbar, a flung trackpad and an anchor jump into the
- * middle of the section. `useScrollSpy` only *reports* which panel is being
- * read, so the rail's `aria-current`, the progress meter and the pinned
- * title stay true to what is on screen. Clicking a rail row scrolls to that
- * panel — scroll progression and direct selection are the same control,
- * which is what the brief asks for.
+ * The rail rows and the headings are buttons: choosing one scrolls to that
+ * service, so the scroll position stays the only state there is.
  *
  * ── Colour ──────────────────────────────────────────────────────────────
  *
- * Each service owns an accent, declared once as `data-tone` on the panel and
- * the rail row (see the SUBJECT TONE CHANNEL in globals.css). Every
- * accent-coloured thing under it — the leading edge, the icon tile, the
- * bullet discs, the category chips, the mark's strokes and fills — reads the
- * tone channel, so this file names no colour at all and both themes get
- * independently tuned instances for free.
- *
- * §10.3's three-visible-colours rule still holds, because only the *active*
- * service shows its accent at full strength; the other two sit neutral.
- * That is also what makes the active state legible without moving anything.
- *
- * ── Motion budget ───────────────────────────────────────────────────────
- *
- * One device: the pin. Everything else is a state change — a border, a fill,
- * a cross-fade of the pinned title, a progress meter tracking scroll. No
- * card lifts, nothing parallaxes, nothing travels further than the 24px
- * content-entrance budget, and every panel renders its final state in base
- * CSS, so the section is complete and readable with scripting or animation
- * doing nothing at all.
+ * Each service owns an accent, declared once as `data-tone` on the card and
+ * its rail row (see the SUBJECT TONE CHANNEL in globals.css). Every
+ * accent-coloured thing under it reads the tone channel, so this file names
+ * no colour and both themes get independently tuned instances for free.
  */
+
+const storyItems: StoryItem[] = servicePillars.map((service) => ({
+  id: service.id,
+  title: service.title,
+  icon: service.icon,
+}));
+
+/** One rail row, in rem — the marker's glide is a multiple of it. */
+const RAIL_ROW_REM = 3.25;
 
 export function ServicesShowcase() {
   /*
     Read synchronously on first render rather than in an effect, so the
-    correct experience is the first thing painted instead of the mobile deck
-    swapping to the pinned layout a frame later.
+    correct composition is the first thing painted.
   */
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const total = servicePillars.length;
+  const story = useScrollStory({
+    count: total,
+    layout: isDesktop ? 'side' : 'stacked',
+    reducedMotion: prefersReducedMotion,
+  });
+
+  const panel = (index: number) => <ServicePanel service={servicePillars[index]} index={index} />;
 
   return (
     /*
       A chapter, entered as a layer: the sunken ground and the rounded top
       edge riding over the goals section above make the boundary a change of
-      surface rather than a gap (§19.1). The overlap is `slab`'s own margin,
-      so it cannot leave a seam if the section above changes height.
+      surface rather than a gap (§19.1). No `overflow` on this section — the
+      story inside it pins.
     */
     <Section
       id="services"
@@ -118,374 +104,171 @@ export function ServicesShowcase() {
           </p>
         </Reveal>
 
-        {isDesktop ? <PinnedServices /> : <ServiceDeck />}
+        {isDesktop ? (
+          <div className="mt-14 grid grid-cols-12 gap-x-12">
+            <div className="col-span-4">
+              <PinnedColumn story={story} />
+            </div>
+            <StoryTrack className="col-span-8" story={story} count={total} renderPanel={panel} />
+          </div>
+        ) : (
+          <div className="mt-10">
+            <StoryHeadings story={story} items={storyItems} label="Our services" noun="Service" ground="sunken" />
+            <StoryTrack story={story} count={total} renderPanel={panel} />
+            <p className="mt-8">
+              <Link to="/services" variant="standalone" trailingIcon={<ArrowRight size={15} aria-hidden="true" />}>
+                All services in detail
+              </Link>
+            </p>
+          </div>
+        )}
       </Container>
     </Section>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   DESKTOP — pinned premise, travelling panels
+   DESKTOP — the pinned premise
    ═══════════════════════════════════════════════════════════════════════ */
 
-function PinnedServices() {
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const panelsRef = useRef<HTMLOListElement>(null);
+function PinnedColumn({ story }: { story: ScrollStory }) {
   const total = servicePillars.length;
-  const { register, activeIndex, goTo } = useScrollSpy({ count: total });
+  const active = servicePillars[story.dominant];
+  const meter = useRef<HTMLSpanElement>(null);
+  const marker = useRef<HTMLSpanElement>(null);
+  const titles = useRef<(HTMLDivElement | null)[]>([]);
 
-  /*
-    Scroll progress across the panels, as a motion value — it never causes a
-    React render, so the meter can track the scroll position continuously
-    while the rest of the section re-renders two or three times in total.
-
-    The offset brackets the reading line rather than the viewport edges, so
-    the meter reaches full exactly as the last panel arrives rather than a
-    viewport later.
-  */
-  const { scrollYProgress } = useScroll({ target: panelsRef, offset: ['start 0.6', 'end 0.75'] });
-  const meterScale = useTransform(scrollYProgress, [0, 1], [0.02, 1]);
-
-  const active = servicePillars[activeIndex];
-  const ActiveIcon = active.icon;
+  useStoryFrame(story, (frame) => {
+    if (meter.current) meter.current.style.transform = `scaleX(${Math.max(0.02, frame.overall).toFixed(4)})`;
+    if (marker.current) {
+      marker.current.style.transform = `translate3d(0, ${(frame.marker * RAIL_ROW_REM).toFixed(3)}rem, 0)`;
+    }
+    frame.opacities.forEach((opacity, index) => {
+      const title = titles.current[index];
+      if (!title) return;
+      title.style.opacity = opacity.toFixed(3);
+      title.style.visibility = opacity < 0.01 ? 'hidden' : 'visible';
+    });
+  });
 
   return (
-    <div className="mt-14 grid grid-cols-12 gap-x-12">
-      <div className="col-span-4">
-        {/*
-          The premise, pinned. `sticky` is CSS and costs nothing per frame;
-          §19.2 nonetheless switches it off under reduced motion, because a
-          column that holds still while its neighbour moves is itself a
-          motion effect to anyone who has asked for none.
-        */}
-        <div className={cn(!prefersReducedMotion && 'sticky top-[calc(var(--header-height)_+_2rem)]')}>
-          {/* ── Progress ───────────────────────────────────────────────── */}
-          <div className="flex items-baseline justify-between">
-            <span className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
-              Now reading
-            </span>
-            <span className="font-display text-legal font-semibold tabular text-ink-muted">
-              {String(activeIndex + 1).padStart(2, '0')} <span aria-hidden="true">/</span>{' '}
-              {String(total).padStart(2, '0')}
-            </span>
-          </div>
-
-          {/*
-            One continuous meter with a tick per service, rather than three
-            separate bars: progress through the section is a single quantity
-            and should be drawn as one. It is `aria-hidden` because the rail
-            underneath already states position accessibly, and a second
-            announcement of the same fact is noise.
-          */}
-          <div aria-hidden="true" className="relative mt-3 h-[3px] w-full overflow-hidden rounded-pill bg-divider">
-            {prefersReducedMotion ? (
-              <span
-                className="absolute inset-y-0 left-0 rounded-pill bg-tone"
-                style={{ width: ((activeIndex + 1) / total) * 100 + '%' }}
-                data-tone={active.id}
-              />
-            ) : (
-              <motion.span
-                data-tone={active.id}
-                className="absolute inset-y-0 left-0 w-full origin-left rounded-pill bg-tone"
-                style={{ scaleX: meterScale }}
-              />
-            )}
-          </div>
-
-          {/* ── The service being read ─────────────────────────────────── */}
-          <div className="mt-7 min-h-[8.5rem]" data-tone={active.id} aria-hidden="true">
-            {/* Keyed remount, not AnimatePresence — see the note on the deck
-                panel below for why  is not used anywhere in
-                this section. */}
-            <motion.div
-              key={active.id}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.base, ease: easing.out }}
-            >
-                <span className="lit lit-tone inline-flex h-11 w-11 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
-                  <ActiveIcon size={20} strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <p className="mt-4 text-display-xs text-ink-display">{active.title}</p>
-                <p className="mt-1.5 text-body-sm font-medium text-tone">{active.tagline}</p>
-            </motion.div>
-          </div>
-
-          {/* ── The rail ───────────────────────────────────────────────
-              Buttons in a group, not a tablist, and deliberately so. All
-              three panels are on the page and readable at once; these rows
-              scroll you to one, they do not reveal it. Calling them tabs
-              would promise a disclosure that is not happening, so they get
-              no roving tabindex and no arrow-key capture either: every row
-              is in the tab order, Enter activates it, and the arrow keys go
-              on scrolling the page the way a reader expects them to.
-
-              The goals section below IS a tablist, and has the full roving
-              tabindex and arrow-key behaviour — because there, one panel
-              genuinely replaces another. */}
-          <div
-            className="mt-6 border-t border-divider"
-            role="group"
-            aria-label="Choose a service"
-          >
-            {servicePillars.map((service, index) => {
-              const isActive = index === activeIndex;
-              const RailIcon = service.icon;
-
-              return (
-                <button
-                  key={service.id}
-                  id={'service-rail-' + service.id}
-                  type="button"
-                  data-tone={service.id}
-                  onClick={() => goTo(index)}
-                  aria-current={isActive ? 'true' : undefined}
-                  className={cn(
-                    'relative flex min-h-[3.25rem] w-full items-center gap-3 border-b border-divider pl-4 pr-2 text-left',
-                    'transition-colors duration-base ease-out',
-                    isActive ? 'text-ink-display' : 'text-ink-secondary hover:bg-hovered hover:text-ink'
-                  )}
-                >
-                  {/*
-                    The marker moves between rows as one object rather than
-                    switching off here and on there — a shared element, which
-                    is the one place §18.3 allows that device outside the nav.
-                  */}
-                  {isActive &&
-                    (prefersReducedMotion ? (
-                      <span aria-hidden="true" className="absolute inset-y-2 left-0 w-[3px] rounded-pill bg-tone" />
-                    ) : (
-                      <motion.span
-                        aria-hidden="true"
-                        layoutId="service-rail-marker"
-                        className="absolute inset-y-2 left-0 w-[3px] rounded-pill bg-tone"
-                        transition={{ type: 'spring', stiffness: 260, damping: 30 }}
-                      />
-                    ))}
-
-                  <span
-                    className={cn(
-                      'font-display text-legal font-semibold tabular',
-                      isActive ? 'text-tone' : 'text-ink-muted'
-                    )}
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <RailIcon
-                    size={17}
-                    strokeWidth={isActive ? 1.75 : 1.5}
-                    aria-hidden="true"
-                    className={cn('shrink-0', isActive ? 'text-tone' : 'text-ink-muted')}
-                  />
-                  <span className="truncate font-display text-title-sm font-semibold">{service.title}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="mt-6">
-            <Link to="/services" variant="standalone" trailingIcon={<ArrowRight size={15} aria-hidden="true" />}>
-              All services in detail
-            </Link>
-          </p>
-        </div>
+    /* The premise, pinned beside the card for as long as the story plays. */
+    <div className="sticky top-[calc(var(--header-height)_+_2rem)]">
+      {/* ── Progress ───────────────────────────────────────────────── */}
+      <div className="flex items-baseline justify-between">
+        <span className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          Now reading
+        </span>
+        <span className="font-display text-legal font-semibold tabular text-ink-muted">
+          {String(story.dominant + 1).padStart(2, '0')} <span aria-hidden="true">/</span>{' '}
+          {String(total).padStart(2, '0')}
+        </span>
       </div>
 
       {/*
-        The travelling counterpart.
-
-        `relative` because it is the scroll target the progress meter is
-        measured against, and Framer cannot compute an offset inside a
-        statically positioned container — it warns about exactly this. It is
-        safe here: position alone creates no stacking context without a
-        z-index, and the pinned column is a sibling rather than a child.
-
-        What must stay off this list is `overflow` and `z-index`: either one
-        would make it a scroll container or a stacking context and break the
-        sticky relationship the section is built on.
-
-        No entrance wrapper on the panels, deliberately. These three are the
-        section's content, not its decoration: a scroll-triggered reveal
-        would start them at opacity 0 and leave them there if the
-        IntersectionObserver never fired, which is precisely the failure
-        §18.2.4 exists to prevent and the one defect the motion reference is
-        criticised for in §4.3. They render their final state in base CSS and
-        are readable with scripting doing nothing at all. It would also be a
-        second signature device in a section that already has one (the pin),
-        which §18.2.2 does not allow.
+        One continuous meter across the whole story, following the scroll.
+        It is `aria-hidden` because the rail underneath already states
+        position accessibly, and a second announcement of the same fact is
+        noise.
       */}
-      <ol ref={panelsRef} className="relative col-span-8 flex flex-col gap-8">
-        {servicePillars.map((service, index) => (
-          <li key={service.id} ref={register(index)} className="scroll-mt-[calc(var(--header-height)_+_2rem)]">
-            <ServicePanel service={service} index={index} active={index === activeIndex} />
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
+      <div aria-hidden="true" className="relative mt-3 h-[3px] w-full overflow-hidden rounded-pill bg-divider">
+        <span
+          ref={meter}
+          data-tone={active.id}
+          className="absolute inset-0 origin-left rounded-pill bg-tone transition-colors duration-slow ease-out"
+        />
+      </div>
 
-/* ═══════════════════════════════════════════════════════════════════════
-   MOBILE / TABLET — tab deck
-   ═══════════════════════════════════════════════════════════════════════ */
+      {/* ── The service being read ─────────────────────────────────────
+          All three, stacked in one place, each as visible as its card. */}
+      <div className="mt-7 grid min-h-[8.5rem]" aria-hidden="true">
+        {servicePillars.map((service, index) => {
+          const Icon = service.icon;
+          return (
+            <div
+              key={service.id}
+              ref={(node) => {
+                titles.current[index] = node;
+              }}
+              data-tone={service.id}
+              className={cn('col-start-1 row-start-1', index > 0 && 'invisible opacity-0')}
+            >
+              <span className="lit lit-tone inline-flex h-11 w-11 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
+                <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <p className="mt-4 text-display-xs text-ink-display">{service.title}</p>
+              <p className="mt-1.5 text-body-sm font-medium text-tone">{service.tagline}</p>
+            </div>
+          );
+        })}
+      </div>
 
-function ServiceDeck() {
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const [activeIndex, setActiveIndex] = useState(0);
-  /* Which way the reader moved, so the incoming panel enters from that side.
-     Direction is the only thing this animation encodes; without it a slide
-     would be decoration. */
-  const [direction, setDirection] = useState(0);
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const total = servicePillars.length;
+      {/* ── The rail ───────────────────────────────────────────────────
+          Buttons in a group: each scrolls to its service. The marker is one
+          object that glides between rows with the scroll. */}
+      <div className="relative mt-6 border-t border-divider" role="group" aria-label="Choose a service">
+        <span
+          ref={marker}
+          aria-hidden="true"
+          data-tone={active.id}
+          className="pointer-events-none absolute left-0 top-2 h-9 w-[3px] rounded-pill bg-tone transition-colors duration-slow ease-out"
+        />
+        {servicePillars.map((service, index) => {
+          const isActive = index === story.dominant;
+          const RailIcon = service.icon;
 
-  const select = useCallback(
-    (next: number, { focus = false }: { focus?: boolean } = {}) => {
-      setDirection(next > activeIndex ? 1 : -1);
-      setActiveIndex(next);
-      const tab = document.getElementById('service-tab-' + servicePillars[next].id);
-      if (focus) tab?.focus();
-      /* Keep the chosen tab on screen when the strip is scrolled. `nearest`
-         so a tab already visible is not yanked to the edge. */
-      tab?.scrollIntoView({
-        behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        inline: 'nearest',
-        block: 'nearest',
-      });
-    },
-    [activeIndex, prefersReducedMotion]
-  );
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    switch (event.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        event.preventDefault();
-        select((activeIndex + 1) % total, { focus: true });
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        event.preventDefault();
-        select((activeIndex - 1 + total) % total, { focus: true });
-        break;
-      case 'Home':
-        event.preventDefault();
-        select(0, { focus: true });
-        break;
-      case 'End':
-        event.preventDefault();
-        select(total - 1, { focus: true });
-        break;
-      default:
-        break;
-    }
-  };
-
-  const active = servicePillars[activeIndex];
-  const enter = prefersReducedMotion ? 0 : travel.md;
-
-  return (
-    <div className="mt-10">
-      {/* The strip. `rail-x` is the site's one designed horizontal scroller
-          (globals.css) — three labels fit on most phones and scroll on a
-          360px one rather than wrapping into a second row. */}
-      <div className="relative">
-        <div
-          ref={tabsRef}
-          role="tablist"
-          aria-label="Our services"
-          aria-orientation="horizontal"
-          onKeyDown={onKeyDown}
-          className="rail-x rail-fade -mx-gutter gap-2 px-gutter pb-1"
-        >
-          {servicePillars.map((service, index) => {
-            const isActive = index === activeIndex;
-            const TabIcon = service.icon;
-
-            return (
-              <button
-                key={service.id}
-                id={'service-tab-' + service.id}
-                type="button"
-                role="tab"
-                data-tone={service.id}
-                aria-selected={isActive}
-                aria-controls={'service-tabpanel-' + service.id}
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => select(index)}
+          return (
+            <button
+              key={service.id}
+              id={'service-rail-' + service.id}
+              type="button"
+              data-tone={service.id}
+              onClick={() => story.select(index)}
+              aria-current={isActive ? 'step' : undefined}
+              className={cn(
+                'relative flex h-[3.25rem] w-full items-center gap-3 border-b border-divider pl-4 pr-2 text-left',
+                'transition-colors duration-base ease-out',
+                isActive ? 'text-ink-display' : 'text-ink-secondary hover:bg-hovered hover:text-ink'
+              )}
+            >
+              <span
                 className={cn(
-                  /* 44px minimum on the short axis, and the whole chip is the
-                     target — there is no separate affordance inside it. */
-                  'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill border px-4',
-                  'font-display text-body-sm font-semibold',
-                  'transition-[background-color,border-color,color] duration-fast ease-out',
-                  isActive
-                    ? 'lit lit-tone border-transparent bg-tone-fill text-on-tone'
-                    : 'edge-top border-divider bg-surface text-ink-secondary hover:border-border hover:text-ink'
+                  'font-display text-legal font-semibold tabular transition-colors duration-base ease-out',
+                  isActive ? 'text-tone' : 'text-ink-muted'
                 )}
               >
-                <TabIcon size={16} strokeWidth={isActive ? 1.75 : 1.5} aria-hidden="true" />
-                <span className="whitespace-nowrap">{service.shortTitle}</span>
-              </button>
-            );
-          })}
-        </div>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <RailIcon
+                size={17}
+                strokeWidth={isActive ? 1.75 : 1.5}
+                aria-hidden="true"
+                className={cn('shrink-0 transition-colors duration-base ease-out', isActive ? 'text-tone' : 'text-ink-muted')}
+              />
+              <span className="truncate font-display text-title-sm font-semibold">{service.title}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div
-        id={'service-tabpanel-' + active.id}
-        role="tabpanel"
-        aria-labelledby={'service-tab-' + active.id}
-        tabIndex={0}
-        className="mt-6 focus-visible:outline-none"
-      >
-        {/*
-          Keyed remount rather than AnimatePresence.
-
-          Two reasons, one of them a defect.  holds the incoming
-          panel until the outgoing one has finished exiting, which under
-          React's StrictMode double-invocation deadlocks outright — the
-          exiting child never signals that it is safe to remove and the panel
-          stops changing at all. It is also the wrong shape for a tab strip:
-          a tap should be answered now, not after a 240ms exit that carries
-          no information the entrance does not already carry.
-
-          Changing the key remounts the panel, so React swaps the content
-          immediately and Framer runs only the entrance — from the side the
-          reader moved toward, which is the one thing the movement encodes.
-        */}
-        <motion.div
-          key={active.id}
-          initial={{ opacity: 0, x: direction * enter }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.base, ease: easing.out }}
-        >
-          <ServicePanel service={active} index={activeIndex} active />
-        </motion.div>
-      </div>
-
-      <p className="mt-8">
+      <p className="mt-6">
         <Link to="/services" variant="standalone" trailingIcon={<ArrowRight size={15} aria-hidden="true" />}>
           All services in detail
         </Link>
+      </p>
+
+      <p aria-live="polite" className="sr-only">
+        {`Service ${story.dominant + 1} of ${total}: ${active.title}`}
       </p>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   THE PANEL — one component, both experiences
+   THE CARD — the approved service card
    ═══════════════════════════════════════════════════════════════════════ */
 
-interface ServicePanelProps {
-  service: ServicePillar;
-  index: number;
-  /** Raises the accent. Always true in the tab deck, where only one shows. */
-  active: boolean;
-}
-
-function ServicePanel({ service, index, active }: ServicePanelProps) {
+function ServicePanel({ service, index }: { service: ServicePillar; index: number }) {
   const Icon = service.icon;
   const Mark = serviceMarks[service.id];
   /* Two labelled groups where the service defines them, the flat list
@@ -497,49 +280,21 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
     <article
       data-tone={service.id}
       aria-labelledby={'service-' + service.id + '-title'}
-      className={cn(
-        'relative overflow-hidden rounded-band border bg-surface',
-        'transition-[border-color,box-shadow] duration-base ease-out',
-        /* Enhancement A: the panel being read is raised; the others rest
-           flat on the page, so the active one reads as nearer, not just
-           brighter. */
-        active ? 'raised border-tone/35' : 'border-divider'
-      )}
+      className="raised relative overflow-hidden rounded-band border border-tone/35 bg-surface"
     >
-      {/* The leading edge. The panel's accent, stated once at its top — the
-          only place the service's colour appears at full strength on an
-          inactive panel, so the set still reads as three coloured subjects
-          when none of them is active. */}
-      <span
-        aria-hidden="true"
-        className={cn(
-          'absolute inset-x-0 top-0 h-1 bg-tone-fill transition-opacity duration-base ease-out',
-          active ? 'opacity-100' : 'opacity-40'
-        )}
-      />
-      {/* The field behind the header, so the panel has depth without a
+      {/* The leading edge: the service's accent, stated once at its top. */}
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-tone-fill" />
+      {/* The field behind the header, so the card has depth without a
           gradient surface fill (§10.3). */}
       <span
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-pill bg-tone blur-3xl',
-          'transition-opacity duration-slow ease-out',
-          active ? 'opacity-[0.14]' : 'opacity-[0.05]'
-        )}
+        className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-pill bg-tone opacity-[0.14] blur-3xl"
       />
 
       <div className="relative p-6 sm:p-7 lg:p-8">
         <header className="flex items-start gap-4">
-          <span
-            className={cn(
-              'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface',
-              'transition-[background-color,border-color,color] duration-base ease-out',
-              active
-                ? 'lit lit-tone border border-transparent bg-tone-fill text-on-tone'
-                : 'edge-top border border-tone/25 bg-tone-tint text-tone'
-            )}
-          >
-            <Icon size={22} strokeWidth={active ? 1.75 : 1.5} aria-hidden="true" />
+          <span className="lit lit-tone inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface border border-transparent bg-tone-fill text-on-tone">
+            <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
           </span>
 
           <div className="min-w-0">
@@ -578,7 +333,7 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
                 it, and it is never the thing squeezing the words. */}
             {Mark && (
               <div className="h-40 lg:h-44">
-                <Mark active={active} />
+                <Mark active />
               </div>
             )}
 
@@ -594,12 +349,6 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
         {/*
           The breadth signal, restored from the previous site (§21).
 
-          Eight categories per service is what told a visitor "we actually do
-          all of this", and the current build had compressed it to three
-          bullet points. It comes back as two labelled groups of four rather
-          than a wall of cards or a flat run of chips — same information,
-          sorted the way a reader sorts it.
-
           Category names only. No rate, no limit, no lender, no insurer:
           those are volatile, unverified, or both (§3.4), and nothing in this
           section may acquire one.
@@ -614,13 +363,7 @@ function ServicePanel({ service, index, active }: ServicePanelProps) {
                 {group.items.map((item) => (
                   <li
                     key={item}
-                    className={cn(
-                      'inline-flex items-center rounded-pill border px-2.5 py-1 text-legal font-medium',
-                      'transition-[background-color,border-color,color] duration-base ease-out',
-                      active
-                        ? 'edge-top border-tone/25 bg-tone-tint text-ink'
-                        : 'border-divider bg-surface-sunken text-ink-secondary'
-                    )}
+                    className="edge-top inline-flex items-center rounded-pill border border-tone/25 bg-tone-tint px-2.5 py-1 text-legal font-medium text-ink"
                   >
                     {item}
                   </li>

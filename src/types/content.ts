@@ -270,8 +270,15 @@ export interface Credential {
 export interface Testimonial {
   id: string;
   name: string;
+  /** Occupation, exactly as supplied — e.g. "Teacher". */
+  role?: string;
   city: string;
   quote: string;
+  /**
+   * The subject accent the story wears (Phase 3 tone channel) — the service
+   * the story is about. Presentational only; absent, the card wears brand blue.
+   */
+  toneId?: string;
   /** Written consent, per person, on file. Nothing renders without it. */
   consentVerified: boolean;
 }

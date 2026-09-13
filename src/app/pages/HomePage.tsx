@@ -25,8 +25,8 @@ import { FinalCta } from '@/components/sections/home/FinalCta';
  *   process         what happens if you get in touch
  *   people          who you'd be dealing with
  *   credentials     what we can evidence (hidden until evidenced)
- *   testimonials    what clients said (hidden until consented)
  *   SIP teaser      one concrete thing you can try right now
+ *   client stories  what clients said (consented testimonials only)
  *   consultation    the ask
  *
  * The index of what is here — the information ribbon — now sits directly
@@ -43,14 +43,15 @@ export default function HomePage() {
       <HowItWorks />
       <FounderSection />
       {/*
-        Both render nothing until the client supplies verified content —
-        credentials need an identifier, testimonials need written consent
-        (§24). They are placed rather than omitted so the page order is a
-        decision made now rather than one made under time pressure later.
+        Renders nothing until the client supplies a credential's identifier
+        (§24). Placed rather than omitted so the page order is a decision made
+        now rather than one made under time pressure later.
       */}
       <CredentialLedger />
-      <Testimonials />
       <SipTeaser />
+      {/* Client stories close the page's argument, directly before the ask.
+          Consented testimonials only — none, and the section is absent. */}
+      <Testimonials />
       <FinalCta />
     </PageShell>
   );
