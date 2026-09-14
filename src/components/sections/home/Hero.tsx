@@ -34,11 +34,12 @@ const trustIcons: Record<string, LucideIcon> = { target: Target, shield: ShieldC
  * ── Composition ─────────────────────────────────────────────────────────
  *
  *   ≥1024px   narrative in the left five columns, sitting on the reading
- *             scrim; the journey ascends through the open sky on the right,
- *             positioned over the whole frame rather than inside a column
- *             so the curve is free to run edge to edge.
- *   <1024px   narrative first, then the same journey as a vertical spine in
- *             a panel beneath it. Not a stripped-down hero: the same
+ *             scrim; the journey ascends through the soft right side of the
+ *             photograph, positioned over the whole frame rather than inside
+ *             a column so the curve is free to run edge to edge.
+ *   <1024px   the photograph as a band across the top with the narrative
+ *             rising onto its fade, then the same journey as a vertical
+ *             spine in a panel beneath it. Not a stripped-down hero: the same
  *             photograph, the same claim, the same three milestones, drawn
  *             along the axis the viewport actually has.
  *
@@ -88,12 +89,18 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      /* The ribbon now sits between the header and the hero, so the hero's
-         top padding is a step lighter on a phone to keep the primary action
-         above the fold on a 640px-tall screen. */
-      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-10 md:min-h-[41rem] md:py-16 lg:min-h-[44rem] lg:py-20"
+      /* Below 1024px the photograph is a band across the top of the hero
+         (see HeroVisual) and the narrative starts a little over halfway down
+         it, so the picture is seen first and the eyebrow lands on its fade.
+         The band follows the viewport's height, so a 640px-tall phone gives
+         less of its first screen to it than a tall one. From 1024px the
+         padding is the approved desktop value. */
+      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-[calc(var(--hero-band)*0.56)] [--hero-band:clamp(17rem,48vh,26rem)] md:min-h-[41rem] md:pb-16 lg:min-h-[44rem] lg:py-20"
     >
-      <HeroVisual depth={parallax ? { imageY, imageScale } : undefined} />
+      <HeroVisual
+        depth={parallax ? { imageY, imageScale } : undefined}
+        reveal={!isDesktop && !prefersReducedMotion}
+      />
 
       {/* The journey is a sibling of the content column, not a child of it,
           so the curve can run past the container's right edge. */}
