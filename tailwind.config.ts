@@ -219,21 +219,24 @@ export default {
           { lineHeight: '1.2', letterSpacing: '-0.014em', fontWeight: 'var(--weight-display)' },
         ],
         /*
-          The hero headline, and the only step above `display-xl`. It is
-          sized against the viewport rather than the container so it holds
-          its three-line break from 360px to 1920px — see the
-          `.hero-headline` rule, which remains the container-query version
-          used inside the narrative column.
+          The hero headline, and the only step above `display-xl`. It sets in
+          three lines at every width — "One advisor / for every money /
+          decision that matters." — which comes down to one measurement: the
+          closing phrase is 9.31em wide and has to fit its column on one line,
+          or "decision" is stranded on a line of its own.
         */
         'display-hero': [
           /*
-            Tuned against the measure rather than picked: the headline has
-            to set in three lines from 1024px up, and the narrative column
-            is ~34rem there. A steeper ramp gave 64px at 1024, which bought
-            a fourth line and left "decision" stranded on its own.
+            Two ramps, the lower one winning:
+              · 10.3vw − 0.26rem on a phone, which keeps the phrase ~4% inside
+                a 20px-gutter column from 360px (33px) to 400px (37px);
+              · 1.77rem + 2.225vw from there up, the gentler ramp the approved
+                desktop sizes sit on — 51px at 1024, 56.8px from 1280.
+            One linear ramp cannot do both: steep enough for a phone, it
+            overshoots the ~34rem narrative column at 1024px.
           */
-          'clamp(2.375rem, 1.04rem + 3.85vw, 4.5rem)',
-          { lineHeight: '1.04', letterSpacing: '-0.028em', fontWeight: '700' },
+          'clamp(2rem, min(10.3vw - 0.26rem, 1.77rem + 2.225vw), 3.55rem)',
+          { lineHeight: '1.08', letterSpacing: '-0.03em', fontWeight: '700' },
         ],
         'title-lg': [
           'clamp(1.25rem, 1.17rem + 0.39vw, 1.5rem)',

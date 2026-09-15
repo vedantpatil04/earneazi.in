@@ -150,8 +150,8 @@ export function FloatingContact() {
   */
   const controlClass = cn(
     'group pointer-events-auto flex items-center overflow-hidden rounded-pill',
-    /* 56×56 at rest — comfortably over the 44px minimum on touch. */
-    'lit lit-float sheen h-14 min-w-14 border border-on-brand/15 bg-brand text-on-brand',
+    /* 48×48 on mobile (exceeds 44px min touch target), 56×56 from sm up */
+    'lit lit-float sheen h-12 w-12 sm:h-14 sm:min-w-14 border border-on-brand/15 bg-brand text-on-brand',
     'transition-[background-color,padding] duration-base ease-out hover:bg-brand-fill-hover',
     /* Desktop expands to a labelled pill on hover and on focus. Below `lg` it
        stays an icon: there is no hover on a thumb, and a pill wide enough to
@@ -161,13 +161,13 @@ export function FloatingContact() {
 
   const controlBody = (
     <>
-      <span className="flex h-14 w-14 shrink-0 items-center justify-center">
+      <span className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center">
         {isWhatsApp ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-pill bg-on-brand text-social-whatsapp shadow-xs">
-            <WhatsAppGlyph size={21} />
+          <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-pill bg-on-brand text-social-whatsapp shadow-xs">
+            <WhatsAppGlyph size={19} />
           </span>
         ) : (
-          <MessageCircle size={24} strokeWidth={1.75} aria-hidden="true" />
+          <MessageCircle size={22} strokeWidth={1.75} aria-hidden="true" />
         )}
       </span>
 
@@ -194,8 +194,8 @@ export function FloatingContact() {
     <motion.div
       /* Bottom-right, lifted clear of the home indicator on iOS: 16px plus
          the safe-area inset, per §25. */
-      className="pointer-events-none fixed bottom-0 right-0 z-overlay p-4"
-      style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      className="pointer-events-none fixed bottom-0 right-0 z-overlay p-3 sm:p-4"
+      style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       initial={false}
       animate={hidden ? 'hidden' : 'visible'}
       variants={{

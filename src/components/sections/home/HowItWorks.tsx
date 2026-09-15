@@ -38,7 +38,7 @@ export function HowItWorks() {
           intro="From the first conversation to a plan you keep coming back to."
         />
 
-        <div className="relative mt-12 lg:mt-20">
+        <div className="relative mt-10 sm:mt-12 lg:mt-20">
           {/* Desktop: one horizontal rule threaded behind the step markers. */}
           <Reveal
             variants={lineDrawVariants}
@@ -46,18 +46,21 @@ export function HowItWorks() {
             delay={0.15}
             className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px origin-left bg-gradient-to-r from-transparent via-brand/45 to-transparent lg:block"
           />
-          {/* Narrow screens: the same idea, turned on its side. */}
+          {/* A phone: the same idea, turned on its side. Only while the steps
+              are one column — in the two-column grid from 640px a rule down
+              the left column would join 01 to 03 and leave 02 and 04 off it,
+              so there the numbers carry the order on their own. */}
           <Reveal
             variants={lineDrawVerticalVariants}
             speed="story"
             delay={0.15}
-            className="pointer-events-none absolute bottom-10 left-7 top-7 w-px origin-top bg-gradient-to-b from-brand/10 via-brand/45 to-transparent lg:hidden"
+            className="pointer-events-none absolute bottom-10 left-7 top-7 w-px origin-top bg-gradient-to-b from-brand/10 via-brand/45 to-transparent sm:hidden"
           />
 
           <RevealGroup
             as="ol"
             stagger={0.13}
-            className="relative grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+            className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4 lg:gap-8"
           >
             {journeySteps.map((step, index) => {
               const Glyph = step.icon;

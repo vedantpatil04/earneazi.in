@@ -320,7 +320,7 @@ function JourneySpine({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'floating rounded-band border border-divider bg-veil/[var(--veil-alpha)] p-5 backdrop-blur-xl sm:p-6',
+        'floating rounded-band border border-divider bg-veil/[var(--veil-alpha)] p-4 sm:p-6 backdrop-blur-xl',
         className
       )}
     >
@@ -335,7 +335,11 @@ function JourneySpine({ className }: { className?: string }) {
         </span>
       </div>
 
-      <ol className="relative mt-5 space-y-4 ps-7">
+      {/* Down a spine on a phone. From 768px the panel spans the column and
+          the three milestones sit in a row — read left to right in the order
+          the spine reads top to bottom — where three rows would leave most of
+          that width empty. */}
+      <ol className="relative mt-5 space-y-3.5 ps-7 md:grid md:grid-cols-3 md:gap-3 md:space-y-0 md:ps-0">
         {/* The spine. Drawn from the top so it reads as a direction rather
             than as a divider. */}
         <motion.span
@@ -343,7 +347,7 @@ function JourneySpine({ className }: { className?: string }) {
           initial={prefersReducedMotion ? false : { scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.story, delay: 0.2, ease: easing.out }}
-          className="absolute bottom-2 left-[7px] top-2 w-0.5 origin-top rounded-pill bg-gradient-to-b from-brand/40 via-brand to-brand"
+          className="absolute bottom-2 left-[7px] top-2 w-0.5 origin-top rounded-pill bg-gradient-to-b from-brand/40 via-brand to-brand md:hidden"
         />
 
         {heroMilestones.map((milestone, index) => {
@@ -360,24 +364,24 @@ function JourneySpine({ className }: { className?: string }) {
                   ? { duration: 0 }
                   : { duration: duration.slow, delay: 0.35 + index * 0.12, ease: easing.out }
               }
-              className="relative"
+              className="relative h-full"
             >
               <span
                 aria-hidden="true"
-                className="sphere sphere-tone absolute -start-7 top-3.5 block h-4 w-4 rounded-pill ring-2 ring-bg"
+                className="sphere sphere-tone absolute -start-7 top-3.5 block h-4 w-4 rounded-pill ring-2 ring-bg md:hidden"
               />
 
               <Link
                 to={goalDeepLink(milestone.goalId)}
                 className={cn(
-                  'raised group/row flex items-start gap-3 rounded-surface border border-divider bg-surface p-3',
+                  'raised group/row flex h-full items-start gap-2.5 sm:gap-3 rounded-surface border border-divider bg-surface p-2.5 sm:p-3',
                   'transition-[border-color] duration-instant ease-out hover:border-tone/50'
                 )}
               >
                 <span className="lit lit-tone mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-action bg-tone-fill text-on-tone">
                   <Glyph size={15} strokeWidth={1.75} aria-hidden="true" />
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block text-body-sm font-semibold text-ink-display">{title}</span>
                   <span className="mt-0.5 block text-legal leading-snug text-ink-secondary">{milestone.line}</span>
                 </span>

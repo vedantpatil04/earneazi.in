@@ -37,13 +37,13 @@ interface SectionProps {
 
 const spacingStyles: Record<SectionSpacing, string> = {
   none: '',
-  sm: 'py-12 md:py-16 lg:py-20',
-  md: 'py-16 md:py-[5.5rem] lg:py-24',
-  /* The standard section rhythm from §13. */
-  lg: 'py-16 md:py-[5.5rem] lg:py-[7.5rem]',
-  xl: 'py-20 md:py-24 lg:py-32',
-  /* Chapter (inverted band) rhythm from §13. */
-  chapter: 'py-20 md:py-[6.5rem] lg:py-40',
+  sm: 'py-10 sm:py-12 md:py-14 lg:py-16',
+  md: 'py-12 sm:py-14 md:py-16 lg:py-20',
+  /* The standard responsive section rhythm: 48px mobile -> 64px sm -> 80px tablet -> 112px desktop */
+  lg: 'py-12 sm:py-16 md:py-20 lg:py-28',
+  xl: 'py-16 sm:py-20 md:py-24 lg:py-32',
+  /* Chapter (inverted band) rhythm */
+  chapter: 'py-16 sm:py-20 md:py-24 lg:py-36',
 };
 
 const backgroundStyles: Record<SectionBackground, string> = {

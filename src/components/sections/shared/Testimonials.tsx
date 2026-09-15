@@ -185,7 +185,7 @@ function StoryDeck({ stories }: { stories: Testimonial[] }) {
               data-story=""
               variants={settleVariants}
               className={cn(
-                'flex w-[min(20rem,calc(100vw-4.5rem))] shrink-0 snap-start md:w-auto',
+                'flex w-[min(20rem,calc(100vw-3.5rem))] shrink-0 snap-start md:w-auto',
                 /* At two columns the third story sits centred beneath, at the same width. */
                 'md:last:col-span-2 md:last:w-[calc(50%-0.625rem)] md:last:justify-self-center',
                 'lg:last:col-span-1 lg:last:w-auto'
@@ -199,7 +199,7 @@ function StoryDeck({ stories }: { stories: Testimonial[] }) {
       </div>
 
       {!isGrid && (
-        <div className="mt-2 flex items-center justify-center gap-2">
+        <div className="mt-3 flex items-center justify-center gap-2">
           <button
             type="button"
             onClick={() => goTo(active - 1)}
@@ -272,7 +272,7 @@ function StoryCard({ story }: { story: Testimonial }) {
     <figure
       data-tone={story.toneId}
       className={cn(
-        'raised group relative flex w-full flex-col overflow-hidden rounded-surface border border-divider bg-surface p-6 sm:p-7',
+        'raised group relative flex w-full flex-col overflow-hidden rounded-surface border border-divider bg-surface p-4 sm:p-7',
         'transition-[border-color,box-shadow] duration-base ease-out motion-reduce:transition-none',
         'hover:border-tone/40 hover:[box-shadow:inset_0_1px_0_0_rgb(var(--edge-light)/var(--edge-light-alpha)),var(--shadow-float)]'
       )}

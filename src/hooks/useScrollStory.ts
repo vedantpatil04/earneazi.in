@@ -188,9 +188,20 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
     const anchor =
       layout === 'side' ? header + (SIDE_GAP / 16) * rootFontSize : header + barHeight + STACKED_GAP;
     const stageHeight = Math.max(240, Math.round(viewport - anchor));
-    /* Long enough to read a settled state and to watch a change happen. */
-    const settle = Math.round(Math.min(380, Math.max(220, viewport * 0.35)));
-    const fade = Math.round(Math.min(480, Math.max(280, viewport * 0.45)));
+    /*
+      Long enough to read a settled state and to watch a change happen. The
+      stacked layout holds for less: it is read on a touch screen, where a
+      flick travels further and a long still stretch reads as the page
+      sticking, and a card taller than its stage already buys its reading
+      time with the pan.
+    */
+    const stacked = layout === 'stacked';
+    const settle = Math.round(
+      stacked ? Math.min(130, Math.max(80, viewport * 0.12)) : Math.min(220, Math.max(140, viewport * 0.2))
+    );
+    const fade = Math.round(
+      stacked ? Math.min(200, Math.max(130, viewport * 0.18)) : Math.min(300, Math.max(180, viewport * 0.26))
+    );
 
     const panelHeights = Array.from({ length: count }, (_, index) => panels.current[index]?.offsetHeight ?? 0);
     if (panelHeights.some((height) => height === 0)) return;

@@ -47,8 +47,10 @@ const variantStyles: Record<LinkVariant, string> = {
   /* A standalone link is a target in its own right rather than a word inside
      a sentence, so WCAG 2.2's 24px minimum applies to it; inline links keep
      the exemption and stay on the text baseline. 28px rather than exactly 24
-     so sub-pixel line-box rounding cannot leave it a fraction short. */
-  standalone: 'group min-h-7 no-underline hover:underline underline-offset-[6px] decoration-1',
+     so sub-pixel line-box rounding cannot leave it a fraction short. Under
+     a finger it pads out to 44px, the step the ribbon's entries take. */
+  standalone:
+    'group min-h-7 no-underline hover:underline underline-offset-[6px] decoration-1 [@media(pointer:coarse)]:min-h-11',
 };
 
 const toneStyles = {

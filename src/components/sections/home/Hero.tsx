@@ -90,12 +90,14 @@ export function Hero() {
       ref={sectionRef}
       aria-labelledby="hero-heading"
       /* Below 1024px the photograph is a band across the top of the hero
-         (see HeroVisual) and the narrative starts a little over halfway down
-         it, so the picture is seen first and the eyebrow lands on its fade.
-         The band follows the viewport's height, so a 640px-tall phone gives
-         less of its first screen to it than a tall one. From 1024px the
-         padding is the approved desktop value. */
-      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-[calc(var(--hero-band)*0.56)] [--hero-band:clamp(17rem,48vh,26rem)] md:min-h-[41rem] md:pb-16 lg:min-h-[44rem] lg:py-20"
+         (see HeroVisual) and the narrative starts halfway down it, so the
+         picture is seen first and the eyebrow lands on its fade. The band is
+         a little over a third of the small viewport height — `svh`, the
+         height with the browser's bars showing — so on a phone the headline
+         and the first action share the opening screen with the picture
+         rather than waiting under it. From 1024px the padding is the
+         approved desktop value. */
+      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-[calc(var(--hero-band)*0.5)] [--hero-band:clamp(14rem,38svh,24rem)] md:min-h-[41rem] md:pb-16 lg:min-h-[44rem] lg:py-20"
     >
       <HeroVisual
         depth={parallax ? { imageY, imageScale } : undefined}
@@ -154,7 +156,7 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.14)}
-            className="mt-4 text-[2.15rem] font-bold leading-[1.08] tracking-[-0.03em] text-ink-display min-[390px]:text-[2.35rem] sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem]"
+            className="mt-4 text-[clamp(1.85rem,7vw,2.35rem)] font-bold leading-[1.08] tracking-[-0.03em] text-ink-display sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem]"
           >
             <span className="block">One advisor</span>
             <span className="block">for every money</span>
@@ -216,16 +218,15 @@ export function Hero() {
             initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={enter(0.58)}
-            /* Wraps until 1280px. Held to one line at 1024px it ran past the
-               narrative column into the journey's "Today" marker. */
-            className="mt-8 flex w-full flex-col gap-y-2.5 border-t border-divider pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3.5 xl:flex-nowrap xl:gap-x-4"
+            /* Clean responsive row: flex-wrap on sm/md without hanging dividers; dividers show only on non-wrapping xl. */
+            className="mt-8 flex w-full flex-col gap-y-3 border-t border-divider pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 xl:flex-nowrap xl:gap-x-4"
           >
             {heroTrustIndicators.map((indicator, idx) => {
               const Glyph = trustIcons[indicator.iconKey] ?? Target;
               return (
                 <li key={indicator.label} className="flex items-center gap-2 xl:shrink-0">
                   {idx > 0 && (
-                    <span className="mr-1.5 hidden h-3 w-px bg-divider sm:inline-block" aria-hidden="true" />
+                    <span className="mr-1.5 hidden h-3 w-px bg-divider xl:inline-block" aria-hidden="true" />
                   )}
                   <span className="lit flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand text-on-brand">
                     <Glyph size={13} strokeWidth={2} aria-hidden="true" />

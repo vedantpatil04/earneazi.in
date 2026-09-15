@@ -168,7 +168,7 @@ export function FinancialGoals() {
 
         {/* Retained from the previous build because it is still the most
             common answer people give: more than one of these applies. */}
-        <div className="raised mt-10 flex flex-col gap-4 rounded-band border border-divider bg-surface p-6 sm:flex-row sm:items-center sm:justify-between lg:mt-14 lg:p-7">
+        <div className="raised mt-10 flex flex-col gap-4 rounded-band border border-divider bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 lg:mt-14 lg:p-7">
           <div className="min-w-0">
             <h3 className="text-display-xs text-ink-display">Not sure which of these fits?</h3>
             <p className="mt-2 max-w-measure text-body-sm text-ink-secondary">
@@ -295,18 +295,18 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
         className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-pill bg-tone opacity-[0.13] blur-3xl"
       />
 
-      <div className="relative p-6 sm:p-7 lg:p-8">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <span className="lit lit-tone inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
-              <Glyph size={22} strokeWidth={1.75} aria-hidden="true" />
+      <div className="relative p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <span className="lit lit-tone inline-flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
+              <Glyph size={20} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <div className="min-w-0">
               <span className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 Goal {String(index + 1).padStart(2, '0')} <span aria-hidden="true">/</span>{' '}
                 {String(total).padStart(2, '0')}
               </span>
-              <h3 className="mt-1 text-display-sm text-ink-display">{goal.title}</h3>
+              <h3 className="mt-1 text-display-xs sm:text-display-sm text-ink-display">{goal.title}</h3>
             </div>
           </div>
 
@@ -314,13 +314,13 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
               as decorative badges — both are framing, neither is a figure.
               `max-w-full` keeps the pair inside the card on a phone. */}
           <dl className="flex max-w-full shrink-0 flex-wrap gap-2">
-            <div className="edge-top rounded-pill border border-tone/25 bg-tone-tint px-3 py-1.5">
+            <div className="edge-top rounded-pill border border-tone/25 bg-tone-tint px-2.5 sm:px-3 py-1 sm:py-1.5">
               <dt className="font-display text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
                 Focus
               </dt>
               <dd className="text-legal font-semibold text-tone">{goal.focus}</dd>
             </div>
-            <div className="inset-well rounded-pill border border-divider bg-surface-sunken px-3 py-1.5">
+            <div className="inset-well rounded-pill border border-divider bg-surface-sunken px-2.5 sm:px-3 py-1 sm:py-1.5">
               <dt className="font-display text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
                 Horizon
               </dt>
@@ -329,28 +329,28 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
           </dl>
         </header>
 
-        <p className="mt-6 max-w-prose text-body-lg text-ink-secondary">{goal.description}</p>
+        <p className="mt-4 sm:mt-6 max-w-prose text-body sm:text-body-lg text-ink-secondary">{goal.description}</p>
 
-        <div className="mt-7 grid gap-7 md:grid-cols-12 md:gap-8">
+        <div className="mt-5 sm:mt-7 grid gap-6 md:grid-cols-12 md:gap-8">
           <div className="min-w-0 md:col-span-7">
-            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-4">
+            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-3.5 sm:p-4">
               <h4 className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 Where this starts
               </h4>
-              <p className="mt-2 text-body-sm text-ink">{goal.startsWith}</p>
+              <p className="mt-1.5 text-body-sm text-ink">{goal.startsWith}</p>
             </div>
 
-            <h4 className="mt-6 font-display text-legal font-semibold uppercase tracking-[0.12em] text-tone">
+            <h4 className="mt-5 sm:mt-6 font-display text-legal font-semibold uppercase tracking-[0.12em] text-tone">
               What we&rsquo;d work through
             </h4>
             {/* An ordered list because it is one: these are the questions in
                 the order a first conversation reaches them. */}
-            <ol className="mt-3 flex flex-col gap-3">
+            <ol className="mt-2.5 flex flex-col gap-2.5 sm:gap-3">
               {goal.considerations.map((consideration, questionIndex) => (
-                <li key={consideration} className="flex items-start gap-3">
+                <li key={consideration} className="flex items-start gap-2.5 sm:gap-3">
                   <span
                     aria-hidden="true"
-                    className="lit lit-tone mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-tone-fill font-display text-legal font-semibold tabular text-on-tone"
+                    className="lit lit-tone mt-px inline-flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-pill bg-tone-fill font-display text-[11px] sm:text-legal font-semibold tabular text-on-tone"
                   >
                     {questionIndex + 1}
                   </span>
@@ -362,31 +362,25 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
 
           <div className="md:col-span-5">
             {Mark && (
-              <div className="h-44 lg:h-52">
+              <div className="h-32 sm:h-40 lg:h-52">
                 <Mark />
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-7 flex flex-col gap-5 border-t border-divider pt-6">
+        <div className="mt-5 sm:mt-7 flex flex-col gap-4 sm:gap-5 border-t border-divider pt-5 sm:pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-legal text-ink-muted">Usually involves</span>
             {goal.relatedServiceIds.map((serviceId) => {
               const service = getServiceById(serviceId);
               if (!service) return null;
-              /*
-                A router Link rather than the ui/Link primitive: this is a
-                chip with a surface and a border, and it needs the 44px touch
-                target the phase brief requires, which the primitive's fixed
-                standalone height would silently override.
-              */
               return (
                 <RouterLink
                   key={serviceId}
                   to={service.href}
                   className={cn(
-                    'raised inline-flex min-h-11 items-center rounded-pill border border-divider bg-surface px-4',
+                    'raised inline-flex min-h-10 sm:min-h-11 items-center rounded-pill border border-divider bg-surface px-3 sm:px-4',
                     'text-legal font-semibold text-ink',
                     'transition-[background-color,border-color,color] duration-fast ease-out',
                     'hover:border-tone hover:bg-tone-tint hover:text-tone'
@@ -402,7 +396,7 @@ function GoalBrief({ goal, index, total }: { goal: GoalEntry; index: number; tot
             {/* Carries which goal it came from into the pre-filled message
                 (§25's contextual entry points), through the one shared
                 builder rather than a second WhatsApp implementation. */}
-            <ConversationCta context={goalConversation(goal.id)} size="md">
+            <ConversationCta context={goalConversation(goal.id)} size="md" className="w-full sm:w-auto">
               Talk through this goal
             </ConversationCta>
             <Link to={goalDeepLink(goal.id)} variant="standalone" trailingIcon={<ArrowUpRight size={15} aria-hidden="true" />}>

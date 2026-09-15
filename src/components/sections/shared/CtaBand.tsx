@@ -76,7 +76,7 @@ export function CtaBand({ id, title, body, primary, secondary }: CtaBandProps) {
               {secondary && (
                 <Link
                   to={secondary.to}
-                  className="rounded-action text-body font-medium text-on-band/85 underline decoration-on-band/40 decoration-1 underline-offset-4 transition-colors duration-instant ease-out hover:text-on-band hover:decoration-on-band"
+                  className="inline-flex min-h-11 items-center rounded-action text-body font-medium text-on-band/85 underline decoration-on-band/40 decoration-1 underline-offset-4 transition-colors duration-instant ease-out hover:text-on-band hover:decoration-on-band"
                 >
                   {secondary.label}
                 </Link>

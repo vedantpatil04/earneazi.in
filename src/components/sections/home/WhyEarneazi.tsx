@@ -74,10 +74,14 @@ export function WhyEarneazi() {
         <RevealGroup
           as="dl"
           stagger={0.09}
-          className="mt-12 grid grid-cols-1 gap-x-14 border-t border-divider sm:grid-cols-2 lg:mt-16"
+          className="mt-10 grid grid-cols-1 gap-x-14 border-t border-divider sm:mt-12 sm:grid-cols-2 lg:mt-16"
         >
           {trustPoints.map((point) => (
-            <motion.div key={point.id} variants={settleVariants} className="flex gap-5 border-b border-divider py-8">
+            <motion.div
+              key={point.id}
+              variants={settleVariants}
+              className="flex gap-4 border-b border-divider py-6 sm:gap-5 sm:py-8"
+            >
               <IconTile icon={point.icon} fill="brand" size="md" className="mt-0.5" />
               <div className="min-w-0">
                 <dt className="text-display-xs text-ink-display">{point.title}</dt>

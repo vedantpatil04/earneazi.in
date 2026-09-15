@@ -508,8 +508,8 @@
   --container-content: 75rem; /* 1200px — the default content column        */
   --container-prose: 45rem; /*  720px — legal, FAQ answers, long-form     */
 
-  /* Gutters, stepped at the breakpoints in §14. Consumed by Container. */
-  --gutter: 1.25rem; /* 20px  <480 */
+  /* Gutters, stepped at responsive breakpoints. Consumed by Container. */
+  --gutter: 1.125rem; /* 18px <375 */
 
   /* Radius (Phase 0 §17). Three values, deliberately not one — a single
      radius on every surface is part of the templated look being removed. */
@@ -546,6 +546,12 @@
   --header-height: 4rem; /* 64px <1024 */
   --header-offset: 5rem; /* header height plus breathing room */
 
+}
+
+@media (min-width: 375px) {
+  :root {
+    --gutter: 1.25rem; /* 20px */
+  }
 }
 
 @media (min-width: 480px) {

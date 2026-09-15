@@ -115,12 +115,14 @@ export function Header() {
               </Button>
             )}
 
+            {/* 44px tall below 1024px, where this bar is used on a touch
+                screen; the desktop bar keeps the 36px `sm` density. */}
             <Button
               to={headerCta.path}
               variant="primary"
               size="sm"
               trailingIcon={<ArrowRight size={15} strokeWidth={2} aria-hidden="true" />}
-              className="hidden rounded-pill sm:inline-flex"
+              className="hidden rounded-pill max-lg:h-11 sm:inline-flex"
             >
               {headerCta.label}
             </Button>

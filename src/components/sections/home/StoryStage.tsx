@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { useStoryFrame } from '@/hooks/useScrollStory';
 import type { ScrollStory } from '@/hooks/useScrollStory';
 import { cn } from '@/lib/utils/cn';
@@ -15,10 +16,11 @@ import { cn } from '@/lib/utils/cn';
  *                   on. Desktop's right column; below the headings on smaller
  *                   screens.
  *
- *   StoryHeadings   the stacked layout's numbered headings: a vertical list
- *                   pinned under the site header, its marker gliding with the
- *                   scroll, the dominant row's own progress and the sequence
- *                   rule beneath. Desktop keeps each section's own left column.
+ *   StoryHeadings   the stacked layout's numbered headings: one row of chips
+ *                   pinned under the site header, the one being read tinted
+ *                   in its accent and carrying its own progress, with the
+ *                   sequence rule beneath. Desktop keeps each section's own
+ *                   left column.
  */
 
 export interface StoryItem {
@@ -93,8 +95,14 @@ export function StoryTrack({ story, count, renderPanel, className }: StoryTrackP
    THE STACKED HEADINGS
    ═══════════════════════════════════════════════════════════════════════ */
 
-/** One row, in rem, so the marker's glide matches the rows at any text size. */
-const ROW_REM = 2.25;
+/*
+  One row, not a list. Six stacked rows came to 245px — a third of a phone's
+  screen pinned over the card they index, which left the card a letterbox to
+  be read through, and each row was a 36px target. A row of 44px chips is
+  ~80px and the stage gets the rest. It is the site's designed scroller
+  (`rail-x` in globals.css) where the titles do not fit, and it keeps the chip
+  being read in view.
+*/
 
 interface StoryHeadingsProps {
   story: ScrollStory;
@@ -110,74 +118,89 @@ interface StoryHeadingsProps {
 }
 
 export function StoryHeadings({ story, items, label, noun, ground, onChoose }: StoryHeadingsProps) {
-  const marker = useRef<HTMLSpanElement>(null);
+  const rail = useRef<HTMLOListElement>(null);
   const rule = useRef<HTMLSpanElement>(null);
   const step = useRef<HTMLSpanElement>(null);
-  const active = items[story.dominant];
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const { dominant } = story;
+  const active = items[dominant];
   const choose = onChoose ?? story.select;
 
   useStoryFrame(story, (frame) => {
-    if (marker.current) marker.current.style.transform = `translate3d(0, ${(frame.marker * ROW_REM).toFixed(3)}rem, 0)`;
     if (rule.current) rule.current.style.transform = `scaleX(${frame.overall.toFixed(4)})`;
     if (step.current) step.current.style.transform = `scaleX(${frame.step.toFixed(4)})`;
   });
 
+  /*
+    Bring the chip being read into view when the story moves on. The rail's
+    own scroll is set directly: `scrollIntoView` would also scroll the page,
+    and the page's scroll is what is driving the story.
+  */
+  useEffect(() => {
+    const row = rail.current;
+    const chip = row?.children[dominant];
+    if (!row || !(chip instanceof HTMLElement) || row.scrollWidth <= row.clientWidth) return;
+    row.scrollTo({
+      left: Math.max(0, chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  }, [dominant, prefersReducedMotion]);
+
   return (
     <div
       ref={story.registerBar}
-      className={cn('sticky z-10 -mx-gutter px-gutter pb-3 pt-2', ground === 'sunken' ? 'bg-surface-sunken' : 'bg-bg')}
+      className={cn('sticky z-10 -mx-gutter pb-3 pt-2', ground === 'sunken' ? 'bg-surface-sunken' : 'bg-bg')}
       style={{ top: 'var(--header-height)' }}
     >
       <nav aria-label={label}>
-        <ol className="relative">
-          <span
-            ref={marker}
-            aria-hidden="true"
-            data-tone={active.id}
-            className="pointer-events-none absolute left-0 top-1.5 h-6 w-[3px] rounded-pill bg-tone transition-colors duration-slow ease-out"
-          />
+        {/* `py-1` is the room a focus ring needs inside a scroller, which
+            clips at its padding edge. */}
+        <ol ref={rail} className="rail-x rail-fade relative gap-2 scroll-px-gutter px-gutter py-1">
           {items.map((item, index) => {
-            const isActive = index === story.dominant;
+            const isActive = index === dominant;
             return (
-              <li key={item.id} data-tone={item.id}>
+              <li key={item.id} data-tone={item.id} className="shrink-0">
                 <button
                   type="button"
                   aria-current={isActive ? 'step' : undefined}
                   onClick={() => choose(index)}
                   className={cn(
-                    'flex h-9 w-full items-center gap-3 rounded-action pl-4 pr-1 text-left',
-                    'transition-colors duration-base ease-out',
-                    isActive ? 'text-ink-display' : 'text-ink-muted hover:text-ink'
+                    'relative flex h-11 items-center gap-2 overflow-hidden rounded-pill border px-4',
+                    'transition-[background-color,border-color,color] duration-base ease-out',
+                    isActive
+                      ? 'border-tone/40 bg-tone-tint text-ink-display'
+                      : 'border-divider bg-surface text-ink-muted hover:border-border hover:text-ink'
                   )}
                 >
                   <span
                     className={cn(
-                      'w-6 shrink-0 font-display text-legal font-semibold tabular transition-colors duration-base ease-out',
+                      'font-display text-legal font-semibold tabular transition-colors duration-base ease-out',
                       isActive ? 'text-tone' : 'text-ink-muted'
                     )}
                   >
                     {pad(index + 1)}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-display text-body-sm font-semibold">{item.title}</span>
-                  <span
-                    aria-hidden="true"
-                    className={cn('relative h-[3px] w-12 shrink-0 overflow-hidden rounded-pill bg-divider', !isActive && 'invisible')}
-                  >
-                    {isActive && (
+                  <span className="whitespace-nowrap font-display text-body-sm font-semibold">{item.title}</span>
+                  {/* The dominant item's own progress, along the foot of its chip. */}
+                  {isActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-4 bottom-1.5 h-0.5 overflow-hidden rounded-pill bg-tone/15"
+                    >
                       <span
                         ref={step}
                         className="absolute inset-0 origin-left rounded-pill bg-tone"
                         style={{ transform: 'scaleX(0)' }}
                       />
-                    )}
-                  </span>
+                    </span>
+                  )}
                 </button>
               </li>
             );
           })}
         </ol>
 
-        <div aria-hidden="true" className="relative mt-2 h-px w-full overflow-hidden bg-divider">
+        <div aria-hidden="true" className="relative mx-gutter mt-2 h-px overflow-hidden bg-divider">
           <span
             ref={rule}
             data-tone={active.id}
@@ -188,7 +211,7 @@ export function StoryHeadings({ story, items, label, noun, ground, onChoose }: S
       </nav>
 
       <p aria-live="polite" className="sr-only">
-        {`${noun} ${story.dominant + 1} of ${items.length}: ${active.title}`}
+        {`${noun} ${dominant + 1} of ${items.length}: ${active.title}`}
       </p>
     </div>
   );

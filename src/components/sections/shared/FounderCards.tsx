@@ -77,7 +77,7 @@ export function FounderCards({ className }: { className?: string }) {
 function PersonCard({ member, compact = false }: { member: TeamMember; compact?: boolean }) {
   const showPhoto = hasVerifiedPhoto(member);
   const showDetail = hasVerifiedDetail(member);
-  const markSize = compact ? 'h-14 w-14 sm:h-16 sm:w-16' : 'h-20 w-20 sm:h-24 sm:w-24';
+  const markSize = compact ? 'h-12 w-12 sm:h-16 sm:w-16' : 'h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24';
 
   return (
     <article
@@ -90,7 +90,7 @@ function PersonCard({ member, compact = false }: { member: TeamMember; compact?:
         'hover:border-tone/40 focus-within:border-tone/60 focus-within:bg-tone-tint/40'
       )}
     >
-      <div className={cn('flex items-start', compact ? 'gap-4 p-4 sm:p-5' : 'gap-5 p-5 sm:p-6')}>
+      <div className={cn('flex items-start', compact ? 'gap-3.5 p-3.5 sm:gap-4 sm:p-5' : 'gap-4 p-4 sm:gap-5 sm:p-6')}>
         {showPhoto ? (
           <img
             src={member.photoUrl ?? undefined}
@@ -107,7 +107,7 @@ function PersonCard({ member, compact = false }: { member: TeamMember; compact?:
             className={cn(
               'lit lit-tone relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-surface',
               'bg-tone-fill font-display font-bold tracking-[0.02em] text-on-tone',
-              compact ? 'text-display-xs' : 'text-display-sm',
+              compact ? 'text-title-lg sm:text-display-xs' : 'text-display-xs sm:text-display-sm',
               markSize
             )}
           >
@@ -118,12 +118,12 @@ function PersonCard({ member, compact = false }: { member: TeamMember; compact?:
           </span>
         )}
 
-        <div className="min-w-0 pt-1">
+        <div className="min-w-0 pt-0.5 sm:pt-1">
           <h3 className={compact ? 'text-title-lg text-ink-display' : 'text-display-xs text-ink-display'}>{member.name}</h3>
-          <p className="mt-1 text-body-sm font-semibold text-tone">{member.role}</p>
+          <p className="mt-0.5 sm:mt-1 text-body-sm font-semibold text-tone">{member.role}</p>
 
           {member.tenureVerified && member.tenure && (
-            <p className="mt-2 text-body-sm text-ink-secondary">{member.tenure}</p>
+            <p className="mt-1.5 sm:mt-2 text-body-sm text-ink-secondary">{member.tenure}</p>
           )}
         </div>
       </div>

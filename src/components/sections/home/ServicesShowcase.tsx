@@ -291,10 +291,10 @@ function ServicePanel({ service, index }: { service: ServicePillar; index: numbe
         className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-pill bg-tone opacity-[0.14] blur-3xl"
       />
 
-      <div className="relative p-6 sm:p-7 lg:p-8">
-        <header className="flex items-start gap-4">
-          <span className="lit lit-tone inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-surface border border-transparent bg-tone-fill text-on-tone">
-            <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+      <div className="relative p-4 sm:p-6 lg:p-8">
+        <header className="flex items-start gap-3 sm:gap-4">
+          <span className="lit lit-tone inline-flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-surface border border-transparent bg-tone-fill text-on-tone">
+            <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
           </span>
 
           <div className="min-w-0">
@@ -307,15 +307,15 @@ function ServicePanel({ service, index }: { service: ServicePillar; index: numbe
           </div>
         </header>
 
-        <p className="mt-5 max-w-prose text-body-lg font-medium text-tone">{service.tagline}</p>
+        <p className="mt-4 sm:mt-5 max-w-prose text-body sm:text-body-lg font-medium text-tone">{service.tagline}</p>
 
-        <div className="mt-6 grid gap-7 md:grid-cols-12 md:gap-8">
+        <div className="mt-5 sm:mt-6 grid gap-6 md:grid-cols-12 md:gap-8">
           <div className="min-w-0 md:col-span-7">
             <p className="text-body text-ink-secondary">{service.summary}</p>
 
-            <ul className="mt-5 flex flex-col gap-3">
+            <ul className="mt-4 sm:mt-5 flex flex-col gap-2.5 sm:gap-3">
               {service.highlights.map((highlight) => (
-                <li key={highlight} className="flex items-start gap-3 text-body-sm text-ink">
+                <li key={highlight} className="flex items-start gap-2.5 sm:gap-3 text-body-sm text-ink">
                   <span
                     aria-hidden="true"
                     className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-pill bg-tone-tint text-tone"
@@ -328,20 +328,20 @@ function ServicePanel({ service, index }: { service: ServicePillar; index: numbe
             </ul>
           </div>
 
-          <div className="flex flex-col gap-4 md:col-span-5">
+          <div className="flex flex-col gap-3.5 sm:gap-4 md:col-span-5">
             {/* The mark. Below `md` it sits under the copy rather than beside
                 it, and it is never the thing squeezing the words. */}
             {Mark && (
-              <div className="h-40 lg:h-44">
+              <div className="h-32 sm:h-36 lg:h-44">
                 <Mark active />
               </div>
             )}
 
-            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-4">
+            <div className="inset-well rounded-surface border border-divider bg-surface-sunken p-3.5 sm:p-4">
               <h4 className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 Who it&rsquo;s for
               </h4>
-              <p className="mt-2 text-body-sm text-ink-secondary">{service.whoItsFor}</p>
+              <p className="mt-1.5 text-body-sm text-ink-secondary">{service.whoItsFor}</p>
             </div>
           </div>
         </div>
@@ -353,13 +353,13 @@ function ServicePanel({ service, index }: { service: ServicePillar; index: numbe
           those are volatile, unverified, or both (§3.4), and nothing in this
           section may acquire one.
         */}
-        <div className="mt-7 grid gap-6 border-t border-divider pt-6 sm:grid-cols-2">
+        <div className="mt-5 sm:mt-7 grid gap-5 sm:gap-6 border-t border-divider pt-5 sm:pt-6 sm:grid-cols-2">
           {groups.map((group) => (
             <div key={group.label}>
               <h4 className="font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-muted">
                 {group.label}
               </h4>
-              <ul className="mt-3 flex flex-wrap gap-2">
+              <ul className="mt-2.5 flex flex-wrap gap-2">
                 {group.items.map((item) => (
                   <li
                     key={item}
@@ -373,24 +373,17 @@ function ServicePanel({ service, index }: { service: ServicePillar; index: numbe
           ))}
         </div>
 
-        <div className="mt-7 flex flex-col gap-4 border-t border-divider pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 sm:mt-7 flex flex-col gap-3.5 sm:gap-4 border-t border-divider pt-5 sm:pt-6 sm:flex-row sm:items-center sm:justify-between">
           <Link to={service.href} variant="standalone" trailingIcon={<ArrowUpRight size={15} aria-hidden="true" />}>
             More on {service.shortTitle.toLowerCase()}
           </Link>
 
-          {/*
-            Two kinds of next step, and only one of them is a conversation.
-            A service whose own next step is a tool (the SIP calculator)
-            keeps that link; the rest go through the shared conversation
-            control carrying which service they came from, so the pre-filled
-            message names it (§25's contextual entry points).
-          */}
           {service.nextStep.to === '/contact' ? (
-            <ConversationCta context={serviceConversation(service.id)} size="md">
+            <ConversationCta context={serviceConversation(service.id)} size="md" className="w-full sm:w-auto">
               {service.nextStep.label}
             </ConversationCta>
           ) : (
-            <Button to={service.nextStep.to} size="md" trailingIcon={<ArrowRight size={15} aria-hidden="true" />}>
+            <Button to={service.nextStep.to} size="md" trailingIcon={<ArrowRight size={15} aria-hidden="true" />} className="w-full sm:w-auto">
               {service.nextStep.label}
             </Button>
           )}

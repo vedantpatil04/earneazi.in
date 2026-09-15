@@ -125,7 +125,7 @@ export function HeroVisual({ depth, reveal = false }: HeroVisualProps) {
         Below 1024px, the vertical wash down the band described above.
       */}
       <div
-        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.16)_0%,transparent_22%,transparent_40%,rgb(var(--color-bg)/0.66)_62%,rgb(var(--color-bg)/0.94)_80%,rgb(var(--color-bg))_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.9)_0%,rgb(var(--color-bg)/0.8)_28%,rgb(var(--color-bg)/0.52)_46%,rgb(var(--color-bg)/0.14)_62%,transparent_76%)]"
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.16)_0%,transparent_20%,transparent_34%,rgb(var(--color-bg)/0.7)_56%,rgb(var(--color-bg)/0.94)_74%,rgb(var(--color-bg))_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.9)_0%,rgb(var(--color-bg)/0.8)_28%,rgb(var(--color-bg)/0.52)_46%,rgb(var(--color-bg)/0.14)_62%,transparent_76%)]"
       />
 
       {/* Gentle bottom transition to the next section */}
