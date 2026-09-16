@@ -97,7 +97,7 @@ export function Hero() {
          and the first action share the opening screen with the picture
          rather than waiting under it. From 1024px the padding is the
          approved desktop value. */
-      className="relative flex min-h-[36rem] w-full items-center overflow-hidden pb-14 pt-[calc(var(--hero-band)*0.5)] [--hero-band:clamp(14rem,38svh,24rem)] md:min-h-[41rem] md:pb-16 lg:min-h-[44rem] lg:py-20"
+      className="relative flex min-h-[34rem] w-full items-center overflow-hidden pb-10 pt-[calc(var(--hero-band)*0.46)] [--hero-band:clamp(12.5rem,34svh,19rem)] sm:min-h-[38rem] sm:pb-14 md:min-h-[41rem] md:pb-16 lg:min-h-[44rem] lg:py-20 xl:min-h-[46rem]"
     >
       <HeroVisual
         depth={parallax ? { imageY, imageScale } : undefined}
@@ -156,7 +156,7 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.14)}
-            className="mt-4 text-[clamp(1.85rem,7vw,2.35rem)] font-bold leading-[1.08] tracking-[-0.03em] text-ink-display sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem]"
+            className="mt-3.5 text-[clamp(1.8rem,6.8vw,2.35rem)] font-bold leading-[1.08] tracking-[-0.03em] text-ink-display sm:mt-4 sm:text-[2.75rem] md:text-[3.15rem] lg:text-[3.25rem] xl:text-[3.55rem]"
           >
             <span className="block">One advisor</span>
             <span className="block">for every money</span>
@@ -173,7 +173,7 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.34)}
-            className="mt-5 max-w-[28rem] text-body-lg leading-relaxed text-ink-secondary lg:max-w-[31rem] xl:max-w-[33rem]"
+            className="mt-4 text-body leading-relaxed text-ink-secondary sm:mt-5 sm:text-body-lg max-w-[28rem] lg:max-w-[31rem] xl:max-w-[33rem]"
           >
             {heroSubheadline}
           </motion.p>
@@ -184,7 +184,7 @@ export function Hero() {
             transition={enter(0.44)}
             /* The floating WhatsApp button steps aside while this row is under it. */
             data-conversion-suppress=""
-            className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center"
+            className="mt-6 flex flex-col gap-2.5 sm:mt-7 sm:flex-row sm:items-center"
           >
             <Button
               to={heroActions.primary.to}
@@ -218,20 +218,20 @@ export function Hero() {
             initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={enter(0.58)}
-            /* Clean responsive row: flex-wrap on sm/md without hanging dividers; dividers show only on non-wrapping xl. */
-            className="mt-8 flex w-full flex-col gap-y-3 border-t border-divider pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 xl:flex-nowrap xl:gap-x-4"
+            className="mt-6 flex w-full flex-wrap items-center gap-x-4 gap-y-2.5 border-t border-divider pt-5 sm:mt-8 sm:gap-x-5 sm:pt-6 xl:flex-nowrap xl:gap-x-5"
           >
             {heroTrustIndicators.map((indicator, idx) => {
               const Glyph = trustIcons[indicator.iconKey] ?? Target;
               return (
                 <li key={indicator.label} className="flex items-center gap-2 xl:shrink-0">
                   {idx > 0 && (
-                    <span className="mr-1.5 hidden h-3 w-px bg-divider xl:inline-block" aria-hidden="true" />
+                    <span className="mr-1 hidden h-3 w-px bg-divider sm:inline-block" aria-hidden="true" />
                   )}
-                  <span className="lit flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand text-on-brand">
-                    <Glyph size={13} strokeWidth={2} aria-hidden="true" />
+                  <span className="lit flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-pill bg-brand text-on-brand">
+                    <Glyph size={12} strokeWidth={2} aria-hidden="true" className="sm:hidden" />
+                    <Glyph size={13} strokeWidth={2} aria-hidden="true" className="hidden sm:block" />
                   </span>
-                  <span className="whitespace-nowrap text-body-sm font-medium text-ink">{indicator.label}</span>
+                  <span className="whitespace-nowrap text-legal sm:text-body-sm font-medium text-ink">{indicator.label}</span>
                 </li>
               );
             })}
@@ -243,7 +243,7 @@ export function Hero() {
             initial={rise}
             animate={{ opacity: 1, y: 0 }}
             transition={enter(0.66)}
-            className="mt-10 w-full max-w-[34rem]"
+            className="mt-8 sm:mt-10 w-full max-w-[34rem]"
           >
             <HeroJourney variant="spine" />
           </motion.div>

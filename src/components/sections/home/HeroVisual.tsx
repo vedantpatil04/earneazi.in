@@ -106,7 +106,7 @@ export function HeroVisual({ depth, reveal = false }: HeroVisualProps) {
             */
             {...({ fetchpriority: 'high' } as Record<string, string>)}
             decoding="async"
-            className="h-full w-full object-cover [object-position:var(--focal-narrow)] md:[object-position:var(--focal)]"
+            className="h-full w-full object-cover contrast-[1.02] saturate-[1.03] [object-position:var(--focal-narrow)] md:[object-position:var(--focal)]"
             style={
               {
                 '--focal': heroImage.focalPoint,
@@ -118,14 +118,14 @@ export function HeroVisual({ depth, reveal = false }: HeroVisualProps) {
       </motion.div>
 
       {/*
-        Reading scrim. From 1024px, the approved horizontal wash: it keeps
-        the headline and supporting copy crisp on the left and clears across
-        the frame toward the trajectory, holding stronger through the middle
-        because at 1024px the supporting copy reaches almost half the width.
-        Below 1024px, the vertical wash down the band described above.
+        Reading scrim. From 1024px, the horizontal wash keeps the narrative
+        column and CTAs crisp on the left while opening up across the middle
+        for the financial image and trajectory line.
+        Below 1024px, the vertical wash down the band preserves the planning
+        desk visual at the top and seamlessly grounds the text below.
       */}
       <div
-        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.16)_0%,transparent_20%,transparent_34%,rgb(var(--color-bg)/0.7)_56%,rgb(var(--color-bg)/0.94)_74%,rgb(var(--color-bg))_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.9)_0%,rgb(var(--color-bg)/0.8)_28%,rgb(var(--color-bg)/0.52)_46%,rgb(var(--color-bg)/0.14)_62%,transparent_76%)]"
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(var(--color-bg)/0.12)_0%,transparent_16%,transparent_32%,rgb(var(--color-bg)/0.65)_52%,rgb(var(--color-bg)/0.94)_72%,rgb(var(--color-bg))_100%)] lg:bg-[linear-gradient(to_right,rgb(var(--color-bg)/0.95)_0%,rgb(var(--color-bg)/0.88)_30%,rgb(var(--color-bg)/0.58)_46%,rgb(var(--color-bg)/0.15)_64%,transparent_78%)]"
       />
 
       {/* Gentle bottom transition to the next section */}

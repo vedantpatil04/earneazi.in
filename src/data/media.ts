@@ -156,7 +156,7 @@ export const heroImage: ResponsiveImageAsset = {
     2:1 frame, the notebook and phone move right — out from under the
     narrative column and toward the open side of the hero.
   */
-  focalPoint: '30% 50%',
+  focalPoint: '32% 48%',
   narrow: {
     /* Matches the `md:` step on the hero's <img>; change the two together. */
     media: '(max-width: 767px)',
@@ -174,9 +174,8 @@ export const heroImage: ResponsiveImageAsset = {
     ],
     /* The band runs the full width of the phone. */
     sizes: '100vw',
-    /* High and a little right: a short band trims the charts before the
-       phone, and a narrow one trims the notebook's edge before the phone's. */
-    focalPoint: '60% 30%',
+    /* Centered across the calculator on the phone and the printed financial charts */
+    focalPoint: '54% 28%',
   },
 };
 

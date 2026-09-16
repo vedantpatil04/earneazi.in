@@ -37,7 +37,7 @@ import { SipMiniCalculator } from '@/features/sip-calculator/SipMiniCalculator';
  */
 export function SipTeaser() {
   return (
-    <Section spacing="lg" aria-labelledby="sip-teaser-heading">
+    <Section spacing="lg" background="sunken" aria-labelledby="sip-teaser-heading">
       <Container size="content">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">

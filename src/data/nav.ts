@@ -8,6 +8,12 @@ import { servicePillars } from '@/data/services';
  */
 export const primaryNav: NavItem[] = [
   { label: 'Home', path: '/', icon: Home },
+  {
+    label: 'SIP Calculator',
+    path: '/sip-calculator',
+    description: 'See what regular investing looks like',
+    icon: Calculator,
+  },
   { label: 'Services', path: '/services', description: 'Mutual funds & PMS, insurance, loans', icon: Layers },
   {
     label: 'Financial Goals',
@@ -15,22 +21,22 @@ export const primaryNav: NavItem[] = [
     description: 'Start from what you’re working toward',
     icon: Target,
   },
-  {
-    label: 'SIP Calculator',
-    path: '/sip-calculator',
-    description: 'See what regular investing looks like',
-    icon: Calculator,
-  },
   { label: 'About', path: '/about', description: 'Who we are', icon: Users },
-  { label: 'Contact', path: '/contact', description: 'Start a conversation', icon: MessageCircle },
   { label: 'FAQ', path: '/faq', description: 'Common questions', icon: CircleHelp },
+  { label: 'Contact', path: '/contact', description: 'Start a conversation', icon: MessageCircle },
 ];
 
 /**
- * What the desktop header shows. Home is already reachable from the
- * wordmark and Contact is promoted to the header's call to action, so
- * repeating either as a plain link only adds width without adding a
- * destination. Every route still appears in the footer and the mobile panel.
+ * What the desktop and mobile header navigation shows in canonical order:
+ * 1. SIP Calculator
+ * 2. Services
+ * 3. Financial Goals
+ * 4. About
+ * 5. FAQ
+ *
+ * Home is already reachable from the wordmark and Contact is promoted to the
+ * header's call to action, so repeating either as a plain link only adds width
+ * without adding a destination.
  */
 export const headerNav: NavItem[] = primaryNav.filter(
   (item) => item.path !== '/' && item.path !== '/contact'

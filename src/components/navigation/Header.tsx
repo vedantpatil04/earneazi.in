@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { headerCta, headerNav, primaryNav } from '@/data/nav';
+import { headerCta, headerNav } from '@/data/nav';
 import { generalConversation, resolveConversation } from '@/lib/contact/conversation';
 import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
 import { Logo } from '@/components/brand/Logo';
@@ -148,7 +148,7 @@ export function Header() {
       <MobileNav
         open={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
-        items={primaryNav}
+        items={headerNav}
         triggerRef={menuButtonRef}
       />
     </header>

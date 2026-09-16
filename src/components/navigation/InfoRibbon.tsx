@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FocusEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Pause, Play } from 'lucide-react';
 import { ribbonItems } from '@/data/nav';
 import type { RibbonItem } from '@/types/nav';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -27,9 +26,6 @@ const TRACK_COPIES = 4;
  * ── Movement, and every way to stop it ──────────────────────────────────
  *
  *   hover, focus, a finger held down   paused, in CSS
- *   the pause control                  paused until pressed again — the
- *                                      mechanism WCAG 2.2.2 asks for, since
- *                                      hover does not exist on a phone
  *   off screen                         paused, so nothing paints for a band
  *                                      nobody can see
  *   keyboard focus inside it           the track stops and becomes a normal
@@ -37,8 +33,7 @@ const TRACK_COPIES = 4;
  *                                      scrolled into view instead of sliding
  *                                      out from under its focus ring
  *   prefers-reduced-motion             never moves: one static, swipeable
- *                                      rail, and no pause control, because
- *                                      there is nothing to pause
+ *                                      rail
  *
  * ── Accessibility ───────────────────────────────────────────────────────
  *
@@ -51,7 +46,6 @@ export function InfoRibbon() {
   const prefersReducedMotion = usePrefersReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
   const [offscreen, setOffscreen] = useState(false);
   const [keyboardInside, setKeyboardInside] = useState(false);
 
@@ -92,7 +86,7 @@ export function InfoRibbon() {
       role="region"
       aria-label="What Earneazi offers"
       data-ribbon=""
-      data-paused={paused || offscreen ? '' : undefined}
+      data-paused={offscreen ? '' : undefined}
       onFocus={onFocus}
       onBlur={onBlur}
       className="relative border-b border-divider bg-surface"
@@ -119,30 +113,6 @@ export function InfoRibbon() {
           </div>
         )}
       </div>
-
-      {!prefersReducedMotion && (
-        <button
-          type="button"
-          onClick={() => setPaused((current) => !current)}
-          aria-pressed={paused}
-          aria-label="Pause the moving ribbon"
-          className="group absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-center rounded-action"
-        >
-          <span
-            aria-hidden="true"
-            className={cn(
-              'raised inline-flex h-7 w-7 items-center justify-center rounded-pill border border-divider bg-surface text-ink-secondary',
-              'transition-[border-color,color] duration-instant ease-out group-hover:border-border group-hover:text-ink'
-            )}
-          >
-            {paused ? (
-              <Play size={12} strokeWidth={2.25} className="translate-x-px" />
-            ) : (
-              <Pause size={12} strokeWidth={2.25} />
-            )}
-          </span>
-        </button>
-      )}
     </div>
   );
 }

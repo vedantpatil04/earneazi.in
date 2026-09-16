@@ -231,8 +231,8 @@ function JourneyPath({ depth, className }: { depth?: { y: MotionValue<number> };
                   {/* The annotation — glass over the photograph. */}
                   <span
                     className={cn(
-                      'raised flex flex-col rounded-surface border border-divider/60 bg-veil/[var(--veil-alpha)] px-2.5 py-1.5 text-left backdrop-blur-md',
-                      'transition-[border-color] duration-instant ease-out',
+                      'raised flex flex-col rounded-surface border border-divider/70 bg-veil/[var(--veil-alpha)] px-2.5 py-1.5 text-left shadow-sm backdrop-blur-md',
+                      'transition-[border-color,box-shadow] duration-instant ease-out',
                       'group-hover/node:border-tone/60 group-focus-visible/node:border-tone/60'
                     )}
                   >
@@ -269,7 +269,7 @@ function JourneyPath({ depth, className }: { depth?: { y: MotionValue<number> };
                 : { duration: duration.slow, delay: settle(2) + 0.2, ease: easing.out }
             }
           >
-            <span className="lit inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill bg-brand px-3 py-1.5 text-xs font-semibold text-on-brand">
+            <span className="lit inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill bg-brand px-3 py-1.5 text-xs font-semibold text-on-brand shadow-sm">
               <Flag size={12} strokeWidth={2} aria-hidden="true" />
               {heroAxis.end}
             </span>
@@ -301,7 +301,7 @@ function AxisLabel({ x, y, delay, children }: { x: number; y: number; delay: num
         animate={{ opacity: 1 }}
         transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.slow, delay, ease: easing.out }}
       >
-        <span className="raised inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill border border-divider/60 bg-veil/[var(--veil-alpha)] px-2.5 py-1 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-secondary backdrop-blur-md">
+        <span className="raised inline-flex items-center gap-1.5 whitespace-nowrap rounded-pill border border-divider/60 bg-veil/[var(--veil-alpha)] px-2.5 py-1 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-secondary shadow-sm backdrop-blur-md">
           <span aria-hidden="true" className="sphere h-2 w-2 rounded-pill" />
           {children}
         </span>
@@ -320,16 +320,16 @@ function JourneySpine({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'floating rounded-band border border-divider bg-veil/[var(--veil-alpha)] p-4 sm:p-6 backdrop-blur-xl',
+        'floating rounded-band border border-divider bg-veil/[var(--veil-alpha)] p-3.5 sm:p-6 backdrop-blur-xl',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-divider pb-3">
+      <div className="flex items-center justify-between gap-3 border-b border-divider pb-2.5 sm:pb-3">
         <span className="inline-flex items-center gap-1.5 font-display text-legal font-semibold uppercase tracking-[0.12em] text-ink-secondary">
           <span aria-hidden="true" className="sphere h-2 w-2 rounded-pill" />
           {heroAxis.start}
         </span>
-        <span className="lit inline-flex items-center gap-1.5 rounded-pill bg-brand px-3 py-1 text-legal font-semibold text-on-brand">
+        <span className="lit inline-flex items-center gap-1.5 rounded-pill bg-brand px-2.5 py-1 sm:px-3 text-legal font-semibold text-on-brand">
           <Flag size={11} strokeWidth={2} aria-hidden="true" />
           {heroAxis.end}
         </span>
@@ -339,7 +339,7 @@ function JourneySpine({ className }: { className?: string }) {
           the three milestones sit in a row — read left to right in the order
           the spine reads top to bottom — where three rows would leave most of
           that width empty. */}
-      <ol className="relative mt-5 space-y-3.5 ps-7 md:grid md:grid-cols-3 md:gap-3 md:space-y-0 md:ps-0">
+      <ol className="relative mt-3.5 sm:mt-5 space-y-2.5 sm:space-y-3.5 ps-6 sm:ps-7 md:grid md:grid-cols-3 md:gap-3 md:space-y-0 md:ps-0">
         {/* The spine. Drawn from the top so it reads as a direction rather
             than as a divider. */}
         <motion.span
@@ -347,7 +347,7 @@ function JourneySpine({ className }: { className?: string }) {
           initial={prefersReducedMotion ? false : { scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.story, delay: 0.2, ease: easing.out }}
-          className="absolute bottom-2 left-[7px] top-2 w-0.5 origin-top rounded-pill bg-gradient-to-b from-brand/40 via-brand to-brand md:hidden"
+          className="absolute bottom-2 left-[6px] top-2 w-0.5 origin-top rounded-pill bg-gradient-to-b from-brand/40 via-brand to-brand md:hidden"
         />
 
         {heroMilestones.map((milestone, index) => {
@@ -368,18 +368,19 @@ function JourneySpine({ className }: { className?: string }) {
             >
               <span
                 aria-hidden="true"
-                className="sphere sphere-tone absolute -start-7 top-3.5 block h-4 w-4 rounded-pill ring-2 ring-bg md:hidden"
+                className="sphere sphere-tone absolute -start-6 sm:-start-7 top-3 block h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-pill ring-2 ring-bg md:hidden"
               />
 
               <Link
                 to={goalDeepLink(milestone.goalId)}
                 className={cn(
-                  'raised group/row flex h-full items-start gap-2.5 sm:gap-3 rounded-surface border border-divider bg-surface p-2.5 sm:p-3',
+                  'raised group/row flex h-full items-start gap-2 sm:gap-3 rounded-surface border border-divider bg-surface p-2 sm:p-3',
                   'transition-[border-color] duration-instant ease-out hover:border-tone/50'
                 )}
               >
-                <span className="lit lit-tone mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-action bg-tone-fill text-on-tone">
-                  <Glyph size={15} strokeWidth={1.75} aria-hidden="true" />
+                <span className="lit lit-tone mt-0.5 flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-action bg-tone-fill text-on-tone">
+                  <Glyph size={14} strokeWidth={1.75} aria-hidden="true" className="sm:hidden" />
+                  <Glyph size={15} strokeWidth={1.75} aria-hidden="true" className="hidden sm:block" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-body-sm font-semibold text-ink-display">{title}</span>
@@ -394,11 +395,11 @@ function JourneySpine({ className }: { className?: string }) {
         })}
       </ol>
 
-      <div className="mt-4 flex flex-col gap-1.5 border-t border-divider pt-3 text-legal text-ink-muted sm:flex-row sm:items-center sm:justify-between">
-        <span className="font-display text-[10.5px] font-semibold uppercase tracking-wider text-ink-secondary">
+      <div className="mt-3.5 sm:mt-4 flex flex-col gap-1 border-t border-divider pt-2.5 sm:gap-1.5 sm:pt-3 text-legal text-ink-muted sm:flex-row sm:items-center sm:justify-between">
+        <span className="font-display text-[10px] sm:text-[10.5px] font-semibold uppercase tracking-wider text-ink-secondary">
           TODAY → GOALS → PROGRESS → FUTURE
         </span>
-        <p>{heroIllustrativeNote}</p>
+        <p className="text-[11px] leading-tight">{heroIllustrativeNote}</p>
       </div>
     </div>
   );

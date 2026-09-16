@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { RefObject } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { ArrowRight, Calculator, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { NavItem } from '@/types/nav';
 import { headerCta } from '@/data/nav';
 import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
@@ -28,9 +28,6 @@ interface MobileNavProps {
 }
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-/** The route that gets its own highlighted row (Phase 0 §16). */
-const HIGHLIGHT_PATH = '/sip-calculator';
 
 /**
  * Mobile navigation — Phase 0 §16.
@@ -144,8 +141,7 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose, triggerRef]);
 
-  const destinations = items.filter((item) => item.path !== HIGHLIGHT_PATH);
-  const highlight = items.find((item) => item.path === HIGHLIGHT_PATH);
+  const destinations = items;
 
   /* Only channels the owner has confirmed. Nothing is invented, and an
      unconfirmed channel renders nothing rather than a placeholder. */
@@ -269,41 +265,7 @@ export function MobileNav({ open, onClose, items, triggerRef }: MobileNavProps) 
               })}
             </ul>
 
-            {/* The one tool a visitor can use before speaking to anyone, so
-                it is a distinct row rather than the fifth item in a list. */}
-            {highlight && (
-              <motion.div variants={navItemVariants} className="mt-5">
-                <NavLink
-                  to={highlight.path}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'edge-top group flex min-h-16 items-center gap-3.5 rounded-band border bg-brand-subtle px-3.5 py-3 text-ink',
-                      'transition-colors motion-safe:duration-instant ease-out hover:border-brand/45',
-                      isActive ? 'border-brand/50' : 'border-brand/20'
-                    )
-                  }
-                >
-                  <span
-                    aria-hidden="true"
-                    className="lit inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-surface bg-brand text-on-brand"
-                  >
-                    <Calculator size={19} strokeWidth={1.75} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-display text-title-sm text-ink-display">{highlight.label}</span>
-                    {highlight.description && (
-                      <span className="block text-body-sm text-ink-secondary">{highlight.description}</span>
-                    )}
-                  </span>
-                  <ArrowRight
-                    size={18}
-                    aria-hidden="true"
-                    className="shrink-0 text-brand-ink transition-transform motion-safe:duration-instant ease-out motion-safe:group-hover:translate-x-0.5"
-                  />
-                </NavLink>
-              </motion.div>
-            )}
+
 
             <motion.div variants={navItemVariants} className="mt-5">
               <Button to={headerCta.path} onClick={onClose} size="lg" className="w-full">

@@ -40,6 +40,7 @@ export default function HomePage() {
       <FinancialGoals />
       <ServicesShowcase />
       <WhyEarneazi />
+      <SipTeaser />
       <HowItWorks />
       <FounderSection />
       {/*
@@ -48,7 +49,6 @@ export default function HomePage() {
         now rather than one made under time pressure later.
       */}
       <CredentialLedger />
-      <SipTeaser />
       {/* Client stories close the page's argument, directly before the ask.
           Consented testimonials only — none, and the section is absent. */}
       <Testimonials />
