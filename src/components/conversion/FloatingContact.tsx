@@ -77,7 +77,7 @@ export function FloatingContact() {
   const target = resolveConversation(generalConversation, 'Start a conversation');
   const isWhatsApp = target.channel === 'whatsapp';
   const label = isWhatsApp ? 'Chat on WhatsApp' : 'Talk to an advisor';
-  const onContactRoute = pathname === '/contact';
+  const onContactRoute = pathname === '/contact' || pathname.startsWith('/contact');
 
   useEffect(() => {
     if (typeof window === 'undefined' || onContactRoute) return;

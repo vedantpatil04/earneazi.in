@@ -6,7 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
 import { Link } from '@/components/ui/Link';
 import { Reveal } from '@/components/motion/Reveal';
-import { clipRevealVariants, riseVariants } from '@/lib/motion/variants';
+import { riseVariants } from '@/lib/motion/variants';
 import { WhatsAppGlyph } from '@/components/conversion/WhatsAppGlyph';
 import { ConsultationForm } from '@/features/contact/ConsultationForm';
 import { contactChannelHref, verifiedContactChannels } from '@/data/contact';
@@ -78,10 +78,10 @@ export default function ContactPage() {
         lead="Where you are now, what you’d like to sort out. A sentence or two is enough to start with — the detail can come later."
       />
 
-      <Section spacing="md" aria-labelledby="consultation-heading">
+      <Section spacing="lg" className="pb-16 sm:pb-24 lg:pb-32" aria-labelledby="consultation-heading">
         <Container size="content">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
-            <Reveal variants={clipRevealVariants} className="lg:col-span-7">
+            <Reveal variants={riseVariants} className="lg:col-span-7">
               <h2 id="consultation-heading" className="text-display-md text-ink-display">
                 Book a consultation
               </h2>
@@ -92,7 +92,10 @@ export default function ContactPage() {
 
               {/* The form sits on its own raised surface (Enhancement A), so
                   the page's one task reads as an object you work on. */}
-              <div className="raised mt-8 rounded-band border border-divider bg-surface p-5 sm:p-7">
+              <div
+                data-conversion-surface
+                className="raised mt-8 rounded-band border border-divider bg-surface p-5 sm:p-7 pb-8 sm:pb-9"
+              >
                 <ConsultationForm />
               </div>
             </Reveal>

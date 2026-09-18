@@ -299,12 +299,12 @@ export function ConsultationForm() {
         </p>
       )}
 
-      <div className="flex flex-col gap-3 border-t border-divider pt-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-t border-divider pt-6 pb-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto shrink-0 shadow-sm"
           leadingIcon={whatsAppAvailable ? <WhatsAppGlyph size={18} /> : undefined}
         >
           {whatsAppAvailable ? 'Review in WhatsApp' : 'Write my message'}

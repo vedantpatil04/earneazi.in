@@ -29,33 +29,25 @@ export const brand = {
 
   logo: {
     /**
-     * The wordmark, as text. Set in the display face by the Logo component.
-     * PROVISIONAL — pending the approved vector (Phase 0 §7).
+     * The official logo wordmark.
      */
     wordmark: 'Earneazi',
 
     /**
-     * Drop the official logo in here once it exists: an imported React SVG
-     * component using `currentColor` for the wordmark so one asset serves
-     * both themes with no flash on switch (Phase 0 §7).
-     *
-     * While this is null, Logo renders the provisional lockup.
+     * The official logo assets are rendered directly by the Logo component.
      */
     vectorAsset: null as null | (() => JSX.Element),
 
     /**
-     * The trailing dot is a genuine asset from the current build and is
-     * retained (Phase 0 §6.3). It is the logo's only interactive element:
-     * on hover and focus the dot moves, the wordmark never does.
+     * Trailing dot is retired with adoption of the official logo artwork.
      */
-    hasDot: true,
+    hasDot: false,
 
     /** Accessible name wherever the logo links home. */
-    homeLabel: 'Earneazi — home',
+    homeLabel: 'Earneazi',
 
     /**
-     * Minimum rendered width of the primary lockup, in pixels (§7). Below
-     * this, use the `compact` lockup instead of scaling the primary one.
+     * Minimum rendered width of the primary lockup, in pixels.
      */
     minPrimaryWidth: 112,
   },

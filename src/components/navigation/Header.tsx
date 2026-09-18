@@ -76,12 +76,14 @@ export function Header() {
       )}
     >
       <Container size="shell">
-        <div className="flex h-header items-center justify-between gap-3 lg:grid lg:grid-cols-[auto_1fr_auto] lg:gap-5">
-          <div className="flex items-center justify-start">
+        <div className="flex h-header items-center justify-between gap-3 lg:gap-4">
+          {/* ── Left brand zone ── */}
+          <div className="flex items-center justify-start shrink-0">
             <Logo lockup="primary" />
           </div>
 
-          <nav aria-label="Primary" className="hidden items-center justify-center lg:flex">
+          {/* ── Center navigation zone ── */}
+          <nav aria-label="Primary" className="hidden lg:flex items-center justify-center flex-1 mx-2 min-w-0">
             <ul className="inset-well flex items-center gap-0.5 rounded-pill border border-divider/80 bg-surface-sunken/70 p-1">
               {headerNav.map((item) => (
                 <li key={item.path}>
@@ -91,7 +93,8 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="flex items-center justify-end gap-2 sm:gap-2.5">
+          {/* ── Right action zone ── */}
+          <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0">
             <HeaderCredential className="hidden min-[1360px]:inline-flex" />
 
             <ThemeToggle />

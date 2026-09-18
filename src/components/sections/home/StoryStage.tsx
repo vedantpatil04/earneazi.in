@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { useStoryFrame } from '@/hooks/useScrollStory';
 import type { ScrollStory } from '@/hooks/useScrollStory';
 import { cn } from '@/lib/utils/cn';
@@ -49,33 +48,26 @@ export function StoryTrack({ story, count, renderPanel, className }: StoryTrackP
   const { geometry, dominant } = story;
 
   return (
-    /*
-      The wrappers overlap and are transparent, so only the dominant panel
-      takes pointer input — a fading panel, or the empty part of a wrapper,
-      never sits over the button the reader is about to press. No `overflow`
-      or `z-index` here or above: the panels pin.
-    */
     <div
       ref={story.registerTrack}
       className={cn('pointer-events-none relative', className)}
       style={geometry ? { height: geometry.trackHeight } : undefined}
     >
       {/* The stage: one pinned window every card starts in, from the anchor to
-          the foot of the screen. It clips top and bottom only, so the cards'
-          shadows still show at the sides. */}
+          the foot of the screen. Stably anchored with no clipping. */}
       <div
         ref={story.registerStage}
-        className={cn('[clip-path:inset(0_-3rem)]', geometry && 'sticky')}
+        className={cn('w-full', geometry && 'sticky')}
         style={geometry ? { top: geometry.anchor, height: geometry.stageHeight } : undefined}
       >
-        <div className="grid">
+        <div className="grid w-full">
           {Array.from({ length: count }, (_, index) => (
             <div
               key={index}
               ref={story.registerPanel(index)}
               aria-hidden={index === dominant ? undefined : true}
               className={cn(
-                'col-start-1 row-start-1 origin-top self-start',
+                'col-start-1 row-start-1 origin-top self-start w-full',
                 index === dominant ? 'pointer-events-auto' : 'pointer-events-none',
                 /* The first paint, before the scroll is read: only the first
                    panel shows. Inline styles written from the scroll take over. */
@@ -92,17 +84,8 @@ export function StoryTrack({ story, count, renderPanel, className }: StoryTrackP
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   THE STACKED HEADINGS
+   THE STACKED HEADINGS (Mobile vertical story)
    ═══════════════════════════════════════════════════════════════════════ */
-
-/*
-  One row, not a list. Six stacked rows came to 245px — a third of a phone's
-  screen pinned over the card they index, which left the card a letterbox to
-  be read through, and each row was a 36px target. A row of 44px chips is
-  ~80px and the stage gets the rest. It is the site's designed scroller
-  (`rail-x` in globals.css) where the titles do not fit, and it keeps the chip
-  being read in view.
-*/
 
 interface StoryHeadingsProps {
   story: ScrollStory;
@@ -118,89 +101,89 @@ interface StoryHeadingsProps {
 }
 
 export function StoryHeadings({ story, items, label, noun, ground, onChoose }: StoryHeadingsProps) {
-  const rail = useRef<HTMLOListElement>(null);
   const rule = useRef<HTMLSpanElement>(null);
-  const step = useRef<HTMLSpanElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
+  const headingsRef = useRef<(HTMLDivElement | null)[]>([]);
   const { dominant } = story;
-  const active = items[dominant];
+  const active = items[dominant] ?? items[0];
   const choose = onChoose ?? story.select;
 
   useStoryFrame(story, (frame) => {
     if (rule.current) rule.current.style.transform = `scaleX(${frame.overall.toFixed(4)})`;
-    if (step.current) step.current.style.transform = `scaleX(${frame.step.toFixed(4)})`;
-  });
-
-  /*
-    Bring the chip being read into view when the story moves on. The rail's
-    own scroll is set directly: `scrollIntoView` would also scroll the page,
-    and the page's scroll is what is driving the story.
-  */
-  useEffect(() => {
-    const row = rail.current;
-    const chip = row?.children[dominant];
-    if (!row || !(chip instanceof HTMLElement) || row.scrollWidth <= row.clientWidth) return;
-    row.scrollTo({
-      left: Math.max(0, chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2),
-      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    frame.opacities.forEach((opacity, index) => {
+      const el = headingsRef.current[index];
+      if (!el) return;
+      el.style.opacity = opacity.toFixed(3);
+      el.style.visibility = opacity < 0.005 ? 'hidden' : 'visible';
     });
-  }, [dominant, prefersReducedMotion]);
+  });
 
   return (
     <div
       ref={story.registerBar}
-      className={cn('sticky z-10 -mx-gutter pb-3 pt-2', ground === 'sunken' ? 'bg-surface-sunken' : 'bg-bg')}
+      className={cn('sticky z-20 pb-3 pt-2', ground === 'sunken' ? 'bg-surface-sunken' : 'bg-bg')}
       style={{ top: 'var(--header-height)' }}
     >
-      <nav aria-label={label}>
-        {/* `py-1` is the room a focus ring needs inside a scroller, which
-            clips at its padding edge. */}
-        <ol ref={rail} className="rail-x rail-fade relative gap-2 scroll-px-gutter px-gutter py-1">
-          {items.map((item, index) => {
-            const isActive = index === dominant;
-            return (
-              <li key={item.id} data-tone={item.id} className="shrink-0">
+      <nav aria-label={label} className="w-full">
+        {/* Step dots / chapter pills row: completely non-scrolling, fits full width without horizontal swipe */}
+        <div className="flex items-center justify-between gap-1.5 pb-2">
+          <div className="flex items-center gap-1.5" role="tablist" aria-label={`${label} steps`}>
+            {items.map((item, index) => {
+              const isActive = index === dominant;
+              return (
                 <button
+                  key={item.id}
                   type="button"
+                  data-tone={item.id}
                   aria-current={isActive ? 'step' : undefined}
+                  aria-label={`${noun} ${index + 1}: ${item.title}`}
                   onClick={() => choose(index)}
                   className={cn(
-                    'relative flex h-11 items-center gap-2 overflow-hidden rounded-pill border px-4',
-                    'transition-[background-color,border-color,color] duration-base ease-out',
-                    isActive
-                      ? 'border-tone/40 bg-tone-tint text-ink-display'
-                      : 'border-divider bg-surface text-ink-muted hover:border-border hover:text-ink'
+                    'h-2 rounded-pill transition-[width,background-color] duration-base ease-out',
+                    isActive ? 'w-8 bg-tone' : 'w-2.5 bg-divider hover:bg-border'
                   )}
-                >
-                  <span
-                    className={cn(
-                      'font-display text-legal font-semibold tabular transition-colors duration-base ease-out',
-                      isActive ? 'text-tone' : 'text-ink-muted'
-                    )}
-                  >
-                    {pad(index + 1)}
+                />
+              );
+            })}
+          </div>
+          <span className="font-display text-legal font-semibold tabular text-ink-muted">
+            {pad(dominant + 1)} <span aria-hidden="true">/</span> {pad(items.length)}
+          </span>
+        </div>
+
+        {/* Active heading: stacked crossfade, one active state at a time */}
+        <div className="relative grid min-h-[3rem] items-center">
+          {items.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.id}
+                ref={(node) => {
+                  headingsRef.current[index] = node;
+                }}
+                data-tone={item.id}
+                className={cn(
+                  'col-start-1 row-start-1 flex items-center gap-2.5 transition-colors duration-slow ease-out',
+                  index > 0 && 'invisible opacity-0'
+                )}
+              >
+                <span className="lit lit-tone inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-surface bg-tone-fill text-on-tone">
+                  <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <span className="block font-display text-legal font-semibold uppercase tracking-[0.12em] text-tone">
+                    {noun} {pad(index + 1)}
                   </span>
-                  <span className="whitespace-nowrap font-display text-body-sm font-semibold">{item.title}</span>
-                  {/* The dominant item's own progress, along the foot of its chip. */}
-                  {isActive && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-4 bottom-1.5 h-0.5 overflow-hidden rounded-pill bg-tone/15"
-                    >
-                      <span
-                        ref={step}
-                        className="absolute inset-0 origin-left rounded-pill bg-tone"
-                        style={{ transform: 'scaleX(0)' }}
-                      />
-                    </span>
-                  )}
-                </button>
-              </li>
+                  <h3 className="truncate font-display text-title-sm font-semibold text-ink-display">
+                    {item.title}
+                  </h3>
+                </div>
+              </div>
             );
           })}
-        </ol>
+        </div>
 
-        <div aria-hidden="true" className="relative mx-gutter mt-2 h-px overflow-hidden bg-divider">
+        {/* Continuous progress meter underneath */}
+        <div aria-hidden="true" className="relative mt-2 h-0.5 overflow-hidden rounded-pill bg-divider">
           <span
             ref={rule}
             data-tone={active.id}
@@ -216,3 +199,81 @@ export function StoryHeadings({ story, items, label, noun, ground, onChoose }: S
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VERTICAL ITEM NAVIGATION (Mobile)
+   SECTION TITLE
+   ↓
+   VERTICAL ITEM NAVIGATION (01, 02, 03...)
+   ↓
+   ACTIVE STORY SCENE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+export function StoryNavVertical({
+  story,
+  items,
+  label,
+  noun,
+  onChoose,
+}: {
+  story: ScrollStory;
+  items: StoryItem[];
+  label: string;
+  noun: string;
+  onChoose?: (index: number) => void;
+}) {
+  const { dominant } = story;
+  const choose = onChoose ?? story.select;
+
+  return (
+    <nav aria-label={label} className="mb-6 w-full">
+      <ol className="flex flex-col gap-2">
+        {items.map((item, index) => {
+          const isActive = index === dominant;
+          const Icon = item.icon;
+          return (
+            <li key={item.id} data-tone={item.id}>
+              <button
+                type="button"
+                aria-current={isActive ? 'step' : undefined}
+                onClick={() => choose(index)}
+                className={cn(
+                  'flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all duration-base ease-out',
+                  isActive
+                    ? 'border-tone/40 bg-tone-tint text-ink-display shadow-sm'
+                    : 'border-divider/70 bg-surface/60 text-ink-secondary hover:border-border hover:text-ink'
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={cn(
+                      'font-display text-legal font-semibold tabular transition-colors duration-base',
+                      isActive ? 'text-tone' : 'text-ink-muted'
+                    )}
+                  >
+                    {pad(index + 1)}
+                  </span>
+                  <span className="truncate font-display text-body-sm font-semibold">
+                    {item.title}
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-base',
+                    isActive ? 'lit lit-tone bg-tone-fill text-on-tone' : 'text-ink-muted'
+                  )}
+                >
+                  <Icon size={14} strokeWidth={isActive ? 2 : 1.5} aria-hidden="true" />
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <p aria-live="polite" className="sr-only">
+        {`${noun} ${dominant + 1} of ${items.length}: ${items[dominant]?.title}`}
+      </p>
+    </nav>
+  );
+}
+

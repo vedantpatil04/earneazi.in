@@ -50,12 +50,6 @@ import type { RefCallback } from 'react';
  * the next replaces it at the midpoint of the transition. The pan of a tall
  * card remains, because it is how the card is read. The marker steps rather
  * than glides.
- *
- * ── Cost ────────────────────────────────────────────────────────────────
- *
- * One passive scroll listener, read at most once per animation frame: a
- * single rect and a handful of style writes. Heights come from a
- * ResizeObserver, never from scrolling.
  */
 
 export type StoryLayout = 'side' | 'stacked';
@@ -107,14 +101,20 @@ export interface StoryFrame {
 
 interface Internals {
   anchor: number;
-  /** Where each item is fully in place, in pixels of story scroll. */
+  /** Start scroll offset for each chapter. */
   starts: number[];
-  /** How far each card pans to bring its end into view. */
+  /** Settle distance upon entering chapter. */
+  settleEnter: number[];
+  /** Vertical reading pan distance if card is taller than stage. */
   reading: number[];
-  /** Each item's whole segment. */
+  /** Dedicated reading hold distance while card is completely still. */
+  readingHold: number[];
+  /** Settle distance before transition begins. */
+  settleExit: number[];
+  /** Transition distance to next chapter (0 for last chapter). */
+  fade: number[];
+  /** Total span for each chapter. */
   spans: number[];
-  settle: number;
-  fade: number;
   total: number;
 }
 
@@ -182,32 +182,40 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
     const viewport = window.innerHeight;
     const header = readHeaderHeight();
     const barHeight = layout === 'stacked' ? bar.current?.offsetHeight ?? 0 : 0;
-    /* The pinned column's `top` is 2rem, so the side gap scales with the root
-       font size — SIDE_GAP is that 2rem at the 16px base. */
     const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
     const anchor =
       layout === 'side' ? header + (SIDE_GAP / 16) * rootFontSize : header + barHeight + STACKED_GAP;
     const stageHeight = Math.max(240, Math.round(viewport - anchor));
-    /*
-      Long enough to read a settled state and to watch a change happen. The
-      stacked layout holds for less: it is read on a touch screen, where a
-      flick travels further and a long still stretch reads as the page
-      sticking, and a card taller than its stage already buys its reading
-      time with the pan.
-    */
+
     const stacked = layout === 'stacked';
-    const settle = Math.round(
-      stacked ? Math.min(130, Math.max(80, viewport * 0.12)) : Math.min(220, Math.max(140, viewport * 0.2))
-    );
-    const fade = Math.round(
-      stacked ? Math.min(200, Math.max(130, viewport * 0.18)) : Math.min(300, Math.max(180, viewport * 0.26))
-    );
+    /* Generous, comfortable reading and transition budgets */
+    const settleEnterDist = Math.round(stacked ? 120 : 160);
+    const readingHoldDist = Math.round(stacked ? 260 : 360);
+    const settleExitDist = Math.round(stacked ? 100 : 120);
+    const fadeDist = Math.round(stacked ? 280 : 340);
 
     const panelHeights = Array.from({ length: count }, (_, index) => panels.current[index]?.offsetHeight ?? 0);
     if (panelHeights.some((height) => height === 0)) return;
 
+    const maxPanelHeight = Math.max(...panelHeights);
+    // Align all panels to uniform height so card frames match identically
+    panels.current.forEach((panel) => {
+      if (panel) {
+        panel.style.minHeight = `${maxPanelHeight}px`;
+      }
+    });
+
     const reading = panelHeights.map((height) => Math.max(0, Math.ceil(height - (stageHeight - END_MARGIN))));
-    const spans = reading.map((distance, index) => settle + distance + settle + (index < count - 1 ? fade : 0));
+    const settleEnter = Array.from({ length: count }, () => settleEnterDist);
+    const readingHold = Array.from({ length: count }, () => readingHoldDist);
+    const settleExit = Array.from({ length: count }, () => settleExitDist);
+    const fade = Array.from({ length: count }, (_, index) => (index < count - 1 ? fadeDist : 0));
+
+    const spans = Array.from(
+      { length: count },
+      (_, index) => settleEnter[index] + reading[index] + readingHold[index] + settleExit[index] + fade[index]
+    );
+
     const starts: number[] = [];
     let cursor = 0;
     for (let index = 0; index < count; index += 1) {
@@ -215,7 +223,17 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
       cursor += spans[index];
     }
 
-    internals.current = { anchor, starts, reading, spans, settle, fade, total: cursor };
+    internals.current = {
+      anchor,
+      starts,
+      settleEnter,
+      reading,
+      readingHold,
+      settleExit,
+      fade,
+      spans,
+      total: cursor,
+    };
 
     const next: StoryGeometry = { anchor, stageHeight, trackHeight: cursor + stageHeight };
     setGeometry((current) => (current && JSON.stringify(current) === JSON.stringify(next) ? current : next));
@@ -231,53 +249,148 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
 
     const opacities: number[] = [];
     const pans: number[] = [];
-    let sum = 0;
-    let weighted = 0;
     let best = 0;
     let bestOpacity = -1;
+    let continuousMarker = 0;
 
     for (let index = 0; index < count; index += 1) {
       const start = current.starts[index];
-      const distance = current.reading[index];
-      const entering = index === 0 ? 1 : clamp01((scrolled - (start - current.fade)) / current.fade);
-      const leaving =
-        index === count - 1
-          ? 0
-          : clamp01((scrolled - (start + current.settle + distance + current.settle)) / current.fade);
-      const pan = distance > 0 ? clamp01((scrolled - (start + current.settle)) / distance) * distance : 0;
+      const enterDist = current.settleEnter[index];
+      const panDist = current.reading[index];
+      const holdDist = current.readingHold[index];
+      const exitHoldDist = current.settleExit[index];
+      const fadeDist = current.fade[index];
 
-      /* Staggered so one item always dominates: the outgoing card is mostly
-         gone before the incoming one is mostly there. */
-      const opacity = calm
-        ? entering >= 0.5 && leaving < 0.5
-          ? 1
-          : 0
-        : smoothstep(0.35, 1, entering) * (1 - smoothstep(0, 0.65, leaving));
+      // Settle phase start and end
+      const readStart = start + enterDist;
+      const readEnd = readStart + panDist;
+      const transitionStart = readEnd + holdDist + exitHoldDist;
+
+      // Pan calculation during reading phase
+      const pan = panDist > 0 ? clamp01((scrolled - readStart) / panDist) * panDist : 0;
+      pans.push(pan);
+
+      let opacity = 0;
+      let y = 0;
+      let visualScale = 1;
+
+      if (scrolled < start) {
+        // Before this chapter
+        if (index === 0) {
+          // Chapter 0 is visible before story scroll reaches anchor
+          opacity = 1;
+          y = 0;
+          visualScale = 1;
+        } else {
+          opacity = 0;
+          y = 16;
+          visualScale = 0.95;
+        }
+      } else if (fadeDist > 0 && scrolled >= transitionStart) {
+        // In transition to next chapter
+        const progress = clamp01((scrolled - transitionStart) / fadeDist);
+        if (calm) {
+          opacity = progress < 0.5 ? 1 : 0;
+          y = 0;
+          visualScale = 1;
+        } else {
+          // Outgoing exit curve: completes in first half of transition
+          const exitT = clamp01(progress / 0.5);
+          opacity = 1 - smoothstep(0, 1, exitT);
+          y = -16 * smoothstep(0, 1, exitT);
+          visualScale = 1 - 0.05 * smoothstep(0, 1, exitT);
+        }
+      } else {
+        // Within chapter's active reading hold
+        opacity = 1;
+        y = 0;
+        visualScale = 1;
+      }
+
+      // Incoming card during previous item's transition
+      if (index > 0) {
+        const prevTransitionStart =
+          current.starts[index - 1] +
+          current.settleEnter[index - 1] +
+          current.reading[index - 1] +
+          current.readingHold[index - 1] +
+          current.settleExit[index - 1];
+        const prevFade = current.fade[index - 1];
+
+        if (scrolled >= prevTransitionStart && scrolled < current.starts[index]) {
+          const progress = clamp01((scrolled - prevTransitionStart) / prevFade);
+          if (calm) {
+            opacity = progress >= 0.5 ? 1 : 0;
+            y = 0;
+            visualScale = 1;
+          } else {
+            // Incoming enters in second half of transition (from progress 0.35 onwards)
+            if (progress < 0.35) {
+              opacity = 0;
+              y = 16;
+              visualScale = 0.95;
+            } else {
+              const enterT = clamp01((progress - 0.35) / 0.65);
+              opacity = smoothstep(0, 1, enterT);
+              y = 16 * (1 - smoothstep(0, 1, enterT));
+              visualScale = 0.95 + 0.05 * smoothstep(0, 1, enterT);
+            }
+          }
+        }
+      }
 
       opacities.push(opacity);
-      pans.push(pan);
-      sum += opacity;
-      weighted += index * opacity;
-      if (opacity > 0 && opacity >= bestOpacity) {
+      if (opacity > bestOpacity) {
         best = index;
         bestOpacity = opacity;
       }
 
+      // Apply transforms directly to panel and internal elements
       const panel = panels.current[index];
-      if (!panel) continue;
-      panel.style.opacity = opacity.toFixed(3);
-      panel.style.visibility = opacity < 0.01 ? 'hidden' : 'visible';
+      if (panel) {
+        panel.style.opacity = opacity.toFixed(3);
+        panel.style.visibility = opacity < 0.005 ? 'hidden' : 'visible';
+        // The panel's outer position stays rock-solid at the anchor, panning only if taller than viewport
+        panel.style.transform = pan > 0 ? `translate3d(0, ${(-pan).toFixed(1)}px, 0)` : '';
 
-      const enter = 1 - (1 - entering) ** 3;
-      const scale = calm ? 1 : 1 - 0.02 * (1 - enter) - 0.015 * leaving * leaving;
-      panel.style.transform =
-        pan > 0 || scale < 1 ? `translate3d(0, ${(-pan).toFixed(1)}px, 0) scale(${scale.toFixed(4)})` : '';
-      /* The incoming card is revealed from the top of the stage down. */
-      panel.style.clipPath = !calm && enter < 0.999 ? `inset(0% 0% ${((1 - enter) * 100).toFixed(2)}% 0%)` : '';
+        // Coordinated choreography for internal elements
+        if (!calm) {
+          const copyEl = panel.querySelector<HTMLElement>('[data-story-copy]');
+          if (copyEl) {
+            copyEl.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+          }
+          const visualEl = panel.querySelector<HTMLElement>('[data-story-visual]');
+          if (visualEl) {
+            visualEl.style.transform = `scale(${visualScale.toFixed(4)})`;
+          }
+        }
+      }
     }
 
-    /* A soft top edge while the dominant card is panned, so text leaving the
-       stage fades rather than being cut. Written only when it changes. */
+    // Continuous marker computation
+    let activeChapter = 0;
+    for (let i = 0; i < count; i += 1) {
+      if (scrolled >= current.starts[i]) {
+        activeChapter = i;
+      }
+    }
+    const chapterStart = current.starts[activeChapter];
+    const transStart =
+      chapterStart +
+      current.settleEnter[activeChapter] +
+      current.reading[activeChapter] +
+      current.readingHold[activeChapter] +
+      current.settleExit[activeChapter];
+    const chFade = current.fade[activeChapter];
+
+    if (chFade > 0 && scrolled >= transStart) {
+      const p = clamp01((scrolled - transStart) / chFade);
+      continuousMarker = activeChapter + smoothstep(0, 1, p);
+    } else {
+      continuousMarker = activeChapter;
+    }
+
+    // Mask for tall cards while scrolling pan is active
     const panned = pans[best] > 0.5;
     if (stage.current && panned !== masked.current) {
       masked.current = panned;
@@ -288,7 +401,7 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
 
     const frame: StoryFrame = {
       opacities,
-      marker: calm || sum === 0 ? best : weighted / sum,
+      marker: calm ? best : continuousMarker,
       overall: clamp01(scrolled / current.total),
       step: clamp01((scrolled - current.starts[best]) / current.spans[best]),
       dominant: best,
@@ -307,8 +420,12 @@ export function useScrollStory({ count, layout, reducedMotion }: ScrollStoryOpti
     const trackElement = track.current;
     if (!current || !trackElement) return;
     const scrolled = current.anchor - trackElement.getBoundingClientRect().top;
+    const targetScroll =
+      current.starts[index] +
+      current.settleEnter[index] +
+      Math.round(current.readingHold[index] / 2);
     window.scrollTo({
-      top: window.scrollY + (current.starts[index] + 1 - scrolled),
+      top: window.scrollY + (targetScroll - scrolled),
       behavior: reduced.current ? 'instant' : 'smooth',
     });
   }, []);
