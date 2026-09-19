@@ -6,7 +6,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow';
 import { serviceMarks } from './ServiceVisuals';
 
 interface ServiceCard {
-  id: 'mutual-funds-pms' | 'insurance' | 'loans';
+  id: 'mutual-funds' | 'insurance' | 'loans';
   category: string;
   title: string;
   description: string;
@@ -16,19 +16,19 @@ interface ServiceCard {
 
 const serviceCards: ServiceCard[] = [
   {
-    id: 'mutual-funds-pms',
+    id: 'mutual-funds',
     category: 'Investing',
-    title: 'Mutual Funds & PMS',
+    title: 'Mutual Funds',
     description: 'Portfolios built around your timeline, not trending funds.',
-    href: '/services#mutual-funds-pms',
+    href: '/services#mutual-funds',
     actionLabel: 'Explore investing',
   },
   {
     id: 'insurance',
     category: 'Protection',
-    title: 'Life & Health Insurance',
+    title: 'Insurance',
     description: 'Coverage sized to protect what you cannot afford to lose.',
-    href: '/services#insurance',
+    href: '/insurance',
     actionLabel: 'Explore insurance',
   },
   {

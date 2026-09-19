@@ -3,16 +3,23 @@ import { Link } from 'react-router-dom';
 import { Section } from '@/components/layout/Section';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
+import { ConversationCta } from '@/components/conversion/ConversationCta';
 import { Reveal } from '@/components/motion/Reveal';
 import { DimensionalText } from '@/components/brand/DimensionalText';
 import { riseVariants } from '@/lib/motion/variants';
+import type { ConversationContext } from '@/lib/contact/conversation';
 
 interface CtaBandProps {
   /** Used for the heading id and the section's aria-labelledby. Must be unique on the page. */
   id: string;
   title: string;
   body: string;
-  primary: { label: string; to: string };
+  /**
+   * A plain route (`to`), or a conversation context resolved through the
+   * shared WhatsApp/contact flow (`context`) — the same choice `ServiceSection`
+   * makes between `Button` and `ConversationCta` for its own next step.
+   */
+  primary: { label: string; to: string } | { label: string; context: ConversationContext };
   secondary?: { label: string; to: string };
 }
 
@@ -69,9 +76,15 @@ export function CtaBand({ id, title, body, primary, secondary }: CtaBandProps) {
             <p className="mx-auto mt-5 max-w-measure text-body-lg text-on-band-muted">{body}</p>
 
             <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row sm:justify-center sm:gap-8">
-              <Button to={primary.to} variant="on-band" size="lg">
-                {primary.label}
-              </Button>
+              {'context' in primary ? (
+                <ConversationCta context={primary.context} variant="on-band" size="lg" showChannelIcon>
+                  {primary.label}
+                </ConversationCta>
+              ) : (
+                <Button to={primary.to} variant="on-band" size="lg">
+                  {primary.label}
+                </Button>
+              )}
 
               {secondary && (
                 <Link

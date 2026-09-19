@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
+import { Link } from '@/components/ui/Link';
 import { ConversationCta } from '@/components/conversion/ConversationCta';
 import { serviceConversation } from '@/lib/contact/conversation';
 import { IconTile } from '@/components/ui/IconTile';
@@ -27,10 +28,12 @@ import type { ServicePillar } from '@/types/content';
  * so each one gets room to answer the four questions people actually arrive
  * with: what it is, who it's for, why it matters, and what to do next.
  *
- * Sections carry the service id as an anchor, because `/services#insurance`
- * is linked from the homepage, the ribbon and the footer. ScrollManager
- * handles the offset for the sticky header; `scroll-mt` covers the native
- * anchor path.
+ * Sections carry the service id as an anchor — `/services#mutual-funds` and
+ * `/services#loans` are linked from the homepage, the ribbon and the footer.
+ * Insurance is the exception: its own entry point is the dedicated `/insurance`
+ * page, so this section is reached by scrolling or by the jump nav below, and
+ * links out to the fuller page in turn. ScrollManager handles the offset for
+ * the sticky header; `scroll-mt` covers the native anchor path.
  *
  * ── Enhancement A ────────────────────────────────────────────────────────
  *
@@ -41,7 +44,7 @@ import type { ServicePillar } from '@/types/content';
  *
  * ── Enhancement B ────────────────────────────────────────────────────────
  *
- * Each service now ends with its products — four for mutual funds and PMS,
+ * Each service now ends with its products — three for mutual funds,
  * eight each for insurance and loans — in an explorer that explains what each
  * one is, who it suits and how Earneazi helps, with a WhatsApp conversation
  * that names the product. Mutual funds add the fund shortlist (names and
@@ -121,7 +124,7 @@ function ServiceSection({ service, background }: { service: ServicePillar; backg
             {/* A next step that is a conversation goes through the shared
                 conversation control, so the WhatsApp draft names the service —
                 the same rule the homepage service panels follow. */}
-            <div className="mt-8">
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
               {service.nextStep.to === '/contact' ? (
                 <ConversationCta context={serviceConversation(service.id)} size="lg" showChannelIcon>
                   {service.nextStep.label}
@@ -130,6 +133,11 @@ function ServiceSection({ service, background }: { service: ServicePillar; backg
                 <Button to={service.nextStep.to} size="lg" trailingIcon={<ArrowRight size={17} aria-hidden="true" />}>
                   {service.nextStep.label}
                 </Button>
+              )}
+              {service.id === 'insurance' && (
+                <Link to="/insurance" variant="standalone" trailingIcon={<ArrowRight size={15} aria-hidden="true" />}>
+                  See all 8 types of cover
+                </Link>
               )}
             </div>
           </Reveal>
@@ -173,7 +181,7 @@ function ServiceSection({ service, background }: { service: ServicePillar; backg
         </div>
 
         <ServiceProducts service={service} />
-        {service.id === 'mutual-funds-pms' && <FundShortlist />}
+        {service.id === 'mutual-funds' && <FundShortlist />}
         {service.id === 'loans' && <PartnerEcosystem />}
       </Container>
     </Section>

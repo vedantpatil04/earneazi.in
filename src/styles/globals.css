@@ -160,7 +160,7 @@
     colour of "Protect family" in the goals section and the colour of
     "Insurance" in the services section are the same statement.
   */
-  [data-tone='mutual-funds-pms'],
+  [data-tone='mutual-funds'],
   [data-tone='grow-wealth'] {
     --tone: var(--accent-invest);
     --tone-fill: var(--accent-invest-fill);
@@ -194,6 +194,50 @@
   }
 
   [data-tone='plan-retirement'] {
+    --tone: var(--accent-retire);
+    --tone-fill: var(--accent-retire-fill);
+    --tone-tint: var(--accent-retire-tint);
+  }
+
+  /*
+    The dedicated Insurance page (/insurance) shows eight cover categories
+    rather than nine subjects, so two accents each carry two categories.
+    Placement in the 4-column grid keeps repeats out of the same row and
+    the same column — see InsurancePage.tsx.
+  */
+  [data-tone='health-insurance'],
+  [data-tone='endowment-plans'] {
+    --tone: var(--accent-protect);
+    --tone-fill: var(--accent-protect-fill);
+    --tone-tint: var(--accent-protect-tint);
+  }
+
+  [data-tone='term-life-insurance'],
+  [data-tone='business-insurance'] {
+    --tone: var(--accent-invest);
+    --tone-fill: var(--accent-invest-fill);
+    --tone-tint: var(--accent-invest-tint);
+  }
+
+  [data-tone='ulip-life-plans'] {
+    --tone: var(--accent-tax);
+    --tone-fill: var(--accent-tax-fill);
+    --tone-tint: var(--accent-tax-tint);
+  }
+
+  [data-tone='motor-insurance'] {
+    --tone: var(--accent-borrow);
+    --tone-fill: var(--accent-borrow-fill);
+    --tone-tint: var(--accent-borrow-tint);
+  }
+
+  [data-tone='home-insurance'] {
+    --tone: var(--accent-learn);
+    --tone-fill: var(--accent-learn-fill);
+    --tone-tint: var(--accent-learn-tint);
+  }
+
+  [data-tone='travel-insurance'] {
     --tone: var(--accent-retire);
     --tone-fill: var(--accent-retire-fill);
     --tone-tint: var(--accent-retire-tint);

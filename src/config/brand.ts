@@ -56,7 +56,7 @@ export const brand = {
    * One-line statement of what the business does. Descriptive only — it
    * makes no claim that needs verifying.
    */
-  tagline: 'Mutual funds and PMS, insurance and loans, planned around your goals.',
+  tagline: 'Mutual funds, insurance and loans, planned around your goals.',
 } as const;
 
 export type Brand = typeof brand;

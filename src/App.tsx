@@ -20,8 +20,9 @@ import HomePage from '@/app/pages/HomePage';
  * explicit that the choice must be a decision rather than a convenience,
  * and switching changes every internal link and every deep-link format.
  *
- * The sitemap is unchanged from the existing build. No route is added,
- * removed or renamed here.
+ * The sitemap otherwise matches the existing build. `/insurance` is the one
+ * addition — the dedicated Insurance experience linked from the homepage
+ * overview, the ribbon, the footer and the services page.
  */
 
 /*
@@ -34,6 +35,7 @@ import HomePage from '@/app/pages/HomePage';
     contact         Zod + React Hook Form
 */
 const ServicesPage = lazy(() => import('@/app/pages/ServicesPage'));
+const InsurancePage = lazy(() => import('@/app/pages/InsurancePage'));
 const FinancialGoalsPage = lazy(() => import('@/app/pages/FinancialGoalsPage'));
 const SipCalculatorPage = lazy(() => import('@/app/pages/SipCalculatorPage'));
 const AboutPage = lazy(() => import('@/app/pages/AboutPage'));
@@ -52,6 +54,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="services" element={<ServicesPage />} />
+            <Route path="insurance" element={<InsurancePage />} />
             <Route path="financial-goals" element={<FinancialGoalsPage />} />
             <Route path="sip-calculator" element={<SipCalculatorPage />} />
             <Route path="about" element={<AboutPage />} />

@@ -32,8 +32,8 @@ import type { GoalEntry, ServicePillar, ServiceProduct } from '@/types/content';
  * ── Products — Enhancement B ────────────────────────────────────────────
  *
  * Each service now carries its products, restored from the previous
- * Earneazi site in the lists the Enhancement B brief supplied: four for
- * mutual funds and PMS, eight each for insurance and loans. Every product
+ * Earneazi site in the lists the Enhancement B brief supplied: three for
+ * mutual funds, eight each for insurance and loans. Every product
  * says three things in a sentence each — what it is, who it tends to suit,
  * and how Earneazi helps — and nothing more:
  *
@@ -49,7 +49,7 @@ import type { GoalEntry, ServicePillar, ServiceProduct } from '@/types/content';
  * what the firm arranges.
  */
 
-/* ── Mutual funds & PMS ─────────────────────────────────────────────────── */
+/* ── Mutual funds ───────────────────────────────────────────────────────── */
 
 const investProducts: ServiceProduct[] = [
   {
@@ -79,16 +79,6 @@ const investProducts: ServiceProduct[] = [
     whoFor: 'Taxpayers on the old regime who want their tax-saving investment to also work toward a longer-term goal.',
     howWeHelp:
       'We check whether the deduction actually applies to you, and whether the lock-in suits your plans, before anything is chosen.',
-  },
-  {
-    id: 'pms',
-    name: 'Portfolio Management Services',
-    icon: Briefcase,
-    summary:
-      'A professionally managed portfolio of individual securities held in your own name, with a higher minimum than a mutual fund.',
-    whoFor: 'Investors with larger portfolios who want more active, hands-on management than a mutual fund offers.',
-    howWeHelp:
-      'We help you judge whether PMS suits the size and purpose of your portfolio, and how it sits alongside what you already hold.',
   },
 ];
 
@@ -249,17 +239,16 @@ function names(products: ServiceProduct[], ids: string[]): string[] {
 
 export const servicePillars: ServicePillar[] = [
   {
-    id: 'mutual-funds-pms',
-    title: 'Mutual Funds & PMS',
+    id: 'mutual-funds',
+    title: 'Mutual Funds',
     shortTitle: 'Mutual funds',
     tagline: 'Built around your timeline, not this month’s trending fund.',
-    summary:
-      'Investing built around what you’re trying to do, not whichever fund is trending this month. For larger portfolios, our PMS option adds more active, hands-on management.',
-    href: '/services#mutual-funds-pms',
+    summary: 'Investing built around what you’re trying to do, not whichever fund is trending this month.',
+    href: '/services#mutual-funds',
     icon: LineChart,
     highlights: [
       'Funds chosen against your timeline, not a standard shortlist',
-      'Portfolio Management Services for larger, more actively managed portfolios',
+      'SIP and lump-sum investing, matched to your timeline',
       'Regular reviews as markets move and your goals change',
     ],
     whoItsFor:
@@ -271,7 +260,7 @@ export const servicePillars: ServicePillar[] = [
     categories: { label: 'What we work with', items: investProducts.map((product) => product.name) },
     categoryGroups: [
       { label: 'Investing', items: names(investProducts, ['mutual-funds', 'sip-planning']) },
-      { label: 'Tax and larger portfolios', items: names(investProducts, ['elss', 'pms']) },
+      { label: 'Tax saving', items: names(investProducts, ['elss']) },
     ],
   },
   {
@@ -281,7 +270,7 @@ export const servicePillars: ServicePillar[] = [
     tagline: 'Cover sized against what you can’t afford to lose.',
     summary:
       'Life, health and asset cover chosen to protect what you can’t afford to lose — explained in plain language rather than policy fine print.',
-    href: '/services#insurance',
+    href: '/insurance',
     icon: ShieldCheck,
     highlights: [
       'Cover sized against what would actually need replacing',
@@ -361,7 +350,7 @@ export const goalEntries: GoalEntry[] = [
     horizon: 'Years, not months',
     startsWith:
       'Establishing how long this money can genuinely be left alone before anything gets chosen.',
-    relatedServiceIds: ['mutual-funds-pms'],
+    relatedServiceIds: ['mutual-funds'],
     icon: TrendingUp,
   },
   {
@@ -411,7 +400,7 @@ export const goalEntries: GoalEntry[] = [
     horizon: 'Every financial year',
     startsWith:
       'Checking which deductions your situation actually lets you claim this year.',
-    relatedServiceIds: ['mutual-funds-pms', 'insurance'],
+    relatedServiceIds: ['mutual-funds', 'insurance'],
     icon: Receipt,
   },
   {
@@ -428,7 +417,7 @@ export const goalEntries: GoalEntry[] = [
     horizon: 'A date you already know',
     startsWith:
       'Pinning down what the course costs today, and when the first payment falls due.',
-    relatedServiceIds: ['mutual-funds-pms', 'loans'],
+    relatedServiceIds: ['mutual-funds', 'loans'],
     icon: GraduationCap,
   },
   {
@@ -445,7 +434,7 @@ export const goalEntries: GoalEntry[] = [
     horizon: 'The longest one you have',
     startsWith:
       'Working backward from what a month would need to cost once you stop working.',
-    relatedServiceIds: ['mutual-funds-pms', 'insurance'],
+    relatedServiceIds: ['mutual-funds', 'insurance'],
     icon: Armchair,
   },
 ];

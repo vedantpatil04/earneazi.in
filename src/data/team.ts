@@ -55,7 +55,7 @@ export const teamMembers: TeamMember[] = [
     monogram: 'AS',
     /* Reuses the Phase 3 subject-accent channel, so the two founders are
        told apart by colour as well as by mark, inside the existing palette. */
-    toneId: 'mutual-funds-pms',
+    toneId: 'mutual-funds',
     photoUrl: null,
     photoVerified: false,
     bio: '',

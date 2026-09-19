@@ -1,4 +1,4 @@
-import { Calculator, CircleHelp, Home, Layers, MessageCircle, Target, Users } from 'lucide-react';
+import { Calculator, CircleHelp, Home, Layers, MessageCircle, ShieldCheck, Target, Users } from 'lucide-react';
 import type { NavItem, RibbonItem } from '@/types/nav';
 import { servicePillars } from '@/data/services';
 
@@ -14,7 +14,13 @@ export const primaryNav: NavItem[] = [
     description: 'See what regular investing looks like',
     icon: Calculator,
   },
-  { label: 'Services', path: '/services', description: 'Mutual funds & PMS, insurance, loans', icon: Layers },
+  {
+    label: 'Insurance',
+    path: '/insurance',
+    description: 'Health, life, motor, home, travel and business cover',
+    icon: ShieldCheck,
+  },
+  { label: 'Services', path: '/services', description: 'Mutual funds, insurance, loans', icon: Layers },
   {
     label: 'Financial Goals',
     path: '/financial-goals',
@@ -29,10 +35,11 @@ export const primaryNav: NavItem[] = [
 /**
  * What the desktop and mobile header navigation shows in canonical order:
  * 1. SIP Calculator
- * 2. Services
- * 3. Financial Goals
- * 4. About
- * 5. FAQ
+ * 2. Insurance
+ * 3. Services
+ * 4. Financial Goals
+ * 5. About
+ * 6. FAQ
  *
  * Home is already reachable from the wordmark and Contact is promoted to the
  * header's call to action, so repeating either as a plain link only adds width
@@ -60,8 +67,8 @@ export const headerCta = { label: 'Book a consultation', path: '/contact' } as c
  * Descriptions are a few words of orientation, never a claim.
  */
 const SERVICE_RIBBON_LINES: Record<string, string> = {
-  'mutual-funds-pms': 'Wealth & active portfolios',
-  insurance: 'Life & health cover',
+  'mutual-funds': 'Wealth & investing',
+  insurance: 'Life, health, motor & more',
   loans: 'Home & personal',
 };
 
@@ -87,7 +94,7 @@ export const ribbonItems: RibbonItem[] = [
     description: 'Run the numbers',
     href: '/sip-calculator',
     icon: Calculator,
-    toneId: 'mutual-funds-pms',
+    toneId: 'mutual-funds',
   },
   {
     id: 'talk-to-advisor',

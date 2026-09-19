@@ -47,4 +47,4 @@ export const aboutPrinciples: AboutPrinciple[] = [
  * same thing.
  */
 export const aboutSummary =
-  'Earneazi helps people plan across mutual funds and PMS, insurance and loans — the three decisions that between them cover most of what a household does with its money. The point of doing all three under one roof is that they stop being separate decisions.';
+  'Earneazi helps people plan across mutual funds, insurance and loans — the three decisions that between them cover most of what a household does with its money. The point of doing all three under one roof is that they stop being separate decisions.';

@@ -22,7 +22,7 @@ export function FundShortlist() {
   return (
     <section
       aria-labelledby="fund-shortlist-heading"
-      data-tone="mutual-funds-pms"
+      data-tone="mutual-funds"
       className="mt-12 border-t border-divider pt-10 lg:mt-16 lg:pt-12"
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">

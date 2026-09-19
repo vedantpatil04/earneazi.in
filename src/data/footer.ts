@@ -75,7 +75,7 @@ function navLabel(path: string, fallback: string): string {
  * never advertise a product the services section does not.
  */
 const SERVICE_DETAIL_CATEGORIES: Record<string, string[]> = {
-  'mutual-funds-pms': ['SIP planning', 'ELSS tax saving'],
+  'mutual-funds': ['SIP planning', 'ELSS tax saving'],
   insurance: ['Health insurance', 'Term life insurance'],
   loans: ['Home loan', 'Personal loan'],
 };
@@ -139,7 +139,7 @@ export function buildFooterGroups({ testimonials = shippedTestimonials }: { test
  * §3.4. "Your financial partner" is the same framing the hero already uses.
  */
 export const BRAND_STATEMENT =
-  'Your financial partner for mutual funds, insurance, loans and PMS — planned around the goals you’re working toward.';
+  'Your financial partner for mutual funds, insurance and loans — planned around the goals you’re working toward.';
 
 /**
  * The statement, with the founding year appended only once the "operating

@@ -21,7 +21,7 @@ export const heroHeadlineLines = [
 export const heroHeadlineAccent = 'decision that matters.';
 
 export const heroSubheadline =
-  'Mutual funds and PMS, insurance and loans, planned together rather than bought separately — around the goals you’re actually working toward.';
+  'Mutual funds, insurance and loans, planned together rather than bought separately — around the goals you’re actually working toward.';
 
 export const heroActions = {
   primary: { label: 'Start with your goals →', to: '/financial-goals' },

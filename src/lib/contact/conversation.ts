@@ -179,7 +179,7 @@ export function contactRouteFor(context: ConversationContext): string {
       return `/contact?goal=${encodeURIComponent(context.goalId)}`;
     case 'sip-plan': {
       const { monthlyInvestment, annualReturnPct, durationYears } = context.input;
-      return `/contact?service=mutual-funds-pms&sip=${monthlyInvestment}-${annualReturnPct}-${durationYears}`;
+      return `/contact?service=mutual-funds&sip=${monthlyInvestment}-${annualReturnPct}-${durationYears}`;
     }
     default:
       return '/contact';

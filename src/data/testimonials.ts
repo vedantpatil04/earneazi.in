@@ -29,7 +29,7 @@ export const testimonials: Testimonial[] = [
     city: 'Hubli',
     quote:
       'Earn Eazi made investing so simple. I started my first SIP and the whole process was handled with zero hassle. Highly recommended to everyone!',
-    toneId: 'mutual-funds-pms',
+    toneId: 'mutual-funds',
     consentVerified: true,
   },
   {

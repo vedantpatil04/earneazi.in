@@ -12,7 +12,7 @@ import { MarkPlate, Prism, Slab, SphereNode } from './MarkPlate';
  * Diagrams of an *idea*, in the way a good annual report draws a concept
  * rather than charting it. Each says the single thing its service is about:
  *
- *   timeline    mutual funds & PMS — money placed against dates that are
+ *   timeline    mutual funds — money placed against dates that are
  *               years apart, not a product picked this month.
  *   perimeter   insurance — layers of cover sized around what is behind
  *               them.
@@ -120,7 +120,7 @@ function Node({
   );
 }
 
-/* ── Mutual funds & PMS — the timeline ─────────────────────────────────── */
+/* ── Mutual funds — the timeline ───────────────────────────────────────── */
 
 const TIMELINE_PATH = 'M 26 132 C 84 126, 130 100, 170 74 C 208 50, 248 32, 276 24';
 
@@ -261,7 +261,7 @@ export function BalanceMark({ active, className }: VisualProps) {
 
 /** The mark for a service, by id. One lookup so callers do not branch. */
 export const serviceMarks: Record<string, (props: VisualProps) => JSX.Element> = {
-  'mutual-funds-pms': TimelineMark,
+  'mutual-funds': TimelineMark,
   insurance: PerimeterMark,
   loans: BalanceMark,
 };
